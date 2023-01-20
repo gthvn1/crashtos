@@ -5,7 +5,8 @@
 ;; Compile with: nasm boot.asm -f bin -o boot.bin
 ;; Run with    : qemy-system-i386 -fda boot.bin
 
-org 0x7C00 ;; this is the BIOS that loads us here
+org 0x7C00 ;; this is the BIOS that loads us here.
+	   ;; ORG is a directive for nasm for flat bin file
 
 bits 16 ;; When we boot we are in real mode (16-bit mode)
 
