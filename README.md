@@ -1,7 +1,16 @@
 # Yet Another Kernel
 
   The goal is to try to understand the differents steps from switching your computer
-on until the prompt of a simple kernel...
+on until executing kernel.
 
-  The code will be in this repo and we will write [some posts](https://gthvn1.github.io/blog/)
-to help to understand things.
+## Blog posts
+
+- [Hello from bootloader](https://gthvn1.github.io/blog/blog/bootloader-hello-world/)
+
+## Some interesting links
+
+### Bootloader
+
+- [Redox bootloader](https://gitlab.redox-os.org/redox-os/bootloader)
+- [BIOS interrupt call](https://en.wikipedia.org/wiki/BIOS_interrupt_call)
+- [OSDev bootloder wiki](https://wiki.osdev.org/Bootloader)
