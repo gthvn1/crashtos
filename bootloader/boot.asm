@@ -17,8 +17,8 @@ start:
 	mov ah, 0x0E    ;; a parameter for the BIOS
 			;; => 0Eh: Write character in TTY mode
 .loop	lodsb		;; load byte at DS:SI into AL (in legacy mode)
-	or al, al	;; We put 0 at the end of msg
-	jz halt		;; thus jump if al == 0
+	or al, al	;; 0 at the end of msg => OR will set ZF
+	je halt		;; thus jump if ZF == 1 (ZF is Zero Flag)
 	int 0x10	;; invoke the BIOS interrupt (ie 0x10) 
 	jmp .loop	;; Same player shoot again
 
