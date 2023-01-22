@@ -13,17 +13,6 @@
 start:
 	cli		;; disable interrupts
 
-	mov si, msg	;; si: source index
-			;; it is used as a source for data copies
-	mov ah, 0x0E    ;; a parameter for the BIOS
-			;; => 0Eh: Write character in TTY mode
-.loop	lodsb		;; load byte at DS:SI into AL (in legacy mode)
-	or al, al	;; 0 at the end of msg => OR will set ZF
-	je boot	;; thus jump if ZF == 1 (ZF is Zero Flag)
-	int 0x10	;; invoke the BIOS interrupt (ie 0x10)
-	jmp .loop	;; Same player shoot again
-
-boot:
 ;;check_a20:
 ;;;; Disable A20
 ;;mov ax, 0x2400
@@ -54,6 +43,10 @@ boot:
 	mov ax, 0x2401
 	int 0x15
 
+	;;set vga text mode
+	mov ax, 0x3
+	int 0x10
+
 	;; We can also check with BIOS
 	;;mov ax, 0x2402
 	;;int 0x15
@@ -68,39 +61,11 @@ boot:
 
 	;; let's halt for now but soon we will do more intresting
 	;; things
-	jmp CODE_SEGMENT:halt
-
-;; Before halt we can define the GDT here
-gdt_start:		;; First 64 bits segment is null segment descriptor
-	dq 0x0
-gdt_code:		;; Code segment descriptor (64 bits)
-	dw 0xFFFF	;; segment limit
-	dw 0x0		;; base address 0-15
-	db 0x0		;; base address 16-23
-	db 10011010b	;; Type: 1001(9), S: 1, DPL: 1, P: 0
-	db 11001111b	;; Limit: 1100(12), A:1, Res, DB: 1, G:1
-	db 0x0		;; base address 24-31
-gdt_data:
-	dw 0xFFFF
-	dw 0x0
-	db 0x0
-	db 10010010b	;; Type: 1001(9), S: 0, DPL: 1, P: 0
-	db 11001111b
-	db 0x0
-gdt_end:
-
-gdt_pointer:	;; GDT descriptor
-	dw gdt_end - gdt_start	;; size on 16 bits (dw)
-	dd gdt_start		;; address on 32 bits (dd)
-
-CODE_SEGMENT equ gdt_code - gdt_start
-DATA_SEGMENT equ gdt_data - gdt_start
-
+	jmp CODE_SEGMENT:boot
 
 [bits 32]
 
-halt:
-	;; Before halting let set DATA segments so it will
+boot:
 	;; help to find the code when debugging...
 	;; CS: code segment
 	;; DS: data segment
@@ -114,9 +79,55 @@ halt:
 	mov fs, ax
 	mov gs, ax
 
+	mov word [0xb8000], 0x0E48 ; 0x0: background black, 0xE: foreground yellow, 0x48:H
+	mov word [0xb8002], 0x0E65 ; e
+	mov word [0xb8004], 0x0E6c ; l
+	mov word [0xb8006], 0x0E6c ; l
+	mov word [0xb8008], 0x0E6f ; o
+	mov word [0xb800a], 0x0E2c ; ,
+	mov word [0xb800c], 0x0E20 ;
+	mov word [0xb800e], 0x0E77 ; w
+	mov word [0xb8010], 0x0E6f ; o
+	mov word [0xb8012], 0x0E72 ; r
+	mov word [0xb8014], 0x0E6c ; l
+	mov word [0xb8016], 0x0E64 ; d
+	mov word [0xb8018], 0x0E21 ; !
+
+halt:
 	hlt		 ;; halt the execution
 
-msg: db "Hello, World!", 0 ;; store the string constant
+;; *************************************************************************
+;; Let's put DATA here...
+
+%define MAKE_GDT_ENTRY(base, limit, access, flags) \
+	(((base & 0x00FFFFFF) << 16)	| \
+	 ((base & 0xFF000000) << 32)	| \
+	  (limit & 0x0000FFFF)		| \
+	 ((limit & 0x000F0000) << 32)	| \
+	 ((access & 0xFF) << 40)	| \
+	 ((flags & 0x0F) << 52))
+
+;; Before halt we can define the GDT here
+gdt_start:		;; First 64 bits segment is null segment descriptor
+	dq MAKE_GDT_ENTRY(0, 0, 0, 0)   ;; NULL descriptor must be the first entry
+gdt_code:		;; Code segment descriptor (64 bits)
+	;; access => P:1, DPL:0, S: 1 (code or data), E:1 (code), DC:0 (grows up)
+	;;	     RW:1 (read allowed), A:0 (accessed bit, best left clear)
+	;; flags  => G:1, DB:1 (32bit segment), L:0, AVL: 0
+	dq MAKE_GDT_ENTRY(0, 0xFFFF, 10011010b, 1100b)
+gdt_data:
+	;; access => P:1, DPL:0, S: 1 (code or data), E:0 (data), DC:0 (grows up)
+	;;	     RW:1 (read allowed), A:0 (accessed bit, best left clear)
+	;; flags  => G:1, DB:1 (32bit segment), L:0, AVL: 0
+	dq MAKE_GDT_ENTRY(0, 0xFFFF, 10010010b, 1100b)
+gdt_end:
+
+gdt_pointer:	;; GDT descriptor
+	dw gdt_end - gdt_start	;; size on 16 bits (dw)
+	dd gdt_start		;; address on 32 bits (dd)
+
+CODE_SEGMENT equ gdt_code - gdt_start
+DATA_SEGMENT equ gdt_data - gdt_start
 
 ;; Magic numbers
 times 510 - ($ - $$) db 0
