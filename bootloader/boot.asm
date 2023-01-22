@@ -52,7 +52,7 @@ start:
 	;;int 0x15
 
 	;;enable_gdt
-	lgdt [gdt_pointer]	;; load the GDT table
+	lgdt [GDT_POINTER]	;; load the GDT table
 
 	;;set_protected_mode
 	mov eax, cr0	;; CR is a Control Register
@@ -99,7 +99,7 @@ halt:
 ;; *************************************************************************
 ;; Let's put DATA here...
 
-%define MAKE_GDT_ENTRY(base, limit, access, flags) \
+%define GDT_ENTRY(base, limit, access, flags) \
 	(((base & 0x00FFFFFF) << 16)	| \
 	 ((base & 0xFF000000) << 32)	| \
 	  (limit & 0x0000FFFF)		| \
@@ -108,26 +108,26 @@ halt:
 	 ((flags & 0x0F) << 52))
 
 ;; Before halt we can define the GDT here
-gdt_start:		;; First 64 bits segment is null segment descriptor
-	dq MAKE_GDT_ENTRY(0, 0, 0, 0)   ;; NULL descriptor must be the first entry
-gdt_code:		;; Code segment descriptor (64 bits)
+GDT:		;; First 64 bits segment is null segment descriptor
+	dq GDT_ENTRY(0, 0, 0, 0)   ;; NULL descriptor must be the first entry
+.code:		;; Code segment descriptor (64 bits)
 	;; access => P:1, DPL:0, S: 1 (code or data), E:1 (code), DC:0 (grows up)
 	;;	     RW:1 (read allowed), A:0 (accessed bit, best left clear)
 	;; flags  => G:1, DB:1 (32bit segment), L:0, AVL: 0
-	dq MAKE_GDT_ENTRY(0, 0xFFFF, 10011010b, 1100b)
-gdt_data:
+	dq GDT_ENTRY(0, 0xFFFF, 10011010b, 1100b)
+.data:
 	;; access => P:1, DPL:0, S: 1 (code or data), E:0 (data), DC:0 (grows up)
 	;;	     RW:1 (read allowed), A:0 (accessed bit, best left clear)
 	;; flags  => G:1, DB:1 (32bit segment), L:0, AVL: 0
-	dq MAKE_GDT_ENTRY(0, 0xFFFF, 10010010b, 1100b)
-gdt_end:
+	dq GDT_ENTRY(0, 0xFFFF, 10010010b, 1100b)
+.end:
 
-gdt_pointer:	;; GDT descriptor
-	dw gdt_end - gdt_start	;; size on 16 bits (dw)
-	dd gdt_start		;; address on 32 bits (dd)
+GDT_POINTER:	;; GDT descriptor
+	dw GDT.end - GDT	;; size on 16 bits (dw)
+	dd GDT			;; address on 32 bits (dd)
 
-CODE_SEGMENT equ gdt_code - gdt_start
-DATA_SEGMENT equ gdt_data - gdt_start
+CODE_SEGMENT equ GDT.code - GDT
+DATA_SEGMENT equ GDT.data - GDT
 
 ;; Magic numbers
 times 510 - ($ - $$) db 0
