@@ -5,6 +5,10 @@ section .text
 bits 32
 
 start:
+	call print_hello
+	hlt
+
+print_hello:
 	;; take the hello world from ../bootloader. It is the same code
 	;; but this time it is grub that setups things for us...
 
@@ -24,4 +28,4 @@ start:
 	mov word [0xb8016], 0x0E64 ;; d
 	mov word [0xb8018], 0x0E21 ;; !
 
-	hlt
+	ret
