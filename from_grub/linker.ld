@@ -1,18 +1,31 @@
 ENTRY(start)  /* entry point for the executable... remember global in boot.asm */
 
-phys = 0x00100000;
+PHYS = 0x00100000;
 
 SECTIONS {
-	/* create a section boot */
-	.boot phys : AT(phys) {
-		/* multiboot header must be at the beginning of the boot section */
-		boot = . ;  /* keep a reference where we put boot */
+	. = PHYS;
+
+	.text : {
+		/* multiboot header must be at the beginning */
+		__boot_start = . ;
 		*(.multiboot_header)
+		__boot_end = . ;
+		__text_start = . ;
+		*(.text)
+		. = ALIGN(4096) ;
+		__text_end = . ;
 	}
 
-	/* Right above the boot we put the text */
-	.text : AT(phys + (text - boot)) {
-		text = . ;
-		*(.text)
+	.data : {
+		__data_start = . ;
+		*(.data)
+		. = ALIGN(4096) ;
+		__data_end = . ;
+		__bss_start = . ;
+		*(.bss)
+		. = ALIGN(4096) ;
+		__bss_end = . ;
 	}
+
+	__end = . ;
 }
