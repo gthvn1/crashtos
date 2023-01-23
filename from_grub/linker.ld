@@ -1,17 +1,18 @@
 ENTRY(start)  /* entry point for the executable... remember global in boot.asm */
 
-SECTIONS {
-	. = 1M; /* Start putting things at 1M. It is a convention */
+phys = 0x00100000;
 
-	.boot :  /* create a secion boot */
-	{
+SECTIONS {
+	/* create a section boot */
+	.boot phys : AT(phys) {
 		/* multiboot header must be at the beginning of the boot section */
-		/* grub will see it */
+		boot = . ;  /* keep a reference where we put boot */
 		*(.multiboot_header)
 	}
 
-	.text : /* create a section text */
-	{
+	/* Right above the boot we put the text */
+	.text : AT(phys + (text - boot)) {
+		text = . ;
 		*(.text)
 	}
 }
