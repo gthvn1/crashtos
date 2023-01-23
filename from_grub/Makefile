@@ -6,10 +6,10 @@ run: build
 	qemu-system-x86_64 -cdrom yak.iso
 
 build: kernel.bin grub.cfg
-	mkdir -p isofiles/boot/grub
-	mv kernel.bin isofiles/boot/
-	cp grub.cfg isofiles/boot/grub/
-	grub2-mkrescue -o yak.iso isofiles
+	mkdir -p iso/boot/grub
+	mv kernel.bin iso/boot/
+	cp grub.cfg iso/boot/grub/
+	grub2-mkrescue -o yak.iso iso
 
 kernel.bin: multiboot_header.o boot.o
 	ld -nmagic --output=kernel.bin --script=linker.ld multiboot_header.o boot.o
@@ -21,4 +21,4 @@ boot.o: boot.asm
 	nasm -f elf64 boot.asm
 
 clean:
-	rm -rf multiboot_header.o boot.o yak.iso isofiles/
+	rm -rf multiboot_header.o boot.o yak.iso iso/
