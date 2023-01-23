@@ -5,7 +5,7 @@ section .multiboot_header
 header:
 	.start:
 	dd 0xE85250D6	;; the magic for multiboot2 header
-	dd 0x0		;; the field arch: 0 => 3 bit protected mode fir i386
+	dd 0x0		;; the field arch: 0 => 32 bits protected mode for i386
 	dd header.end - header.start ;; length of the header including magic fields
 	;; grub also requires a fourth parameter that is the checksum
 	;; with checksum = - (magic + arch + length)
