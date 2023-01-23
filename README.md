@@ -5,19 +5,30 @@ on until executing kernel.
 
 ## Blog posts
 
-In the first post we see how BIOS is loading our first stage0 boot that just print
+### Hello from bootloader
+
+  In the first post we see how BIOS is loading our first stage0 boot that just print
 *Hello, World!* from real mode (16 bits).
 - [Hello from bootloader](https://gthvn1.github.io/blog/blog/bootloader-hello-world/)
 
-In the second post we see how to reach the protected mode and we print the same
+### Good bye real mode
+
+  In the second post we see how to reach the protected mode and we print the same
 *Hello, World!* but in protected mode.
 - [Good bye real mode](https://gthvn1.github.io/blog/posts/bootloader-good-bye-real-mode/)
 
-The role of the bootloader is to setup things for switching to protected mode, read
+### Your door to operating system
+
+  The role of the bootloader is to setup things for switching to protected mode, read
 the code of an operating system from a boot device, load this piece of code somewhere
 and finally jump to the entry code of this new software. In the next post we will see
 how a bootloader (we will use grub) is able to load another *Hello, World!* but this
 time from our operating system...
+- [Your door to operating system](https://gthvn1.github.io/blog/posts/your-door-to-os/)
+
+### A long jump...
+
+Next will be the long jump to the 64 bits world.... 
 
 ## Some interesting links
 
