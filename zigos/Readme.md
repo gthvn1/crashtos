@@ -10,6 +10,21 @@ The goal is to
  - [X] boot
  - [ ] print message
 
- ## Build
+## Build
 
- `zig build`
+- `zig build`
+
+## Run & debug
+
+- `qemu-system-i386 -cdrom zig-out/bin/zigos.iso`
+- if you want to attach a debugger add `-s -S`
+- check with `nm -s` the address of **kmain**
+    - In my case it is 0x00100220
+```
+gdb -ex 'target remote localhost:1234' \
+    -ex 'set disassembly-flavor intel' \
+    -ex 'break *0x00100220' \
+    -ex 'continue'
+
+```
+
