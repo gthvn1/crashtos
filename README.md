@@ -26,12 +26,13 @@ how a bootloader (we will use grub) is able to load another *Hello, World!* but 
 time from our operating system...
 - [Your door to operating system](https://gthvn1.github.io/blog/posts/your-door-to-os/)
 
-### A long jump...
+### long mode
 
-Next will be the long jump to the 64 bits world.... 
+Next will discover the 64 bits world....
 
 ## Some interesting links
 
+- [OSDev long mode](https://wiki.osdev.org/Setting_Up_Long_Mode)
 - [Redox bootloader](https://gitlab.redox-os.org/redox-os/bootloader)
 - [BIOS interrupt call](https://en.wikipedia.org/wiki/BIOS_interrupt_call)
 - [OSDev bootloder wiki](https://wiki.osdev.org/Bootloader)
