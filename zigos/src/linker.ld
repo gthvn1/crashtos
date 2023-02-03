@@ -1,23 +1,28 @@
 ENTRY(kmain)  /* kernel main entry point */
 
-PHYS = 0x00100000;
-
 SECTIONS {
-	. = PHYS;
+	/* Start at 1MB, it is required to be loaded by bootloader */
+	. = 1M;
 
-	.text : {
+	.text : ALIGN(4096) {
 		/* multiboot header must be at the beginning */
 		KEEP(*(.multiboot))
 		*(.text)
-		. = ALIGN(4096) ;
 	}
 
-	.data : {
+	/* Read-only data */
+	.rodata : ALIGN(4096) {
+		*(.rodata)
+
+	}
+
+	/* Read-write data (initialized) */
+	.data : ALIGN(4096) {
 		*(.data)
-		. = ALIGN(4096) ;
-		*(.bss)
-		. = ALIGN(4096) ;
 	}
 
-	__end = . ;
+	/* Read-write data (uninitialized) and stack */
+	.bss : ALIGN(4096) {
+		*(.bss)
+	}
 }
