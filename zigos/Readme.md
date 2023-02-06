@@ -22,8 +22,11 @@ build low level stuff and use some cool keyword like `linksection`...
 
 The goal is to
  - [X] boot
- - [X] print message
- - [ ] switch to long mode
+ - [X] print message (tagged "step1_banner")
+ - [ ] switch to long mode (not sure yet about steps)
+    - [ ] setup gdt ???
+    - [ ] setup interrupt vector
+    - [ ] setup page table
 
 ### Existing Zig Operating System
 
