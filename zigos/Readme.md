@@ -1,6 +1,15 @@
 # ZigOS
 
+## Overview
+
+The only purpose of this "operating system" is the exploration of this universe.
+There is many really good tutorials and blogs that explain how to setup your own
+operating system. So this one and the related blog posts are more some milestones
+for me but maybe it can be usefull for someone else so I will try to keep things
+simple and working.
+
 ## Links
+
 ### Bare Bones tutorial
 
 Try the tutorial [Bare Bones](https://wiki.osdev.org/Bare_Bones) from OS dev.
@@ -15,6 +24,12 @@ The goal is to
 ### Related blogs
 
 TODO
+
+### Existing Zig Operating System
+
+- [Pluto](https://github.com/ZystemOS/pluto)
+- [Zen](https://github.com/AndreaOrru/zen)
+- [Zig Bare Bones](https://wiki.osdev.org/Zig_Bare_Bones)
 
 ## Build
 
