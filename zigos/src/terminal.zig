@@ -24,57 +24,57 @@ const VGA_COLOR_LIGHT_BROWN: u8 = 14;
 const VGA_COLOR_WHITE: u8 = 15;
 
 // 0x0E => 0x0: background black & 0xE: foreground yellow
-fn vga_entry_color(fg: u8, bg: u8) u8 {
+fn vgaEntryColor(fg: u8, bg: u8) u8 {
     return bg << 4 | fg;
 }
 
 // 0x0E48 => 0x0: background black & 0xE: foreground yellow & 0x48: char
-fn vga_entry(car: u8, color: u8) u16 {
+fn vgaEntry(car: u8, color: u8) u16 {
     var color_u16: u16 = color;
     return color_u16 << 8 | car;
 }
 
 // Terminal state
-var terminalRow: u8 = undefined;
-var terminalColumn: u8 = undefined;
-var terminalColor: u8 = undefined;
-var terminalBuffer = @intToPtr([*]volatile u16, 0xB8000);
+var term_row: u8 = undefined;
+var term_column: u8 = undefined;
+var term_color: u8 = undefined;
+var term_buff = @intToPtr([*]volatile u16, 0xB8000);
 
-fn set_color(fg: u8, bg: u8) void {
-    terminalColor = vga_entry_color(fg, bg);
+fn setColor(fg: u8, bg: u8) void {
+    term_color = vgaEntryColor(fg, bg);
 }
 
-fn put_entry_at(c: u8, color: u8, x: u8, y: u8) void {
+fn putEntryAt(c: u8, color: u8, x: u8, y: u8) void {
     const index: u8 = y * VGA_WIDTH + x;
-    terminalBuffer[index] = vga_entry(c, color);
+    term_buff[index] = vgaEntry(c, color);
 }
 
-fn put_char(c: u8) void {
-    put_entry_at(c, terminalColor, terminalColumn, terminalRow);
+fn putChar(c: u8) void {
+    putEntryAt(c, term_color, term_column, term_row);
     // Update row and columns
-    terminalColumn += 1;
-    if (terminalColumn == VGA_WIDTH) {
-        next_line();
+    term_column += 1;
+    if (term_column == VGA_WIDTH) {
+        nextLine();
     }
 }
 
 pub fn initialize() void {
-    terminalRow = 0;
-    terminalColumn = 0;
-    terminalColor = vga_entry_color(VGA_COLOR_GREEN, VGA_COLOR_BLACK);
-    mem.set(u16, terminalBuffer[0..VGA_SIZE], vga_entry(' ', terminalColor));
+    term_row = 0;
+    term_column = 0;
+    term_color = vgaEntryColor(VGA_COLOR_GREEN, VGA_COLOR_BLACK);
+    mem.set(u16, term_buff[0..VGA_SIZE], vgaEntry(' ', term_color));
 }
 
-pub fn next_line() void {
-    terminalColumn = 0;
-    terminalRow += 1;
-    if (terminalRow == VGA_HEIGHT) {
-        terminalRow = 0;
+pub fn nextLine() void {
+    term_column = 0;
+    term_row += 1;
+    if (term_row == VGA_HEIGHT) {
+        term_row = 0;
     }
 }
 
 pub fn write(s: []const u8) void {
     for (s) |c| {
-        put_char(c);
+        putChar(c);
     }
 }

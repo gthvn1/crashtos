@@ -15,10 +15,12 @@ const MultibootHeader = packed struct {
 export var multiboot align(4) linksection(".multiboot") = MultibootHeader{};
 
 export fn kmain() callconv(.Naked) noreturn {
+    const banner = "-= ZigOS 0.1 =-";
+
     terminal.initialize();
-    terminal.write("== ZigOS 0.1 ==");
-    terminal.next_line();
-    terminal.next_line();
+    terminal.write(banner);
+    terminal.nextLine();
+    terminal.nextLine();
     terminal.write("Hello, World!");
     while (true) {}
 }
