@@ -47,18 +47,63 @@ fn vga_entry(car: u8, color: u8) u16 {
 }
 
 // Terminal state
-var terminalRow: u8 = 0;
-var terminalColumn: u8 = 0;
-var terminalColor = vga_entry_color(VGA_COLOR_LIGHT_BROWN, VGA_COLOR_BLUE);
+var terminalRow: u8 = undefined;
+var terminalColumn: u8 = undefined;
+var terminalColor: u8 = undefined;
 var terminalBuffer = @intToPtr([*]volatile u16, 0xB8000);
 
+fn terminal_set_color(fg: u8, bg: u8) void {
+    terminalColor = vga_entry_color(fg, bg);
+}
+
+fn terminal_set_default_color() void {
+    terminalColor = vga_entry_color(VGA_COLOR_LIGHT_BROWN, VGA_COLOR_BLUE);
+}
+
 fn terminal_initialize() void {
+    terminalRow = 0;
+    terminalColumn = 0;
+    terminal_set_default_color();
     mem.set(u16, terminalBuffer[0..VGA_SIZE], vga_entry(' ', terminalColor));
+}
+
+fn terminal_put_entry_at(c: u8, color: u8, x: u8, y: u8) void {
+    const index: u8 = y * VGA_WIDTH + x;
+    terminalBuffer[index] = vga_entry(c, color);
+}
+
+fn terminal_next_line() void {
+    terminalColumn = 0;
+    terminalRow += 1;
+    if (terminalRow == VGA_HEIGHT) {
+        terminalRow = 0;
+    }
+}
+
+fn terminal_put_char(c: u8) void {
+    terminal_put_entry_at(c, terminalColor, terminalColumn, terminalRow);
+    // Update row and columns
+    terminalColumn += 1;
+    if (terminalColumn == VGA_WIDTH) {
+        terminal_next_line();
+    }
+}
+
+fn terminal_write(s: []const u8) void {
+    for (s) |c| {
+        terminal_put_char(c);
+    }
 }
 
 export var multiboot align(4) linksection(".multiboot") = MultibootHeader{};
 
 export fn kmain() callconv(.Naked) noreturn {
     terminal_initialize();
+    terminal_set_color(VGA_COLOR_WHITE, VGA_COLOR_BLUE);
+    terminal_write("== ZigOS 0.1 ==");
+    terminal_set_default_color();
+    terminal_next_line();
+    terminal_next_line();
+    terminal_write("Hello, World!");
     while (true) {}
 }
