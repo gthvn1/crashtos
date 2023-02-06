@@ -8,6 +8,10 @@ operating system. So this one and the related blog posts are more some milestone
 for me but maybe it can be usefull for someone else so I will try to keep things
 simple and working.
 
+So we will try to follow tutorials from OS dev and also get inspired by existing
+Zig and others existing operating system. All links that we use are available in
+the next section.
+
 ## Links
 
 ### Bare Bones tutorial
@@ -21,15 +25,16 @@ The goal is to
  - [X] print message
  - [ ] switch to long mode
 
+### Existing Zig Operating System
+
+- [Zig Bare Bones](https://wiki.osdev.org/Zig_Bare_Bones)
+- [Pluto](https://github.com/ZystemOS/pluto)
+- [Zen](https://github.com/AndreaOrru/zen)
+- [BoksOS](https://boksos.com/)
+
 ### Related blogs
 
 TODO
-
-### Existing Zig Operating System
-
-- [Pluto](https://github.com/ZystemOS/pluto)
-- [Zen](https://github.com/AndreaOrru/zen)
-- [Zig Bare Bones](https://wiki.osdev.org/Zig_Bare_Bones)
 
 ## Build
 
