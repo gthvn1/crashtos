@@ -1,4 +1,4 @@
-const terminal = @import("terminal.zig");
+const tty = @import("tty.zig");
 
 const ALIGN = 1 << 0; // align loaded modules on page boundaries
 const MEMINFO = 1 << 1; // provide memory map
@@ -17,10 +17,11 @@ export var multiboot align(4) linksection(".multiboot") = MultibootHeader{};
 export fn kmain() callconv(.Naked) noreturn {
     const banner = "-= ZigOS 0.1 =-";
 
-    terminal.initialize();
-    terminal.write(banner);
-    terminal.nextLine();
-    terminal.nextLine();
-    terminal.write("Hello, World!");
+    tty.initialize();
+    tty.write(banner, tty.VGAColor.Green, tty.VGAColor.Black);
+    tty.nextLine();
+    tty.nextLine();
+    tty.write("Hello, World!", tty.VGAColor.White, tty.VGAColor.Black);
+
     while (true) {}
 }
