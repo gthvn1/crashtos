@@ -28,7 +28,7 @@ time from our operating system...
 
 ### long mode
 
-Next will discover the 64 bits world.... but this is [ZigOS](https://github.com/gthvn1/yet-another-kernel/tree/master/zigos).
+Next will discover the 64 bits world.... but this is [ZigOS](https://github.com/gthvn1/zigos).
 
 ## Some interesting links
 
