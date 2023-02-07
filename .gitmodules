@@ -1,0 +1,3 @@
+[submodule "zigos"]
+	path = zigos
+	url = git@github.com:gthvn1/zigos.git
