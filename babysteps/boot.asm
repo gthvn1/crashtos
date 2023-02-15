@@ -17,12 +17,29 @@
 		   ; and 0xB8000 is where video's memory is mapped.
 
 	; Say Hello
-	mov si, hello_msg
+	mov si, helloMsg
 	call print_string
 
 	; And Welcome to this fantastic world !!!
-	mov si, welcome_msg
+	mov si, welcomeMsg
 	call print_string
+
+	; Next we want to print the content [0xB8000]
+	mov si, contentOfMem0
+	call print_string
+
+	mov bx, 0x0000  ; the offset, here we read the first byte
+	mov ax, [es:bx] ; ax == [0xB8000] (content of the memory)
+	call print_ax
+
+	; and finally we want to print the content [0xB8004]
+	; that is the next caracter written...
+	mov si, contentOfMem1
+	call print_string
+
+	mov bx, 0x0004  ; the offset, here we read the first byte
+	mov ax, [es:bx] ; ax == [0xB8001] (content of the memory)
+	call print_ax
 
 ;; ----- This is the end...
 infinite_loop:
@@ -67,11 +84,48 @@ print_char:
 	add byte [xpos], 1 ; Update the position, we don't wrap
 	ret
 
+print_ax:
+	mov di, outputString
+	mov si, hexaString
+	mov cx, 4 ; Need to loop four times (see below for explanations)
+.hexloop:
+	; What we want is to translate the value of AX into readable hexaStringing
+	; For example:
+	; AX = 1E48 should print "1E48"
+	; in binary it is 0001_1110_0100_1000
+	; For this we will:
+	;     1) use the shift rotate:
+	;         => ax -> 1110_0100_1000_0001 (the first 4 bits are now at the end)
+	;     2) We will extract the last four bits to get 0000_0000_0000_0001
+	;       This new value is in fact the index in the hexaString
+	;        => 0001 => index 1 in "012..." that is "1"
+	;     3) add the caracter at the given index in outputString
+	; We do this four times (this is why CX == 0x4 ;-)
+	rol ax, 4         ; 1)
+	mov bx, ax        ; save ax into bx
+	and bx, 0x0f      ; 2) get last 4 bits (the index into hexaString)
+	mov bl, [si + bx] ; BL contains the corresponding hexacar
+	mov [di], bl      ; 3) copy it into outputString
+	inc di		  ; next car in outsring16
+	dec cx            ; do it for the next 4 bits if needed
+	jnz .hexloop
+
+	; We can now print the outputString...
+	mov si, outputString
+	call print_string
+	ret
+
 ; Data
-hello_msg db 'Hello, World!', 0  ; String end with 0 to detect the end when looping
-welcome_msg db 'Welcome to the real mode...', 0
-xpos db 0
-ypos db 0
+helloMsg   db "Hello, World!", 0  ; String end with 0 to detect the end when looping
+welcomeMsg db "Welcome to the real mode...", 0
+xpos	   db 0
+ypos       db 0
+
+contentOfMem0 db "[0xB8000]", 0
+contentOfMem1 db "[0xB8004]", 0
+
+hexaString     db "0123456789ABCDEF"
+outputString   db "0000", 0  ; will contain the output string
 
 ; Fill the rest with 0 and at the end add the bootloader signature
 times 510-($-$$) db 0
