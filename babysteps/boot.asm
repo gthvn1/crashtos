@@ -8,6 +8,8 @@
 	mov ds, ax ; BIOS interrupts expect DS to be set
 
 	mov si, msg
+	cld ; clear DF flag in EFLAGS register
+	    ; => increment index register when doing string operations
 
 print_ah:
 	lodsb		; load DS:SI into AL and increment SI
