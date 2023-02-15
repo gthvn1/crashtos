@@ -76,7 +76,14 @@ After babystep we will try to go further... So now we are able to create an ISO 
 can be booted using grub and we are able to write the hello world but this time in
 protected mode...
 
-Next steps:
+### Build and test
+
+- to build just run `make`
+- to test it: `qemu-system-x86_64  -drive format=raw,file=yak.iso`
+  - Note the currently i386 is working as well...
+
+### Next steps
+
 - [ ] setup the GDT
 - [ ] setup the interrupt
 - [ ] jump into the kernel (don't know yet if it will be in C, in Rust, in Zig...)
