@@ -56,6 +56,13 @@ Breakpoint 1, 0x00007c00 in ?? ()
 - Then *31* that is the opcode for **xor register**. To decode the instruction completely we need
   to check the [instruction format](http://www.baldwin.cx/386htm/s17_02.htm).
 
+### Babystep4
+
+Nothing really special.
+
+### Babystep5
+
+Now you can press a key and you will see the value read from the keyboard... Cool no?
 
 ## Blog posts
 
