@@ -70,7 +70,18 @@ They are not really interesting. It is said that we need to setup the GDT to be 
 to jump to protected mode. We already wrote a blog about this and it is almost done
 in [ZigOS](https://github.com/gthvn1/zigos).
 
-## Blog posts
+## YaK (Yet another Kernel)
+
+After babystep we will try to go further... So now we are able to create an ISO that
+can be booted using grub and we are able to write the hello world but this time in
+protected mode...
+
+Next steps:
+- [ ] setup the GDT
+- [ ] setup the interrupt
+- [ ] jump into the kernel (don't know yet if it will be in C, in Rust, in Zig...)
+
+## Blog posts related to previous paragraphs
 
 During babysteps we will sometimes wrote some blogs for a better understanding.
 We will list them here:
