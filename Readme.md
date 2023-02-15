@@ -3,7 +3,7 @@
   The goal is to try to understand the differents steps from switching your computer
 on until executing kernel. For this we will follow [OSDev tutorials](https://wiki.osdev.org/Tutorials).
 
-## Babystep
+## Babysteps
 
 Steps to create a basic kernel in assembly are in [Babysteps](https://wiki.osdev.org/Tutorials#Babysteps).
 
