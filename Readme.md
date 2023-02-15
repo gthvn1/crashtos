@@ -11,7 +11,7 @@ How to create a basic kernel in assembly:
 - [X] [Babystep1](https://wiki.osdev.org/Babystep1) - Your first boot sector.
 - [X] [Babystep2](https://wiki.osdev.org/Babystep2) - Writing a message using the BIOS.
 - [X] [Babystep3](https://wiki.osdev.org/Babystep3) - A look at machine code
-- [ ] [Babystep4](https://wiki.osdev.org/Babystep4) - Printing to the screen without the BIOS
+- [X] [Babystep4](https://wiki.osdev.org/Babystep4) - Printing to the screen without the BIOS
 - [ ] [Babystep5](https://wiki.osdev.org/Babystep5) - Interrupts
 - [ ] [Babystep6](https://wiki.osdev.org/Babystep6) - Entering protected mode
 - [ ] [Babystep7](https://wiki.osdev.org/Babystep7) - Unreal Mode
