@@ -64,6 +64,12 @@ Nothing really special.
 
 Now you can press a key and you will see the value read from the keyboard... Cool no?
 
+### Babysteps 6 to 8
+
+They are not really interesting. It is said that we need to setup the GDT to be able
+to jump to protected mode. We already wrote a blog about this and it is almost done
+in [ZigOS](https://github.com/gthvn1/zigos).
+
 ## Blog posts
 
 During babysteps we will sometimes wrote some blogs for a better understanding.
