@@ -88,6 +88,10 @@ protected mode...
 - [ ] setup the interrupt
 - [ ] jump into the kernel (don't know yet if it will be in C, in Rust, in Zig...)
 
+**NOTE**: we already added a file *kernel.c* and we try to call the C function from
+the *boot.asm*. Currently it is not really used. It is more for exploring because we
+don't know which langage we will use...
+
 ## Blog posts related to previous paragraphs
 
 During babysteps we will sometimes wrote some blogs for a better understanding.
@@ -120,6 +124,7 @@ Next will discover the 64 bits world.... but this is [ZigOS](https://github.com/
 
 ## Some interesting links
 
+- [The little book about OS development](https://ordoflammae.github.io/littleosbook/)
 - [OSDev long mode](https://wiki.osdev.org/Setting_Up_Long_Mode)
 - [Redox bootloader](https://gitlab.redox-os.org/redox-os/bootloader)
 - [BIOS interrupt call](https://en.wikipedia.org/wiki/BIOS_interrupt_call)

@@ -1,4 +1,5 @@
 global start	;; make start label available outside this form
+extern kernel_main
 
 bits 32
 
@@ -20,8 +21,7 @@ start:
 	mov esi, helloMsg
 	call print_string
 
-infinite_loop:
-	jmp infinite_loop
+	call kernel_main
 
 ;; ----- Print functions ------------------------------------------------------
 print_trampoline:
