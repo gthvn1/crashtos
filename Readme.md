@@ -9,14 +9,14 @@ Steps to create a basic kernel in assembly are in [Babysteps](https://wiki.osdev
 
 How to create a basic kernel in assembly:
 - [X] [Babystep1](https://wiki.osdev.org/Babystep1) - Your first boot sector.
-- [ ] [Babystep2](https://wiki.osdev.org/Babystep2) - Writing a message using the BIOS.
+- [X] [Babystep2](https://wiki.osdev.org/Babystep2) - Writing a message using the BIOS.
 - [ ] [Babystep3](https://wiki.osdev.org/Babystep3) - A look at machine code
 - [ ] [Babystep4](https://wiki.osdev.org/Babystep4) - Printing to the screen without the BIOS
 - [ ] [Babystep5](https://wiki.osdev.org/Babystep5) - Interrupts
 - [ ] [Babystep6](https://wiki.osdev.org/Babystep6) - Entering protected mode
 - [ ] [Babystep7](https://wiki.osdev.org/Babystep7) - Unreal Mode
 - [ ] [Babystep8](https://wiki.osdev.org/Babystep0) - 32-bit printing
-- [ ] Appendix A - Additional information
+- Appendix A - [Additional information](https://wiki.osdev.org/Real_mode_assembly_appendix_A)
 
 ### Babystep1
 
@@ -33,6 +33,12 @@ Breakpoint 1, 0x00007c00 in ?? ()
    0x7c01:	jmp    0x7c01
 ```
 - As you see it is our code that it is running...
+
+### Babystep2
+
+- Just run `qemu-system-i386 -hda boot.bin` and you should see the famous **Hello, World!**.
+  - `-fda` is working as well.
+
 ## Blog posts
 
 During babysteps we will sometimes wrote some blogs for a better understanding.
