@@ -6,6 +6,7 @@
 	cli
 	xor ax, ax ; ax == 0x0
 	mov ds, ax ; BIOS interrupts expect DS to be set
+
 	mov ss, ax ; We will setup a stack to be able to use call and ret
 	mov sp, 0x9C00 ; far enough from code
 
@@ -41,9 +42,42 @@
 	mov ax, [es:bx] ; ax == [0xB8001] (content of the memory)
 	call print_ax
 
-;; ----- This is the end...
+;; ----- This is the end... but before add keyboard handler.
+
+	; The keyboard controller generates an IRQ1. The x86 interrupt
+	; controller maps this interrupt to the IRQ9. To catch it
+	; we need to override the interrupt handler for interrupt 9 and
+	; read key from port 60.
+	mov bx, 0x9 ; the HW interrupt for keyboard
+	shl bx, 2   ; an IVT entry is for bytes, so multiply the offset by 4
+	            ; | Segment | Offset |
+		    ; 4         2        0
+	xor ax, ax
+	mov fs, ax
+	mov [fs:bx], word keyboard_handler
+	mov [fs:bx+2], cs
+
+	sti ; before looping forever enable maskable interrupts
+
 infinite_loop:
 	jmp infinite_loop
+
+;; ----- Interrupts handler
+keyboard_handler:
+	in al, 0x60 ; Get input byte from port 0x60
+	mov bl, al  ; save it into BL to check the value (see below)
+	mov byte [byteRead], al ; and into byteRead
+
+	mov al, 0x20   ; Acknowledge the interrupt by writing the End of Interrupt
+	out 0x20, al
+
+	and bl, 0x80   ; Don't print the code that corresponds to the key released
+	jnz .done
+
+	mov ax, [byteRead] ; restore it and print ax
+	call print_ax
+.done:
+	iret
 
 ;; ----- Print functions
 print_trampoline:
@@ -124,8 +158,10 @@ ypos       db 0
 contentOfMem0 db "[0xB8000]", 0
 contentOfMem1 db "[0xB8004]", 0
 
-hexaString     db "0123456789ABCDEF"
-outputString   db "0000", 0  ; will contain the output string
+hexaString   db "0123456789ABCDEF"
+outputString db "0000", 0  ; will contain the output string
+
+byteRead db 0 ; store the byte read by keyboard handler
 
 ; Fill the rest with 0 and at the end add the bootloader signature
 times 510-($-$$) db 0

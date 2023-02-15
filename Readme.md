@@ -12,7 +12,7 @@ How to create a basic kernel in assembly:
 - [X] [Babystep2](https://wiki.osdev.org/Babystep2) - Writing a message using the BIOS.
 - [X] [Babystep3](https://wiki.osdev.org/Babystep3) - A look at machine code
 - [X] [Babystep4](https://wiki.osdev.org/Babystep4) - Printing to the screen without the BIOS
-- [ ] [Babystep5](https://wiki.osdev.org/Babystep5) - Interrupts
+- [X] [Babystep5](https://wiki.osdev.org/Babystep5) - Interrupts
 - [ ] [Babystep6](https://wiki.osdev.org/Babystep6) - Entering protected mode
 - [ ] [Babystep7](https://wiki.osdev.org/Babystep7) - Unreal Mode
 - [ ] [Babystep8](https://wiki.osdev.org/Babystep0) - 32-bit printing
