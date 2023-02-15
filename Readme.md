@@ -10,7 +10,7 @@ Steps to create a basic kernel in assembly are in [Babysteps](https://wiki.osdev
 How to create a basic kernel in assembly:
 - [X] [Babystep1](https://wiki.osdev.org/Babystep1) - Your first boot sector.
 - [X] [Babystep2](https://wiki.osdev.org/Babystep2) - Writing a message using the BIOS.
-- [ ] [Babystep3](https://wiki.osdev.org/Babystep3) - A look at machine code
+- [X] [Babystep3](https://wiki.osdev.org/Babystep3) - A look at machine code
 - [ ] [Babystep4](https://wiki.osdev.org/Babystep4) - Printing to the screen without the BIOS
 - [ ] [Babystep5](https://wiki.osdev.org/Babystep5) - Interrupts
 - [ ] [Babystep6](https://wiki.osdev.org/Babystep6) - Entering protected mode
@@ -38,6 +38,24 @@ Breakpoint 1, 0x00007c00 in ?? ()
 
 - Just run `qemu-system-i386 -hda boot.bin` and you should see the famous **Hello, World!**.
   - `-fda` is working as well.
+
+### Babystep3
+
+- We use `hexdump` to see binary file:
+```sh
+# hexdump -C boot.bin
+00000000  fa 31 c0 8e d8 be 16 7c  fc ac 08 c0 74 06 b4 0e  |.1.....|....t...|
+00000010  cd 10 eb f5 eb fe 48 65  6c 6c 6f 2c 20 57 6f 72  |......Hello, Wor|
+00000020  6c 64 21 00 00 00 00 00  00 00 00 00 00 00 00 00  |ld!.............|
+00000030  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+*
+000001f0  00 00 00 00 00 00 00 00  00 00 00 00 00 00 55 aa  |..............U.|
+00000200
+```
+- We see for example *fa* that is the opcode for **cli**.
+- Then *31* that is the opcode for **xor register**. To decode the instruction completely we need
+  to check the [instruction format](http://www.baldwin.cx/386htm/s17_02.htm).
+
 
 ## Blog posts
 
