@@ -118,9 +118,11 @@ how a bootloader (we will use grub) is able to load another *Hello, World!* but 
 time from our operating system...
 - [Your door to operating system](https://gthvn1.github.io/blog/posts/your-door-to-os/)
 
-### long mode
+### Enter long mode
 
-Next will discover the 64 bits world.... but this is [ZigOS](https://github.com/gthvn1/zigos).
+  A first try using [Zig](https://ziglang.org/) but unfortunatly we had some issues for
+building it.
+  - [Enter long mode](https://www.thouvenin.eu/blog/posts/enter-long-mode/)
 
 ## Some interesting links
 
