@@ -1,9 +1,27 @@
 # Yet Another Kernel
 
   The goal is to try to understand the differents steps from switching your computer
-on until executing kernel.
+on until executing kernel. For this we will follow [OSDev tutorials](https://wiki.osdev.org/Tutorials).
+
+## Babystep
+
+Steps to create a basic kernel in assembly are in [Babysteps](https://wiki.osdev.org/Tutorials#Babysteps).
+
+How to create a basic kernel in assembly:
+- [ ] [Babystep1](https://wiki.osdev.org/Babystep1) - Your first boot sector.
+- [ ] [Babystep2](https://wiki.osdev.org/Babystep2) - Writing a message using the BIOS.
+- [ ] [Babystep3](https://wiki.osdev.org/Babystep3) - A look at machine code
+- [ ] [Babystep4](https://wiki.osdev.org/Babystep4) - Printing to the screen without the BIOS
+- [ ] [Babystep5](https://wiki.osdev.org/Babystep5) - Interrupts
+- [ ] [Babystep6](https://wiki.osdev.org/Babystep6) - Entering protected mode
+- [ ] [Babystep7](https://wiki.osdev.org/Babystep7) - Unreal Mode
+- [ ] [Babystep8](https://wiki.osdev.org/Babystep0) - 32-bit printing
+- [ ] Appendix A - Additional information
 
 ## Blog posts
+
+During babysteps we will sometimes wrote some blogs for a better understanding.
+We will list them here:
 
 ### Hello from bootloader
 
