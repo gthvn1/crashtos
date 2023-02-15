@@ -44,4 +44,4 @@ boot.o: boot.asm
 	nasm -f elf64 boot.asm
 
 clean:
-	rm -rf multiboot_header.o boot.o yak.iso iso/ kernel.o
+	rm -rf multiboot_header.o boot.o yak.iso iso/ kernel.o kernel.d
