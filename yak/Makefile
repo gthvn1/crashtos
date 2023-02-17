@@ -14,14 +14,19 @@ $(BUILD_DIR)/iso/boot/kernel.bin: $(DEPS)
 	mkdir -p $(BUILD_DIR)/iso/boot
 	ld -m elf_i386 -nostdlib -o $@ -T linker.ld $^
 
-$(BUILD_DIR)/kmain.o: kernel/kmain.zig
+ifdef zig
+$(BUILD_DIR)/kmain.o: kernel_zig/kmain.zig
 	mkdir -p $(BUILD_DIR)
 	zig build-obj -target i386-freestanding $<
 	mv kmain.o build/
+else
+$(BUILD_DIR)/kmain.o: kernel_C/kmain.c
+	$(CC) $(CFLAGS) -c $< -o $@
+endif
 
 $(BUILD_DIR)/%.o: $(ASM_DIR)/%.asm
 	mkdir -p $(BUILD_DIR)
 	nasm -f elf32 -o $@ $<
 
 clean:
-	rm -rf $(BUILD_DIR) kernel/zig-cache
+	rm -rf $(BUILD_DIR) kernel_zig/zig-cache

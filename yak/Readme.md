@@ -14,13 +14,14 @@ protected mode...
 - *asm*: contains ASM files used to start the kernel
 - *bochs_config*: default configuration if you want to test it using [bochs](https://bochs.sourceforge.io/)
 - *grub*: grub configuration used when generating the iso with **grub2-mkrescue**
-- *kernel*: kernel source files
-- *old*: Before trying Zig we try C. We keep the file in this repo.
+- *kernel_C*: kernel source files in *C*.
+- *kernel_zig*: kernel source files in *Zig*.
 
 You will also find a linker script *linker.ld*, the *Makefile* and this *Readme.md*.
 
 ### Build and test
 
+### default
 - to build just run `make`. It will create an bootable iso in **build/**.
 - to test it: `qemu-system-x86_64  -drive format=raw,file=build/yak.iso`
   - Note the currently i386 is working as well...
@@ -31,13 +32,15 @@ gdb -ex 'target remote localhost:1234' -ex 'set disassembly-flavor intel'
 (gdb) c
 ```
 
+### C or Zig or ...
+
+We don't know yet which langage we will use. We tried *C* and *Zig* for now. By default
+`make` will compile the *C* kernel. If you want to compile the *Zig* one you can run
+`make zig=1`.
+
 ### Next steps
 
 - [X] setup the stack
 - [ ] setup the GDT
 - [ ] setup the IDT
 - [ ] jump into the kernel (don't know yet if it will be in C, in Rust, in Zig...)
-
-**NOTE**: we already added a file *kernel.c* (renamed *kernel.c.not_used* and we try to call the C function from
-the *boot.asm*. We also tried to do it in Zig... So it is working in Zig and also in C. Before going further we
-need to setup GDT, IDT and then jump into **kmain()** that is the kernel entry point. 
