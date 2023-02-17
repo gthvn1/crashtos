@@ -95,9 +95,9 @@ gdb -ex 'target remote localhost:1234' -ex 'set disassembly-flavor intel'
 - [ ] setup the IDT
 - [ ] jump into the kernel (don't know yet if it will be in C, in Rust, in Zig...)
 
-**NOTE**: we already added a file *kernel.c* and we try to call the C function from
-the *boot.asm*. Currently it is not really used. It is more for exploring because we
-don't know which langage we will use...
+**NOTE**: we already added a file *kernel.c* (renamed *kernel.c.not_used* and we try to call the C function from
+the *boot.asm*. We also tried to do it in Zig... So it is working in Zig and also in C. Before going further we
+need to setup GDT, IDT and then jump into **kmain()** that is the kernel entry point. 
 
 ## Blog posts related to previous paragraphs
 
