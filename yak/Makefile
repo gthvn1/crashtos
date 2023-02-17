@@ -16,8 +16,8 @@ build: kernel.bin grub.cfg
 kernel.bin: multiboot_header.o boot.o kernel.o
 	ld -m elf_i386 -nostdlib -o $@ -T linker.ld $^
 
-kernel.o: kernel.c
-	$(CC) $(CFLAGS) -c $< -o $@
+kernel.o: kernel.zig
+	zig build-obj -target i386-freestanding kernel.zig
 
 multiboot_header.o: multiboot_header.asm
 	nasm -f elf32 multiboot_header.asm
