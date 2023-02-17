@@ -16,8 +16,8 @@ build: kernel.bin grub.cfg
 kernel.bin: multiboot_header.o boot.o kernel.o
 	ld -m elf_i386 -nostdlib -o $@ -T linker.ld $^
 
-kernel.o: kernel.zig
-	zig build-obj -target i386-freestanding kernel.zig
+kernel.o: src/kernel.zig
+	zig build-obj -target i386-freestanding $<
 
 multiboot_header.o: multiboot_header.asm
 	nasm -f elf32 multiboot_header.asm
@@ -26,4 +26,4 @@ boot.o: boot.asm
 	nasm -f elf32 boot.asm
 
 clean:
-	rm -rf multiboot_header.o boot.o yak.iso iso/ kernel.o kernel.d
+	rm -rf multiboot_header.o boot.o yak.iso iso/ kernel.o kernel.d src/zig-cache
