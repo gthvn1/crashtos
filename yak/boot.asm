@@ -1,4 +1,4 @@
-global start	;; make start label available outside this form
+global _start	;; make _start label available outside this form
 extern kmain
 
 bits 32
@@ -18,12 +18,13 @@ bits 32
 ; As seen we must provide a stack. We allocate 16Ko.
 ; Remember that stack grows downards on x86 so top is the bottom ;-p
 section .bss
+
 stack_bottom:
-resb 16384; allocate 16KB (16*1024)
+	resb 16384; allocate 16KB (16*1024)
 stack_top:
 
 section .text
-start:
+_start:
 	cli ; until IDT is set ensure that interrupt are disabled
 
 	; setup the stack
@@ -32,4 +33,8 @@ start:
 	; TODO:
 	;   - setup GDT
 	;   - setup IDT
+
+	; currently calling kmain will work because GDT is usable and interrupts
+	; are disable. But we need to setup things cleanly before fully calling
+	; kmain.
 	call kmain

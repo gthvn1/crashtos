@@ -1,4 +1,4 @@
-ENTRY(start)  /* entry point for the executable... remember global in boot.asm */
+ENTRY(_start)  /* entry point for the executable... remember global in boot.asm */
 
 PHYS = 0x00100000;
 
