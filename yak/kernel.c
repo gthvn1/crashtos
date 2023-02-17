@@ -35,18 +35,48 @@ static inline uint16_t vga_entry(unsigned char uc, uint8_t color)
 	return (uint16_t) uc | (uint16_t) color << 8;
 }
 
-void tty_put_char_at(char c, uint8_t color, uint16_t x, uint16_t y)
+static unsigned int string_len(const char *str)
+{
+	unsigned int len = 0;
+	while (str[len])
+		len++;
+
+	return len;
+}
+
+static void tty_put_char_at(char c, uint8_t color, uint16_t x, uint16_t y)
 {
 	const uint16_t index = y * VGA_WIDTH + x;
 	ttyBuffer[index] = vga_entry(c, color);
 }
 
+static void tty_write(const char* data, uint8_t color, uint16_t x, uint16_t y)
+{
+	unsigned int len = string_len(data);
+
+	for (unsigned int i = 0; i < len; i++) {
+		tty_put_char_at(data[i], color, x, y);
+		// update x and y
+		x++;
+		if (x == VGA_WIDTH) {
+			x = 0;
+			y++;
+			if (y == VGA_HEIGHT) {
+				y = 0;
+			}
+		}
+	}
+}
+
 void kernel_main(void)
 {
-	uint8_t ttyColor = vga_entry_color(VGAColor_LIGHT_GREY, VGAColor_BLACK);
+	uint8_t ttyColor;
 
-	tty_put_char_at('O', ttyColor, 2, 2);
-	tty_put_char_at('K', ttyColor, 4, 2);
+	ttyColor = vga_entry_color(VGAColor_LIGHT_GREY, VGAColor_BLACK);
+	tty_write("In the kernel !!!", ttyColor, 0, 1);
+
+	ttyColor = vga_entry_color(VGAColor_LIGHT_GREEN, VGAColor_BLACK);
+	tty_write("Isn't that cool :-)", ttyColor, 0, 2);
 
 	for(;;) {}
 }
