@@ -72,37 +72,9 @@ in [ZigOS](https://github.com/gthvn1/zigos).
 
 ## YaK (Yet another Kernel)
 
-After babystep we will try to go further... So now we are able to create an ISO that
-can be booted using grub and we are able to write the hello world but this time in
-protected mode...
-
-### Build and test
-
-- to build just run `make`
-- to test it: `qemu-system-x86_64  -drive format=raw,file=yak.iso`
-  - Note the currently i386 is working as well...
-- to debug:
-```sh
-gdb -ex 'target remote localhost:1234' -ex 'set disassembly-flavor intel'
-(gdb) b *0x100020
-(gdb) c
-```
-
-### Next steps
-
-- [X] setup the stack
-- [ ] setup the GDT
-- [ ] setup the IDT
-- [ ] jump into the kernel (don't know yet if it will be in C, in Rust, in Zig...)
-
-**NOTE**: we already added a file *kernel.c* (renamed *kernel.c.not_used* and we try to call the C function from
-the *boot.asm*. We also tried to do it in Zig... So it is working in Zig and also in C. Before going further we
-need to setup GDT, IDT and then jump into **kmain()** that is the kernel entry point. 
+It is the main project, it has its own [Readme.md](https://github.com/gthvn1/yet-another-kernel/blob/master/yak/Readme.md) file...
 
 ## Blog posts related to previous paragraphs
-
-During babysteps we will sometimes wrote some blogs for a better understanding.
-We will list them here:
 
 ### Hello from bootloader
 
