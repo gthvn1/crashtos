@@ -1,24 +1,6 @@
 .PHONY: default run build clean
 
-override CFLAGS +=       \
-    -std=c11             \
-    -ffreestanding       \
-    -fno-stack-protector \
-    -fno-stack-check     \
-    -fno-lto             \
-    -fno-pie             \
-    -fno-pic             \
-    -m64                 \
-    -march=x86-64        \
-    -mabi=sysv           \
-    -mno-80387           \
-    -mno-mmx             \
-    -mno-sse             \
-    -mno-sse2            \
-    -mno-red-zone        \
-    -mcmodel=kernel      \
-    -MMD                 \
-    -I.
+override CFLAGS = -m32
 
 default: build
 
@@ -32,16 +14,16 @@ build: kernel.bin grub.cfg
 	grub2-mkrescue -o yak.iso iso
 
 kernel.bin: multiboot_header.o boot.o kernel.o
-	ld -nostdlib -nmagic --output=kernel.bin --script=linker.ld multiboot_header.o boot.o kernel.o
+	ld -m elf_i386 -nostdlib -o $@ -T linker.ld $^
 
 kernel.o: kernel.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 multiboot_header.o: multiboot_header.asm
-	nasm -f elf64 multiboot_header.asm
+	nasm -f elf32 multiboot_header.asm
 
 boot.o: boot.asm
-	nasm -f elf64 boot.asm
+	nasm -f elf32 boot.asm
 
 clean:
 	rm -rf multiboot_header.o boot.o yak.iso iso/ kernel.o kernel.d

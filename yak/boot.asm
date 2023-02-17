@@ -3,20 +3,31 @@ extern kernel_main
 
 bits 32
 
-section .text
-
-; Grub sets GDT for us
-; It seems that we have a CS at index 16 (that is the first entry after the NULL descriptor)
-; and others segments are at index 24 (+0x8)
-;
-; Stack seems set already
+; Looking at https://www.gnu.org/software/grub/manual/multiboot/multiboot.html we
+; see that:
+;   - interrupts must be disabled until sets up its own IDT
+;   - stack must be created as soon as possible
+;   - even though the segment register are set up with correct offset, limit and 32-bit
+;     read/execute for CS and 32-bit read/write for other segments the exact values are
+;     all *UNDEFINED*
 ;
 ; We almost copy the print_XXX functions
 ; from https://github.com/gthvn1/yet-another-kernel/blob/master/babysteps/boot.asm
 ; All details about the implementation (I think about the hexa dump) can be found over there.
 
+; As seen we must provide a stack. We allocate 16Ko.
+; Remember that stack grows downards on x86 so top is the bottom ;-p
+section .bss
+stack_bottom:
+resb 16384; allocate 16KB (16*1024)
+stack_top:
+
+section .text
 start:
-	cli
+	cli ; until IDT is set ensure that interrupt are disabled
+
+	; setup the stack
+	mov esp, stack_top
 
 	mov esi, helloMsg
 	call print_string
@@ -78,7 +89,7 @@ print_eax:
 
 section .data
 
-helloMsg   db "Welcome to Yet Another Kernel!", 0  ; String end with 0 to detect the end when looping
+helloMsg   db "Welcome to YaK, Yet another Kernel!", 0  ; String end with 0 to detect the end when looping
 xpos       db 0
 ypos       db 0
 

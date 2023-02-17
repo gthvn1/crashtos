@@ -1,5 +1,3 @@
-#include <stdint.h>
-
 enum VGAColor {
 	VGAColor_BLACK = 0,
 	VGAColor_BLUE = 1,
@@ -18,6 +16,9 @@ enum VGAColor {
 	VGAColor_LIGHT_BROWN = 14,
 	VGAColor_WHITE = 15,
 };
+
+typedef unsigned char uint8_t;
+typedef unsigned short uint16_t;
 
 const uint16_t VGA_WIDTH = 80;
 const uint16_t VGA_HEIGHT = 25;

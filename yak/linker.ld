@@ -23,7 +23,7 @@ SECTIONS {
 		__data_end = . ;
 		__bss_start = . ;
 		*(.bss)
-		. = ALIGN(4096) ;
+		. = ALIGN(16384) ;
 		__bss_end = . ;
 	}
 

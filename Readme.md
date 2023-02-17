@@ -24,7 +24,7 @@ How to create a basic kernel in assembly:
   - `qemu-system-i386 -s -S -fda boot.bin`
 - And in another terminal attach gdb:
 ```sh
-gdb -ex 'target remote localhost:1234' -ex 'set disassembly-flavor intel
+gdb -ex 'target remote localhost:1234' -ex 'set disassembly-flavor intel'
 (gdb) b *0x7c00
 (gdb) c
 Breakpoint 1, 0x00007c00 in ?? ()
@@ -81,11 +81,18 @@ protected mode...
 - to build just run `make`
 - to test it: `qemu-system-x86_64  -drive format=raw,file=yak.iso`
   - Note the currently i386 is working as well...
+- to debug:
+```sh
+gdb -ex 'target remote localhost:1234' -ex 'set disassembly-flavor intel'
+(gdb) b *0x100020
+(gdb) c
+```
 
 ### Next steps
 
+- [X] setup the stack
 - [ ] setup the GDT
-- [ ] setup the interrupt
+- [ ] setup the IDT
 - [ ] jump into the kernel (don't know yet if it will be in C, in Rust, in Zig...)
 
 **NOTE**: we already added a file *kernel.c* and we try to call the C function from
