@@ -5,27 +5,35 @@ PHYS = 0x00100000;
 SECTIONS {
 	. = PHYS;
 
+	__text_start = . ;
 	.text : {
 		/* multiboot header must be at the beginning */
-		__boot_start = . ;
-		*(.multiboot_header)
-		__boot_end = . ;
-		__text_start = . ;
+		KEEP(*(.multiboot_header))
 		*(.text)
 		. = ALIGN(4096) ;
-		__text_end = . ;
 	}
+	__text_end = . ;
 
+	__rodata_start = . ;
+	.rodata : {
+		*(.rodata)
+		. = ALIGN(4096) ;
+	}
+	__rodata_end = . ;
+
+	__data_start = . ;
 	.data : {
-		__data_start = . ;
 		*(.data)
 		. = ALIGN(4096) ;
-		__data_end = . ;
-		__bss_start = . ;
+	}
+	__data_end = . ;
+
+	__bss_start = . ;
+	.bss : {
 		*(.bss)
 		. = ALIGN(16384) ;
-		__bss_end = . ;
 	}
+	__bss_end = . ;
 
 	__end = . ;
 }
