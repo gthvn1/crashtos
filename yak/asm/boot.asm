@@ -30,11 +30,87 @@ _start:
 	; setup the stack
 	mov esp, stack_top
 
+	; setup GDT (Not working for now)
+	; call setup_gdt 
+
 	; TODO:
-	;   - setup GDT
 	;   - setup IDT
 
-	; currently calling kmain will work because GDT is usable and interrupts
-	; are disable. But we need to setup things cleanly before fully calling
-	; kmain.
 	call kmain
+
+unreachable:
+	jmp unreachable
+
+; --------
+setup_gdt:
+	lgdt [gdt_descriptor]
+
+	; Once setup we need to reload it
+	jmp 0x8:setup_gdt.reload_cs
+.reload_cs:
+	mov ax, 0x10
+	mov ds, ax
+	mov es, ax
+	mov fs, ax
+	mov gs, ax
+	mov ss, ax
+	ret
+
+section .data
+
+; We followed the Long Mode Setup from https://wiki.osdev.org/GDT_Tutorial
+; GDT entry are 8 bytes long
+;
+; An entry is:
+; +-------------------------------------------------------------------------------+
+; | Base @(24-31) |G|DB| |A|Limit (16-19)|P|DPL(13-14)|S|Type(8-11)|Base @(16-23) |
+; +-------------------------------------------------------------------------------+
+; |    Base address (Bit 0-15)           |      Segment Limit                     |
+; +-------------------------------------------------------------------------------+
+;
+; 0x00: keep it NULL
+; 0x08: Kernel Code Seg (Base: 0x0, Limit: 0xFFFFF, Access Byte: 0x9A, Flags: 0xC)
+; 0x10: Kernel Data Seg (Base: 0x0, Limit: 0xFFFFF, Access Byte: 0x92, Flags: 0xC)
+; 0x18: User Code Seg   (Base: 0x0, Limit: 0xFFFFF, Access Byte: 0xFA, Flags: 0xC)
+; 0x20: User Data Seg   (Base: 0x0, Limit: 0xFFFFF, Access Byte: 0xF2, Flags: 0xC)
+; 0x28: Task State Seg  ...TO BE DONE
+
+gdt:
+.start:
+	dd 0
+	dd 0
+.kernel_code:
+	dw 0xFFFF ; Segment Limit
+	dw 0x0    ; Base@ low
+	db 0x0    ; Base@ mid
+	db 0x94   ; Access Byte
+	db 0xCF   ; Flags + Seg length(16-19)
+	db 0x0    ; Base@ hi
+.kernel_data:
+	dw 0xFFFF ; Segment Limit
+	dw 0x0    ; Base@ low
+	db 0x0    ; Base@ mid
+	db 0x92   ; Access Byte
+	db 0xCF   ; Flags + Seg length(16-19)
+	db 0x0    ; Base@ hi
+.user_code:
+	dw 0xFFFF ; Segment Limit
+	dw 0x0    ; Base@ low
+	db 0x0    ; Base@ mid
+	db 0xFA   ; Access Byte
+	db 0xCF   ; Flags + Seg length(16-19)
+	db 0x0    ; Base@ hi
+.user_data:
+	dw 0xFFFF ; Segment Limit
+	dw 0x0    ; Base@ low
+	db 0x0    ; Base@ mid
+	db 0xF2   ; Access Byte
+	db 0xCF   ; Flags + Seg length(16-19)
+	db 0x0    ; Base@ hi
+.end:
+
+; We can now define the GDT descriptor that will be passed to lgdt
+; https://wiki.osdev.org/Global_Descriptor_Table#GDTR
+gdt_descriptor:
+	dw gdt.end - gdt.start - 1 ; size of the table in bytes subtracted by 1
+	dd gdt.start               ; the linear address of the GDT
