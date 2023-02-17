@@ -68,7 +68,7 @@ static void tty_write(const char* data, uint8_t color, uint16_t x, uint16_t y)
 	}
 }
 
-void kernel_main(void)
+void kmain(void)
 {
 	uint8_t ttyColor;
 

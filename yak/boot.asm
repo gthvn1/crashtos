@@ -1,5 +1,5 @@
 global start	;; make start label available outside this form
-extern kernel_main
+extern kmain
 
 bits 32
 
@@ -32,7 +32,7 @@ start:
 	mov esi, helloMsg
 	call print_string
 
-	call kernel_main
+	call kmain
 
 ;; ----- Print functions ------------------------------------------------------
 print_trampoline:
