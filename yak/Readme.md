@@ -44,3 +44,7 @@ We don't know yet which langage we will use. We tried *C* and *Zig* for now. By 
 - [ ] setup the GDT
 - [ ] setup the IDT
 - [ ] jump into the kernel (don't know yet if it will be in C, in Rust, in Zig...)
+
+## Links
+
+- [Issue with GDT in asm](https://stackoverflow.com/questions/58192042/solution-needed-for-building-a-static-idt-and-gdt-at-assemble-compile-link-time)
