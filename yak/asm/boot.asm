@@ -30,8 +30,8 @@ _start:
 	; setup the stack
 	mov esp, stack_top
 
-	; setup GDT (Not working for now)
-	;call load_gdt 
+	; setup new GDT 
+	call setup_gdt
 
 	; TODO:
 	;   - setup IDT
@@ -42,11 +42,11 @@ unreachable:
 	jmp unreachable
 
 ; --------
-load_gdt:
+setup_gdt:
 	lgdt [gdt_desc]
 
 	; Once loaded we need to reload it
-	jmp 0x8:load_gdt.reload_cs
+	jmp 0x8:setup_gdt.reload_cs
 .reload_cs:
 	mov ax, 0x10
 	mov ds, ax
@@ -77,20 +77,20 @@ section .data
 
 gdt:
 .start:
-	dd 0
+	dd 0      ; null descriptor
 	dd 0
 .kernel_code:
 	dw 0xFFFF ; Segment Limit
 	dw 0x0    ; Base@ low
 	db 0x0    ; Base@ mid
-	db 0x94   ; Access Byte: 1001_0100 
+	db 0x9A   ; Access Byte: 1001_1010
 	db 0xCF   ; Flags + Seg length(16-19)
 	db 0x0    ; Base@ hi
 .kernel_data:
 	dw 0xFFFF ; Segment Limit
 	dw 0x0    ; Base@ low
 	db 0x0    ; Base@ mid
-	db 0x92   ; Access Byte
+	db 0x92   ; Access Byte: 1001_0010
 	db 0xCF   ; Flags + Seg length(16-19)
 	db 0x0    ; Base@ hi
 .user_code:

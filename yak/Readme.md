@@ -41,7 +41,7 @@ We don't know yet which langage we will use. We tried *C* and *Zig* for now. By 
 ### Next steps
 
 - [X] setup the stack
-- [ ] setup the GDT
+- [X] setup the GDT
 - [ ] setup the IDT
 - [ ] jump into the kernel (don't know yet if it will be in C, in Rust, in Zig...)
 
