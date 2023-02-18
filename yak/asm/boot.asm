@@ -31,7 +31,7 @@ _start:
 	mov esp, stack_top
 
 	; setup GDT (Not working for now)
-	; call setup_gdt 
+	;call load_gdt 
 
 	; TODO:
 	;   - setup IDT
@@ -42,11 +42,11 @@ unreachable:
 	jmp unreachable
 
 ; --------
-setup_gdt:
-	lgdt [gdt_descriptor]
+load_gdt:
+	lgdt [gdt_desc]
 
-	; Once setup we need to reload it
-	jmp 0x8:setup_gdt.reload_cs
+	; Once loaded we need to reload it
+	jmp 0x8:load_gdt.reload_cs
 .reload_cs:
 	mov ax, 0x10
 	mov ds, ax
@@ -83,7 +83,7 @@ gdt:
 	dw 0xFFFF ; Segment Limit
 	dw 0x0    ; Base@ low
 	db 0x0    ; Base@ mid
-	db 0x94   ; Access Byte
+	db 0x94   ; Access Byte: 1001_0100 
 	db 0xCF   ; Flags + Seg length(16-19)
 	db 0x0    ; Base@ hi
 .kernel_data:
@@ -111,6 +111,6 @@ gdt:
 
 ; We can now define the GDT descriptor that will be passed to lgdt
 ; https://wiki.osdev.org/Global_Descriptor_Table#GDTR
-gdt_descriptor:
+gdt_desc:
 	dw gdt.end - gdt.start - 1 ; size of the table in bytes subtracted by 1
 	dd gdt.start               ; the linear address of the GDT

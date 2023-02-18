@@ -72,10 +72,11 @@ void kmain(void)
 {
 	uint8_t ttyColor;
 
-	ttyColor = vga_entry_color(VGAColor_LIGHT_GREY, VGAColor_BLACK);
-	tty_write("In the kernel !!!", ttyColor, 0, 1);
+	ttyColor = vga_entry_color(VGAColor_LIGHT_BROWN, VGAColor_BLUE);
+	tty_write("-= Welcome to YaK version 0.1 =-", ttyColor, 0, 0);
 
-	ttyColor = vga_entry_color(VGAColor_LIGHT_GREEN, VGAColor_BLACK);
+	ttyColor = vga_entry_color(VGAColor_GREEN, VGAColor_BLACK);
+	tty_write("We are in kmain !!!", ttyColor, 0, 1);
 	tty_write("Isn't that cool :-)", ttyColor, 0, 2);
 
 	for(;;) {}
