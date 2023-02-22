@@ -4,13 +4,13 @@ We will follow [Amateur Makes an OS](https://www.youtube.com/playlist?list=PLT7N
 
 - Disk has 1 cylinder, 1 head and 2 sectors
   - cylinders'size is 512 bytes
-  - cylinder number starts from 1
-  - cylinder 1 -> bootloader (512 bytes ended with magic)
-  - cylinder 2 -> kernel (512 bytes)
+  - sector numbers start from 1 (cylinder and head start from 0)
+  - sector 1 -> bootloader (512 bytes ended with magic)
+  - sector 2 -> kernel (512 bytes)
 
 # Next steps
 
-- [ ] In the step3 it is really cool to load the *"kernel"* using a *"bootloader"*.
+- [x] In the step3 it is really cool to load the *"kernel"* using a *"bootloader"*.
 So create an raw image that has the *"bootloader*" in its first sector and the kernel
 after. A sector is 512 bytes that is the size of the bootloader...
 - [x] To prepare this step we just create an empty kernel that will fill the second sector
