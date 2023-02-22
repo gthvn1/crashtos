@@ -70,43 +70,13 @@ They are not really interesting. It is said that we need to setup the GDT to be 
 to jump to protected mode. We already wrote a blog about this and it is almost done
 in [ZigOS](https://github.com/gthvn1/zigos).
 
-## YaK (Yet another Kernel)
+## YaK (Yet another Kernel) vs Crash test dummies...
 
-It is the main project, it has its own [Readme.md](https://github.com/gthvn1/yet-another-kernel/blob/master/yak/Readme.md) file...
+YaK was our first project and it has its own [Readme.md](https://github.com/gthvn1/yet-another-kernel/blob/master/yak/Readme.md) file...
+Then few weeks after starting it we found cool videos from video [Amateur Makes an OS](https://www.youtube.com/playlist?list=PLT7NbkyNWaqajsw8Xh7SP9KJwjfpP8TNX). We are trying to follow them so we create a new repo and as YaK
+it has its own [Readme.md](https://github.com/gthvn1/yet-another-kernel/blob/master/crash_test_dummy/Readme.md).
 
-## Crash test dummies..
-
-In the **crash_test_dummy/** repo it is stuff only for testing purpose. Inspiration
-comes from video [Amateur Makes an OS](https://www.youtube.com/playlist?list=PLT7NbkyNWaqajsw8Xh7SP9KJwjfpP8TNX).
-
-## Blog posts related to previous paragraphs
-
-### Hello from bootloader
-
-  In the first post we see how BIOS is loading our first stage0 boot that just print
-*Hello, World!* from real mode (16 bits).
-- [Hello from bootloader](https://gthvn1.github.io/blog/blog/bootloader-hello-world/)
-
-### Good bye real mode
-
-  In the second post we see how to reach the protected mode and we print the same
-*Hello, World!* but in protected mode.
-- [Good bye real mode](https://gthvn1.github.io/blog/posts/bootloader-good-bye-real-mode/)
-
-### Your door to operating system
-
-  The role of the bootloader is to setup things for switching to protected mode, read
-the code of an operating system from a boot device, load this piece of code somewhere
-and finally jump to the entry code of this new software. In the next post we will see
-how a bootloader (we will use grub) is able to load another *Hello, World!* but this
-time from our operating system...
-- [Your door to operating system](https://gthvn1.github.io/blog/posts/your-door-to-os/)
-
-### Enter long mode
-
-  A first try using [Zig](https://ziglang.org/) but unfortunatly we had some issues for
-building it.
-  - [Enter long mode](https://www.thouvenin.eu/blog/posts/enter-long-mode/)
+In any cases the final goal is to be able to load and run an ELF in userspace.
 
 ## Some interesting links
 
@@ -116,3 +86,4 @@ building it.
 - [BIOS interrupt call](https://en.wikipedia.org/wiki/BIOS_interrupt_call)
 - [OSDev bootloder wiki](https://wiki.osdev.org/Bootloader)
 - [Multiboot headers](https://intermezzos.github.io/book/first-edition/multiboot-headers.html)
+- [A Blog](https://www.thouvenin.eu/blog/) related to these attempts to create a *"kernel"*.
