@@ -35,22 +35,27 @@
 	int 0x10
 
 	; start writing something
-	mov si, helloStr ; bx "points" to helloStr
+	mov si, helloTest ; si "points" to helloStr
 	call print_string
 
-	mov si, worldStr
-	call print_string
+	mov dx, 0x123A    ; Set dx to the value we will print
+	mov si, hexTest   ; Set the string we want to print
+	call print_string ; print the string
+	call print_hex	  ; print the value of dx
+	mov si, nextLine
+	call print_string ; go to the next line
 
 infinite_loop:
 	jmp infinite_loop
 
 %include "print_string.asm"
+%include "print_hex.asm"
 
-helloStr: db "Hello,", 0xa, 0 ; 0xa is line feed (move cursor down to next line)
-worldStr: db "World!", 0xa, 0xd, 0 ; 0xd is carriage return (return to the beginning)
-; We should see when printing:
-; Hello,
-;       World!
+nextLine:  db 0xa, 0xd, 0
+	; 0xa is line feed (move cursor down to next line)
+	; 0xd is carriage return (return to the beginning)
+helloTest: db "Hello, World!", 0xa, 0xd, 0
+hexTest:   db "test dump dx: ", 0
 
 	times 510-($-$$) db 0 ; padding with 0s
 	dw 0xaa55  ; BIOS magic number
