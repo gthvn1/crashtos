@@ -1,16 +1,17 @@
 .PHONY: run clean
 
-FLOPPY=floppy.bin
-
-run: $(FLOPPY) disk.raw
+run: disk.raw
 	bochs -q
 
-disk.raw:
-	qemu-img create disk.raw 510K
+disk.raw: bootloader.bin kernel.bin
+	cat bootloader.bin kernel.bin > $@
 
 # BIN format puts NASM by default in 16-bit mode
-$(FLOPPY): boot.asm
+kernel.bin: kernel.asm
+	nasm -f bin -o $@ $<
+
+bootloader.bin: bootloader.asm
 	nasm -f bin -o $@ $<
 
 clean:
-	rm -f $(FLOPPY)
+	rm -f *.bin disk.raw

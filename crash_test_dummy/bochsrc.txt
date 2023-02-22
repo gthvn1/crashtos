@@ -1,3 +1,2 @@
-ata0-master: type=disk, path="disk.raw", cylinders=10, heads=6, spt=17
-floppya: 1_44=floppy.bin, status=inserted
-boot: floppy
+ata0-master: type=disk, path="disk.raw", cylinders=1, heads=1, spt=2
+boot: disk
