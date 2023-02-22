@@ -23,27 +23,12 @@
 		   ; we will refer to memory location the address will be
 		   ; wrong. For example mov al, [outputChar] will not work.
 
-	; Set up mode 80x25 color text
-	mov ah, 0x0
-	mov al, 0x3
-	int 0x10
+	xor bx, bx     ; bx == 0x0000
+	mov es, bx     ; es == 0x0000
+	mov bx, 0x7E00 ; [es:bx] == 0x7E00
 
-	; Set color Palette
-	mov ah, 0xb ; BIOS Service to set color palette
-	mov bh, 0x0 ; set border color
-	mov bl, 0x1 ; blue
-	int 0x10
-
-	; start writing something
-	mov si, helloTest ; si "points" to helloStr
-	call print_str
-	call print_newline
-
-	mov dx, 0x123A     ; Set dx to the value we will print
-	mov si, hexaTest   ; Set the string we want to print
-	call print_str     ; print the string
-	call print_hex	   ; print the value of dx
-	call print_newline
+	call read_chs
+	jmp 0x7E00
 
 	; This is the end...
 	cli
@@ -51,9 +36,7 @@
 
 %include "print_str.asm"
 %include "print_hex.asm"
-
-helloTest: db "Hello, World!", 0
-hexaTest:  db "test dump dx: ", 0
+%include "read_chs.asm"
 
 	times 510-($-$$) db 0 ; padding with 0s
 	dw 0xaa55  ; BIOS magic number
