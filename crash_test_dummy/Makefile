@@ -5,6 +5,7 @@ FLOPPY=floppy.bin
 run: $(FLOPPY)
 	bochs -q
 
+# BIN format puts NASM by default in 16-bit mode
 $(FLOPPY): boot.asm
 	nasm -f bin -o $@ $<
 
