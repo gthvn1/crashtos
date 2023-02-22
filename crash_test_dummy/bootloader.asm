@@ -23,12 +23,12 @@
 		   ; we will refer to memory location the address will be
 		   ; wrong. For example mov al, [outputChar] will not work.
 
-	mov bx, 0x1000
-	mov es, bx ; es == 0x1000
-	xor bx, bx ; bx == 0x0000 => [es:bx] == 0x10000
+	xor bx, bx     ; bx == 0x0000
+	mov es, bx     ; es == 0x0000
+	mov bx, 0x7E00 ; [es:bx] == 0x7E00
 
 	call read_chs
-	jmp 0x1000:0
+	jmp 0x7E00
 
 	; This is the end...
 	cli

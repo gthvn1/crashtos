@@ -1,8 +1,8 @@
 ; Kernel will setup screen mode, print some messages
-; Bootloader will load us at 0x1000:0x0000
+; Bootloader will load us at 0x7E00
 
 kernel:
-	org 0x10000
+	org 0x7E00
 
 	; Set up mode 80x25 color text
 	mov ah, 0x0
