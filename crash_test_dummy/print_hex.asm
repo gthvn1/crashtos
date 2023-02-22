@@ -30,7 +30,7 @@ print_hex:
 	jnz .hexloop
 
 	mov si, hexaOutput
-	call print_string
+	call print_str
 
 	popa
 	ret

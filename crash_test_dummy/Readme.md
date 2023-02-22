@@ -1,0 +1,3 @@
+- Disk has 10 cylinder, 6 heads and 17 sectors
+  - size is `10 * 6 * 17 * 512 bytes` (510KB)
+- It is created by the Makefile if it doesn't exist.

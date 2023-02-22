@@ -36,26 +36,24 @@
 
 	; start writing something
 	mov si, helloTest ; si "points" to helloStr
-	call print_string
+	call print_str
+	call print_newline
 
-	mov dx, 0x123A    ; Set dx to the value we will print
-	mov si, hexTest   ; Set the string we want to print
-	call print_string ; print the string
-	call print_hex	  ; print the value of dx
-	mov si, nextLine
-	call print_string ; go to the next line
+	mov dx, 0x123A     ; Set dx to the value we will print
+	mov si, hexaTest   ; Set the string we want to print
+	call print_str     ; print the string
+	call print_hex	   ; print the value of dx
+	call print_newline
 
-infinite_loop:
-	jmp infinite_loop
+	; This is the end...
+	cli
+	hlt
 
-%include "print_string.asm"
+%include "print_str.asm"
 %include "print_hex.asm"
 
-nextLine:  db 0xa, 0xd, 0
-	; 0xa is line feed (move cursor down to next line)
-	; 0xd is carriage return (return to the beginning)
-helloTest: db "Hello, World!", 0xa, 0xd, 0
-hexTest:   db "test dump dx: ", 0
+helloTest: db "Hello, World!", 0
+hexaTest:  db "test dump dx: ", 0
 
 	times 510-($-$$) db 0 ; padding with 0s
 	dw 0xaa55  ; BIOS magic number
