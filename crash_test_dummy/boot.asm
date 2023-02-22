@@ -7,6 +7,11 @@
 ;   AH = 0x0
 ;   AL = Mode
 ;
+; Set Color Palette
+;   AH = 0xb
+;   BH = Palette color ID (0 or 1)
+;   BL = Color or palette value to be used with color ID (0-31)
+;
 ; Write Char in TTY (TeleTYpe mode)
 ;   AH = 0x0e
 ;   AL = Character to write
@@ -18,14 +23,18 @@
 		   ; we will refer to memory location the address will be
 		   ; wrong. For example mov al, [outputChar] will not work.
 
-	; Set up mode to VGA 640x480 16 colors
+	; Set up mode 80x25 color text
 	mov ah, 0x0
-	mov al, 0x12
+	mov al, 0x3
+	int 0x10
+
+	; Set color Palette
+	mov ah, 0xb ; BIOS Service to set color palette
+	mov bh, 0x0 ; set border color
+	mov bl, 0x1 ; blue
 	int 0x10
 
 	; start writing something
-	mov ah, 0x0e ; code of the service to write Char
-	mov bl, 0xa  ; Light Green
 	mov si, helloStr ; bx "points" to helloStr
 	call print_string
 
@@ -35,17 +44,7 @@
 infinite_loop:
 	jmp infinite_loop
 
-; print_chars
-;  si: points to the beginning of the string and ends with '0'
-print_string:
-	mov al, [si]
-	or al, al ; Set ZF if it is zero
-	jnz print_char
-	ret
-print_char:
-	int 0x10
-	inc si
-	jmp print_string
+%include "print_string.asm"
 
 helloStr: db "Hello,", 0xa, 0 ; 0xa is line feed (move cursor down to next line)
 worldStr: db "World!", 0xa, 0xd, 0 ; 0xd is carriage return (return to the beginning)
