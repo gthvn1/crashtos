@@ -1,42 +1,61 @@
-; Interrupt 10H is video services
-;
-; https://grandidierite.github.io/bios-interrupts/
-; https://en.wikipedia.org/wiki/BIOS_color_attributes
-;
-; Set video mode
-;   AH = 0x0
-;   AL = Mode
-;
-; Set Color Palette
-;   AH = 0xb
-;   BH = Palette color ID (0 or 1)
-;   BL = Color or palette value to be used with color ID (0-31)
-;
-; Write Char in TTY (TeleTYpe mode)
-;   AH = 0x0e
-;   AL = Character to write
-;   BL = Foreground color (graphics mode only)
-;   BH = Display page number (text modes only)
-
+;; ============================================================================
+;; bootloader.asm
+;;
+;; It will load the kernel by reading the second sector on the first
+;; disk.
+;;
 	org 0x7C00 ; The code is loaded at 0x7C00 by the bootloader
 		   ; We need to set it otherwise when later in the code
 		   ; we will refer to memory location the address will be
 		   ; wrong. For example mov al, [outputChar] will not work.
 
-	xor bx, bx     ; bx == 0x0000
-	mov es, bx     ; es == 0x0000
-	mov bx, 0x7E00 ; [es:bx] == 0x7E00
+	xor bx, bx
+	mov es, bx      ; es <- 0x0000
+	mov bx, 0x7E00  ; Set [es:bx] to 0x7E00, this is where the data
+			; will be put when read from the disk. So it is
+			; where the kernel will be loaded.
 
-	call read_chs
-	jmp 0x7E00
+	call load_kernel_from_disk   ; Read the kernel from disk
+	jmp 0x7E00	; If it returns then jump to the kernel
 
-	; This is the end...
+	; Should not be reached !!!
 	cli
 	hlt
 
-%include "print_str.asm"
-%include "print_hex.asm"
-%include "read_chs.asm"
+load_kernel_from_disk:
+	;  - es:bx are set set before calling it
+	push si
+	mov si, 0x5 ; disk reads should be retried at least three times
+		    ; we use SI because all others registers are needed
 
-	times 510-($-$$) db 0 ; padding with 0s
-	dw 0xaa55  ; BIOS magic number
+	; Reset the disk before reading it
+	mov ah, 0x0
+	int 0x13
+
+	mov ah, 0x2  ; Read sectors from drive
+	mov al, 0x1  ; Only read 1 sector
+	mov ch, 0x0  ; Cylinder 0
+	mov cl, 0x2  ; Sector 2 (1 is where bootloader is stored)
+		     ; Remember, sector starts from 1
+	mov dh, 0x0  ; Head 0
+	mov dl, 0x80 ; First hard drive
+
+	int 0x13 ; 0x13 BIOS service
+
+	; Check the result
+	; If CF == 1 then there is an error
+	jc .failed_to_load_kernel
+
+	pop si
+	ret
+
+.failed_to_load_kernel:
+	dec si       
+	jnz load_kernel_from_disk ; if it is not zero we can retry
+
+	; We failed more than 3 times, it is over !!!
+	cli
+	halt
+
+	times 510-($-$$) db 0	; padding with 0s
+	dw 0xaa55		; BIOS magic number
