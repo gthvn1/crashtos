@@ -74,6 +74,11 @@ in [ZigOS](https://github.com/gthvn1/zigos).
 
 It is the main project, it has its own [Readme.md](https://github.com/gthvn1/yet-another-kernel/blob/master/yak/Readme.md) file...
 
+## Crash test dummies..
+
+In the **crash_test_dummy/** repo it is stuff only for testing purpose. Inspiration
+comes from video [Amateur Makes an OS](https://www.youtube.com/playlist?list=PLT7NbkyNWaqajsw8Xh7SP9KJwjfpP8TNX).
+
 ## Blog posts related to previous paragraphs
 
 ### Hello from bootloader
