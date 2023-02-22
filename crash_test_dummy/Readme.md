@@ -2,15 +2,19 @@ We will follow [Amateur Makes an OS](https://www.youtube.com/playlist?list=PLT7N
 
 # Some notes
 
-- Disk has 10 cylinder, 6 heads and 17 sectors
-  - size is `10 * 6 * 17 * 512 bytes` (510KB)
-- It is created by the Makefile if it doesn't exist.
+- Disk has 1 cylinder, 1 head and 2 sectors
+  - cylinders'size is 512 bytes
+  - cylinder number starts from 1
+  - cylinder 1 -> bootloader (512 bytes ended with magic)
+  - cylinder 2 -> kernel (512 bytes)
 
 # Next steps
 
-In the step3 it is really cool to load the *"kernel"* using a *"bootloader"*.
+- [ ] In the step3 it is really cool to load the *"kernel"* using a *"bootloader"*.
 So create an raw image that has the *"bootloader*" in its first sector and the kernel
 after. A sector is 512 bytes that is the size of the bootloader...
-
-To prepare this step we just create an empty kernel that will fill the second sector
+- [x] To prepare this step we just create an empty kernel that will fill the second sector
 so the size of the disk will be related to its geometry.
+- [ ] Currently it is not working on real hardware. Maybe we just need to add A20. It can
+be cool to try to have it working on real HW...
+- [ ] ...
