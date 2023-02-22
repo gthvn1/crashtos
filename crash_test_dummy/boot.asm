@@ -22,16 +22,24 @@
 	mov al, 0x12
 	int 0x10 ; change mode to VGA 640x480 16 colors
 
+	mov ah, 0x0e ; Write Char on TTY service
 	mov bl, 0xa  ; Light Green
+	mov si, outputChars ; bx "points" to outputChars
 
-	mov ah, 0x0e
-	mov al, [outputChar]
+print_chars:
+	mov al, [si]
+	
+	or al, al ; Set ZF if it is zero
+	jz .end
 	int 0x10
+	inc si
+	jmp print_chars
+.end
 
-loop:
-	jmp loop
+infinite_loop:
+	jmp infinite_loop
 
-outputChar: db 'Z', 0
+outputChars: db 'A', 'B', 'C', 'D', 0
 
 	times 510-($-$$) db 0 ; padding with 0s
 	dw 0xaa55  ; BIOS magic number
