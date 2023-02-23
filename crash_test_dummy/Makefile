@@ -6,17 +6,21 @@ BIN_DIR := bin
 $(shell mkdir -p $(BIN_DIR))
 
 BOOTLOADER := $(BIN_DIR)/bootloader.bin
+FILETABLE  := $(BIN_DIR)/filetable.bin
 KERNEL     := $(BIN_DIR)/kernel.bin
 MINIOS	   := $(BIN_DIR)/mini-os
 
 run: $(MINIOS)
 	bochs -q
 
-$(MINIOS): $(BOOTLOADER) $(KERNEL)
+$(MINIOS): $(BOOTLOADER) $(FILETABLE) $(KERNEL)
 	cat $^ > $(MINIOS)
 
 # BIN format puts NASM by default in 16-bit mode
 $(BOOTLOADER): $(SRC_ASM)/bootloader.asm
+	nasm -f bin -o $@ $<
+
+$(FILETABLE): $(SRC_ASM)/filetable.asm
 	nasm -f bin -o $@ $<
 
 $(KERNEL): $(SRC_ASM)/kernel.asm

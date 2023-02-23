@@ -32,10 +32,10 @@ load_kernel_from_disk:
 	mov ah, 0x0
 	int 0x13
 
-	mov ah, 0x2  ; Read sectors from drive
+	mov ah, 0x2  ; BIOS service: read sectors from drive
 	mov al, 0x1  ; Only read 1 sector
 	mov ch, 0x0  ; Cylinder 0
-	mov cl, 0x2  ; Sector 2 (1 is where bootloader is stored)
+	mov cl, 0x3  ; Sector 3 (1 is bootloader and 2 is filetable)
 		     ; Remember, sector starts from 1
 	mov dh, 0x0  ; Head 0
 	mov dl, 0x80 ; First hard drive

@@ -61,7 +61,10 @@ print_str:
 .done:
 	ret
 
-helloFromCTD: db "Crash Test Dummy loaded!", 0xa, 0xd, 0
+helloFromCTD:
+	db "------------------------", 0xa, 0xd
+	db "Crash Test Dummy loaded!", 0xa, 0xd
+	db "------------------------", 0xa, 0xd, 0
 	; 0xa is line feed (move cursor down to next line)
 	; 0xd is carriage return (return to the beginning)
 
