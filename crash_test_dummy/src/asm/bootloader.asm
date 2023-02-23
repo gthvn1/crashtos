@@ -55,7 +55,7 @@ load_kernel_from_disk:
 
 	; We failed more than 3 times, it is over !!!
 	cli
-	halt
+	hlt
 
 	times 510-($-$$) db 0	; padding with 0s
 	dw 0xaa55		; BIOS magic number

@@ -1,4 +1,4 @@
-ata0-master: type=disk, path="disk.raw", cylinders=1, heads=1, spt=2
+ata0-master: type=disk, path="bin/mini-os", cylinders=1, heads=1, spt=2
 boot: disk
 debugger_log: debugger.out
 
