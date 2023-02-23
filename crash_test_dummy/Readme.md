@@ -16,7 +16,7 @@ on the second sector.
 
 ## Some notes
 
-# Disks
+### Disks
 
 - Disk has 1 cylinder, 1 head and 2 sectors
   - cylinders'size is 512 bytes
@@ -24,7 +24,7 @@ on the second sector.
   - sector 1 -> bootloader (512 bytes ended with magic)
   - sector 2 -> kernel (512 bytes)
 
-# Next steps
+### Next steps
 
 - [x] In the step3 it is really cool to load the *"kernel"* using a *"bootloader"*.
 So create an raw image that has the *"bootloader*" in its first sector and the kernel
