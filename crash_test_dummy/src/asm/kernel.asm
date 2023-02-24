@@ -20,7 +20,7 @@ display_menu:
 
     mov ah, 0xb ; Set BIOS Service to "set color palette"
     mov bh, 0x0 ; set background & border color
-    mov bl, 0x1 ; blue
+    mov bl, 0x5 ; magenta
     int 0x10
 
     mov si, menuString ; si "points" to helloStr
