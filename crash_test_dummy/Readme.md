@@ -19,14 +19,15 @@ on the second sector.
 Currently it is not working on real hardware. Maybe we just need to add A20. It can
 be cool to try to have it working on real HW...
 
-### Disks
+### Disk geometry
 
-- Disk has 1 cylinder, 1 head and 3 sectors
+- Disk has 1 cylinder, 1 head and 4 sectors
   - cylinders'size is 512 bytes
   - sector numbers start from 1 (cylinder and head start from 0)
   - sector 1 -> bootloader (512 bytes ended with magic)
   - sector 2 -> File table (512 bytes padded with 0s)
-  - sector 3 -> kernel (512 bytes padded with 0s)
+  - sector 3 -> kernel (1024 bytes padded with 0s)
+  - sector 5 -> future program... (not yet done)
 
 ### Next steps
 
