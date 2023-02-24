@@ -2,8 +2,8 @@
 ;; kernel.asm
 ;;
 ;; Kernel will:
-;;	- setup screen mode
-;;	- display the menu
+;;    - setup screen mode
+;;    - display the menu
 ;;
 ;; Bootloader will load us at 0x8000
 ;;
@@ -11,20 +11,20 @@
 ;; [Video Colors](https://en.wikipedia.org/wiki/BIOS_color_attributes)
 
 kernel:
-	org 0x8000
+    org 0x8000
 
-	mov ah, 0x0 ; Set BIOS service to "set video mode"
-	mov al, 0x3 ; 80x25 16 color text
-	int 0x10    ; BIOS interrupt for video services
+    mov ah, 0x0 ; Set BIOS service to "set video mode"
+    mov al, 0x3 ; 80x25 16 color text
+    int 0x10    ; BIOS interrupt for video services
 
-	mov ah, 0xb ; Set BIOS Service to "set color palette"
-	mov bh, 0x0 ; set background & border color
-	mov bl, 0x1 ; blue
-	int 0x10
+    mov ah, 0xb ; Set BIOS Service to "set color palette"
+    mov bh, 0x0 ; set background & border color
+    mov bl, 0x1 ; blue
+    int 0x10
 
-	; Display the menu
-	mov si, menuString ; si "points" to helloStr
-	call print_str
+    ; Display the menu
+    mov si, menuString ; si "points" to helloStr
+    call print_str
 
 process_input:
     mov ah, 0x0 ; wait for keypress and read character
@@ -70,18 +70,18 @@ process_input:
 %include "src/asm/print_str.asm"
 
 menuString:
-	db "------------------------", 0xa, 0xd
-	db "Crash Test Dummy loaded!", 0xa, 0xd
-	db "------------------------", 0xa, 0xd,
+    db "------------------------", 0xa, 0xd
+    db "Crash Test Dummy loaded!", 0xa, 0xd
+    db "------------------------", 0xa, 0xd,
     db "[F]ile & Program Browser/Loader", 0xa, 0xd,
     db "[R]eboot", 0xa, 0xd,
     db "[Q]uit", 0xa, 0xd, 0
-	; 0xa is line feed (move cursor down to next line)
-	; 0xd is carriage return (return to the beginning)
+    ; 0xa is line feed (move cursor down to next line)
+    ; 0xd is carriage return (return to the beginning)
 
 runBrowserMsg:  db "run browser", 0xa, 0xd, 0
 cmdNotFoundMsg: db "command not found", 0xa, 0xd, 0
 haltMsg:        db "enter in infinite loop", 0xa, 0xd, 0
 cmdInput:       db "You pressed: 0", 0xa, 0xd, 0
 
-	times 512-($-$$) db 0 ; padding with 0s
+    times 512-($-$$) db 0 ; padding with 0s
