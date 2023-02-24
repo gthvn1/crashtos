@@ -46,4 +46,5 @@ be cool to try to have it working on real HW...
   - NOTE: we just store the key press in memory (in fact we save the caracter in then
           expected index of the input string to have a nice print message).
 - [x] Add warm reboot (it is a far jump to 0xFFFF:0x0000)
+- [x] Load file table from sector 2
 - [ ] Display file table

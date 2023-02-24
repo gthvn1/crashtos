@@ -6,8 +6,7 @@
 ;; For example:
 ;;   '{fileName1-sector#, fileName2-sector#, ... }
 ;;
-;; The file table will be written on sector 2 after the bootloader.
-;; So kernel will be in 3 and other program after the kernel
+;; Bootloader will load us at 0x7E00
 db '{kernel-03, calculator-04}'
 
 	; Sector padding to have a bin generated of 512 bytes (one sector)

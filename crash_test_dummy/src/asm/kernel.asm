@@ -5,13 +5,13 @@
 ;;	- setup screen mode
 ;;	- display the menu
 ;;
-;; Bootloader will load us at 0x7E00
+;; Bootloader will load us at 0x8000
 ;;
 ;; [BIOS Services](https://grandidierite.github.io/bios-interrupts)
 ;; [Video Colors](https://en.wikipedia.org/wiki/BIOS_color_attributes)
 
 kernel:
-	org 0x7E00
+	org 0x8000
 
 	mov ah, 0x0 ; Set BIOS service to "set video mode"
 	mov al, 0x3 ; 80x25 16 color text
