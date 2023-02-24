@@ -1,9 +1,8 @@
 ; print_str
 ; Inputs:
 ;   - SI: contains address of the string to be printed
-; Clobbers:
-;   - SI, AX
 print_str:
+    pusha        ; save all registers
 	mov ah, 0x0e ; Set BIOS Service to "write text in Teletype Mode"
 .get_next_char:
 	lodsb        ; al <- DS:SI and increment SI by one
@@ -12,4 +11,5 @@ print_str:
 	int 0x10     ; otherwise print the character and go to next one...
 	jmp .get_next_char
 .done:
+    popa         ; restore all registers
 	ret

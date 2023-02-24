@@ -34,19 +34,18 @@ process_input:
     ; AH will contain the keyboard scan code
     ;       https://www.stanislavs.org/helppc/scan_codes.html
     ; AL will contain the ASCII character or zero
-    mov bx, ax         ; save ax into bx because print_str clobbers it
     mov si, cmdInput   ; set source index to cmdInput string
     mov [si + 13], al  ; Relace the 13th character by ASCII char found in AL
     call print_str     ; Print the input
 
     ; Let's compare the key pressed by the used with our known code
-    cmp bl, 0x66 ; Compare AL to 'F'
+    cmp al, 0x66 ; Compare AL to 'F'
     je process_input.browser   ; If equal we can now run the command
 
-    cmp bl, 0x71 ; Compare AL to 'Q'
+    cmp al, 0x71 ; Compare AL to 'Q'
     je process_input.quit      ; if equal "halt" the machine
 
-    cmp bl, 0x72 ; Compare AL to 'R'
+    cmp al, 0x72 ; Compare AL to 'R'
     je process_input.reboot    ; if equal reboot
 
     mov si, cmdNotFoundMsg ; no match so print an error and get user input again
