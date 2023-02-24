@@ -39,19 +39,34 @@ get_user_input:
                 ; we lost the keystroke but we don't use it for now
     int 0x10    ; print ascii in AL to TTY
 
-    cmp al, 0x66       ; Compare AL to 'F'
-    je run_command     ; If equal we can now run the command
-    jmp get_user_input ; If not continue to get user input
-
 run_command:
-    mov si, runCommand
+    cmp al, 0x66     ; Compare AL to 'F'
+    je browser       ; If equal we can now run the command
+
+    cmp al, 0x72     ; Compare AL to 'R'
+    je reboot        ; if equal reboot
+
+    cmp al, 0x68     ; Compare AL to 'H'
+    je shutdown      ; if equal shut down the machine
+
+    mov si, CmdNotFoundMsg ; no match so print an error and get user input again
     call print_str
+    jmp get_user_input
 
-infinite_loop:
-	hlt
-	jmp infinite_loop
+browser:
+    mov si, runBrowserMsg
+    call print_str
+    jmp get_user_input
 
-;; Functions used by our kernel
+reboot:
+    jmp 0xFFFF:0x0000 ; jump to the vector reset
+
+shutdown:
+    mov si, shutdownMsg
+    call print_str
+    cli
+    hlt
+
 print_str:
 	mov ah, 0x0e ; Set BIOS Service to "write text in Teletype Mode"
 .get_next_char:
@@ -67,11 +82,14 @@ menuString:
 	db "------------------------", 0xa, 0xd
 	db "Crash Test Dummy loaded!", 0xa, 0xd
 	db "------------------------", 0xa, 0xd,
-    db "F) File & Program Browser/Loader", 0xa, 0xd, 0
+    db "[F]ile & Program Browser/Loader", 0xa, 0xd,
+    db "[R]eboot", 0xa, 0xd,
+    db "[H]alt", 0xa, 0xd, 0
 	; 0xa is line feed (move cursor down to next line)
 	; 0xd is carriage return (return to the beginning)
 
-runCommand:
-    db "run command", 0xa, 0xd, 0
+runBrowserMsg:  db "run browser", 0xa, 0xd, 0
+CmdNotFoundMsg: db "command not found", 0xa, 0xd, 0
+shutdownMsg:    db "shutting down, bye!!!", 0xa, 0xd, 0
 
 	times 512-($-$$) db 0 ; padding with 0s

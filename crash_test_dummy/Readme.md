@@ -42,3 +42,5 @@ be cool to try to have it working on real HW...
   user press "Enter" then we check if the command starts from "F" and do appropriate
   thing, if it starts by "Q" we quit, and otherwise we get another input from the user.
   The cool thing with that is that later we will be able to have a shell :)
+- [ ] Add warm reboot (it is a far jump to 0xFFFF:0x0000)
+- [ ] Display file table
