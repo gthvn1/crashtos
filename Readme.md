@@ -80,6 +80,7 @@ In any cases the final goal is to be able to load and run an ELF in userspace.
 
 ## Some interesting links
 
+- [BIOS Interrupt services](https://www.stanislavs.org/helppc/idx_interrupt.html]
 - [The little book about OS development](https://ordoflammae.github.io/littleosbook/)
 - [OSDev long mode](https://wiki.osdev.org/Setting_Up_Long_Mode)
 - [Redox bootloader](https://gitlab.redox-os.org/redox-os/bootloader)
