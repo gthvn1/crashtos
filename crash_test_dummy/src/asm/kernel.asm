@@ -26,7 +26,7 @@ kernel:
 	mov si, menuString ; si "points" to helloStr
 	call print_str
 
-get_user_input:
+process_input:
     mov ah, 0x0 ; wait for keypress and read character
     int 0x16    ; BIOS interrupt for keyboard services
 
@@ -39,35 +39,39 @@ get_user_input:
     mov [si + 13], al  ; Relace the 13th character by ASCII char found in AL
     call print_str     ; Print the input
 
-run_command:
+    ; Let's compare the key pressed by the used with our known code
     cmp bl, 0x66 ; Compare AL to 'F'
-    je browser   ; If equal we can now run the command
+    je process_input.browser   ; If equal we can now run the command
+
+    cmp bl, 0x71 ; Compare AL to 'Q'
+    je process_input.quit      ; if equal "halt" the machine
 
     cmp bl, 0x72 ; Compare AL to 'R'
-    je reboot    ; if equal reboot
+    je process_input.reboot    ; if equal reboot
 
-    cmp bl, 0x68 ; Compare AL to 'H'
-    je halt      ; if equal halt the machine
-
-    mov si, CmdNotFoundMsg ; no match so print an error and get user input again
+    mov si, cmdNotFoundMsg ; no match so print an error and get user input again
     call print_str
-    jmp get_user_input
+    jmp process_input
 
-browser:
-    mov si, runBrowserMsg
+.browser:
+    mov si, 0x7E00 ; Put the address of the File table into si
     call print_str
-    jmp get_user_input
+    jmp process_input
 
-reboot:
-    jmp 0xFFFF:0x0000 ; jump to the vector reset
-
-halt:
+.quit:
     mov si, haltMsg
     call print_str
     cli
     hlt
 
-; print_str clobbers AX
+.reboot:
+    jmp 0xFFFF:0x0000 ; jump to the vector reset
+
+; print_str
+; Inputs:
+;   - SI: contains address of the string to be printed
+; Clobbers:
+;   - SI, AX
 print_str:
 	mov ah, 0x0e ; Set BIOS Service to "write text in Teletype Mode"
 .get_next_char:
@@ -85,12 +89,12 @@ menuString:
 	db "------------------------", 0xa, 0xd,
     db "[F]ile & Program Browser/Loader", 0xa, 0xd,
     db "[R]eboot", 0xa, 0xd,
-    db "[H]alt", 0xa, 0xd, 0
+    db "[Q]uit", 0xa, 0xd, 0
 	; 0xa is line feed (move cursor down to next line)
 	; 0xd is carriage return (return to the beginning)
 
 runBrowserMsg:  db "run browser", 0xa, 0xd, 0
-CmdNotFoundMsg: db "command not found", 0xa, 0xd, 0
+cmdNotFoundMsg: db "command not found", 0xa, 0xd, 0
 haltMsg:        db "enter in infinite loop", 0xa, 0xd, 0
 cmdInput:       db "You pressed: 0", 0xa, 0xd, 0
 

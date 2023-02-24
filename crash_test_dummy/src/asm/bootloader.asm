@@ -41,7 +41,7 @@
 	hlt
 
 ; load_disk_sector:
-; input:
+; Inputs:
 ;   - CH: Cylinder
 ;   - CL: Sector
 ;   - [ES:BX] the memory where we want to load the sector
