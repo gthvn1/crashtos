@@ -14,16 +14,9 @@ kernel:
     org 0x8000
 
 display_menu:
-    mov ah, 0x0 ; Set BIOS service to "set video mode"
-    mov al, 0x3 ; 80x25 16 color text
-    int 0x10    ; BIOS interrupt for video services
+    call reset_screen
 
-    mov ah, 0xb ; Set BIOS Service to "set color palette"
-    mov bh, 0x0 ; set background & border color
-    mov bl, 0x5 ; magenta
-    int 0x10
-
-    mov si, menuString ; si "points" to helloStr
+    mov si, menuHeader ; si "points" to helloStr
     call print_str
 
 process_input:
@@ -61,7 +54,14 @@ process_input:
     jmp process_input.wait_press_key
 
 .print_registers:
-    ;; TODO
+    ; clear screen by setting video mode
+    call reset_screen
+    ; Display the print registers header
+    mov si, printRegsHeader
+    call print_str
+    ; print registers
+    call print_regs
+    ; wait to key pressed before returning to main menu
     jmp process_input.wait_press_key
 
 .wait_press_key:
@@ -81,10 +81,29 @@ process_input:
 .reboot:
     jmp 0xFFFF:0x0000 ; jump to the vector reset
 
+reset_screen:
+    push ax
+    push bx
+
+    mov ah, 0x0 ; Set BIOS service to "set video mode"
+    mov al, 0x3 ; 80x25 16 color text
+    int 0x10    ; BIOS interrupt for video services
+
+    mov ah, 0xb ; Set BIOS Service to "set color palette"
+    mov bh, 0x0 ; set background & border color
+    mov bl, 0x5 ; magenta
+    int 0x10
+
+    pop bx
+    pop ax
+    ret
+
 ;; As it is compile at the top we need to include the asm file with its path
 %include "src/asm/print_str.asm"
+%include "src/asm/print_hex.asm"
+%include "src/asm/print_regs.asm"
 
-menuString:
+menuHeader:
     db "------------------------", 0xa, 0xd
     db "Crash Test Dummy loaded!", 0xa, 0xd
     db "------------------------", 0xa, 0xd,
@@ -94,6 +113,11 @@ menuString:
     db "[Q]uit", 0xa, 0xd, 0
     ; 0xa is line feed (move cursor down to next line)
     ; 0xd is carriage return (return to the beginning)
+
+printRegsHeader:
+    db "--------     -----------", 0xa, 0xd
+    db "Register     MemLocation", 0xa, 0xd
+    db "--------     -----------", 0xa, 0xd, 0
 
 pressKeyMsg:    db 0xa, 0xd, "press any keys to return to main menu", 0
 runBrowserMsg:  db "run browser", 0xa, 0xd, 0
