@@ -48,3 +48,6 @@ be cool to try to have it working on real HW...
 - [x] Add warm reboot (it is a far jump to 0xFFFF:0x0000)
 - [x] Load file table from sector 2
 - [ ] Display file table
+- [ ] Add an entry for printing registers
+- [x] After running a command add a "return to menu" message, wait for key input
+      , cleanup the screen and go back to menu.
