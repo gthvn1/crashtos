@@ -16,6 +16,9 @@ on the second sector.
 
 ## Some notes
 
+Currently it is not working on real hardware. Maybe we just need to add A20. It can
+be cool to try to have it working on real HW...
+
 ### Disks
 
 - Disk has 1 cylinder, 1 head and 2 sectors
@@ -27,13 +30,15 @@ on the second sector.
 ### Next steps
 
 - [x] In the step3 it is really cool to load the *"kernel"* using a *"bootloader"*.
-So create an raw image that has the *"bootloader*" in its first sector and the kernel
-after. A sector is 512 bytes that is the size of the bootloader...
+  So create an raw image that has the *"bootloader*" in its first sector and the kernel
+  after. A sector is 512 bytes that is the size of the bootloader...
 - [x] To prepare this step we just create an empty kernel that will fill the second sector
-so the size of the disk will be related to its geometry.
-- [ ] Move the kernel into sector 3 and add something else on the second sector. Use kind
-of filesystem to know where things are stored. The "filesystem" will just be a string with
-the filename of things stored on sectors. For the moment we store segment by segment.
-- [ ] Currently it is not working on real hardware. Maybe we just need to add A20. It can
-be cool to try to have it working on real HW...
-- [ ] ...
+  so the size of the disk will be related to its geometry.
+- [x] Move the kernel into sector 3 and add something else on the second sector. Use kind
+  of filesystem to know where things are stored. The "filesystem" will just be a string with
+  the filename of things stored on sectors. For the moment we store segment by segment.
+- [x] Read input from user
+- [ ] Instead of reading the key pressed we can store keys pressed in memory and when
+  user press "Enter" then we check if the command starts from "F" and do appropriate
+  thing, if it starts by "Q" we quit, and otherwise we get another input from the user.
+  The cool thing with that is that later we will be able to have a shell :)

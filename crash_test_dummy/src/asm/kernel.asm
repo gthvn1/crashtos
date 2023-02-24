@@ -3,69 +3,75 @@
 ;;
 ;; Kernel will:
 ;;	- setup screen mode
-;;	- print the hello world !!!
+;;	- display the menu
 ;;
 ;; Bootloader will load us at 0x7E00
 ;;
-;; Interrupt 10H is video services
-;;
-;; https://grandidierite.github.io/bios-interrupts/
-;; https://en.wikipedia.org/wiki/BIOS_color_attributes
-;;
-;; Set video mode
-;;   AH = 0x0
-;;   AL = Mode
-;;
-;; Set Color Palette
-;;   AH = 0xb
-;;   BH = Palette color ID (0 or 1)
-;;   BL = Color or palette value to be used with color ID (0-31)
-;;
-;; Write Char in TTY (TeleTYpe mode)
-;;   AH = 0x0e
-;;   AL = Character to write
-;;   BL = Foreground color (graphics mode only)
-;;   BH = Display page number (text modes only)
+;; [BIOS Services](https://grandidierite.github.io/bios-interrupts)
+;; [Video Colors](https://en.wikipedia.org/wiki/BIOS_color_attributes)
 
 kernel:
 	org 0x7E00
 
-	; Set up mode 80x25 color text
-	mov ah, 0x0
-	mov al, 0x3
-	int 0x10
+	mov ah, 0x0 ; Set BIOS service to "set video mode"
+	mov al, 0x3 ; 80x25 16 color text
+	int 0x10    ; BIOS interrupt for video services
 
-	; Set color Palette
-	mov ah, 0xb ; BIOS Service to set color palette
-	mov bh, 0x0 ; set border color
+	mov ah, 0xb ; Set BIOS Service to "set color palette"
+	mov bh, 0x0 ; set background & border color
 	mov bl, 0x1 ; blue
 	int 0x10
 
-	; say hello
-	mov si, helloFromCTD ; si "points" to helloStr
+	; Display the menu
+	mov si, menuString ; si "points" to helloStr
 	call print_str
 
-	;; infinite loop
+get_user_input:
+    mov ah, 0x0 ; wait for keypress and read character
+    int 0x16    ; BIOS interrupt for keyboard services
+
+    ; The program is halted until key with scancode is pressed.
+    ; AH will contain the keyboard scan code
+    ;       https://www.stanislavs.org/helppc/scan_codes.html
+    ; AL will contain the ASCII character or zero
+
+    mov ah, 0xe ; set "write text in teletype mode"
+                ; we lost the keystroke but we don't use it for now
+    int 0x10    ; print ascii in AL to TTY
+
+    cmp al, 0x66       ; Compare AL to 'F'
+    je run_command     ; If equal we can now run the command
+    jmp get_user_input ; If not continue to get user input
+
+run_command:
+    mov si, runCommand
+    call print_str
+
 infinite_loop:
 	hlt
 	jmp infinite_loop
 
+;; Functions used by our kernel
 print_str:
-	mov ah, 0x0e ; code of the service to write Char
+	mov ah, 0x0e ; Set BIOS Service to "write text in Teletype Mode"
 .get_next_char:
-	lodsb     ; al <- DS:SI and increment SI by one
-	or al, al ; Set ZF if it is zero
-	jz .done
-	int 0x10
+	lodsb        ; al <- DS:SI and increment SI by one
+	or al, al    ; It will set ZF if it is zero
+	jz .done     ; And if it al == 0 we reach the end of the string
+	int 0x10     ; otherwise print the character and go to next one...
 	jmp .get_next_char
 .done:
 	ret
 
-helloFromCTD:
+menuString:
 	db "------------------------", 0xa, 0xd
 	db "Crash Test Dummy loaded!", 0xa, 0xd
-	db "------------------------", 0xa, 0xd, 0
+	db "------------------------", 0xa, 0xd,
+    db "F) File & Program Browser/Loader", 0xa, 0xd, 0
 	; 0xa is line feed (move cursor down to next line)
 	; 0xd is carriage return (return to the beginning)
+
+runCommand:
+    db "run command", 0xa, 0xd, 0
 
 	times 512-($-$$) db 0 ; padding with 0s
