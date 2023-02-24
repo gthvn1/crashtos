@@ -38,9 +38,11 @@ be cool to try to have it working on real HW...
   of filesystem to know where things are stored. The "filesystem" will just be a string with
   the filename of things stored on sectors. For the moment we store segment by segment.
 - [x] Read input from user
-- [ ] Instead of reading the key pressed we can store keys pressed in memory and when
+- [x] Instead of reading the key pressed we can store keys pressed in memory and when
   user press "Enter" then we check if the command starts from "F" and do appropriate
   thing, if it starts by "Q" we quit, and otherwise we get another input from the user.
   The cool thing with that is that later we will be able to have a shell :)
-- [ ] Add warm reboot (it is a far jump to 0xFFFF:0x0000)
+  - NOTE: we just store the key press in memory (in fact we save the caracter in then
+          expected index of the input string to have a nice print message).
+- [x] Add warm reboot (it is a far jump to 0xFFFF:0x0000)
 - [ ] Display file table

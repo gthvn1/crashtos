@@ -34,20 +34,20 @@ get_user_input:
     ; AH will contain the keyboard scan code
     ;       https://www.stanislavs.org/helppc/scan_codes.html
     ; AL will contain the ASCII character or zero
-
-    mov ah, 0xe ; set "write text in teletype mode"
-                ; we lost the keystroke but we don't use it for now
-    int 0x10    ; print ascii in AL to TTY
+    mov bx, ax         ; save ax into bx because print_str clobbers it
+    mov si, cmdInput   ; set source index to cmdInput string
+    mov [si + 13], al  ; Relace the 13th character by ASCII char found in AL
+    call print_str     ; Print the input
 
 run_command:
-    cmp al, 0x66     ; Compare AL to 'F'
-    je browser       ; If equal we can now run the command
+    cmp bl, 0x66 ; Compare AL to 'F'
+    je browser   ; If equal we can now run the command
 
-    cmp al, 0x72     ; Compare AL to 'R'
-    je reboot        ; if equal reboot
+    cmp bl, 0x72 ; Compare AL to 'R'
+    je reboot    ; if equal reboot
 
-    cmp al, 0x68     ; Compare AL to 'H'
-    je shutdown      ; if equal shut down the machine
+    cmp bl, 0x68 ; Compare AL to 'H'
+    je halt      ; if equal halt the machine
 
     mov si, CmdNotFoundMsg ; no match so print an error and get user input again
     call print_str
@@ -61,12 +61,13 @@ browser:
 reboot:
     jmp 0xFFFF:0x0000 ; jump to the vector reset
 
-shutdown:
-    mov si, shutdownMsg
+halt:
+    mov si, haltMsg
     call print_str
     cli
     hlt
 
+; print_str clobbers AX
 print_str:
 	mov ah, 0x0e ; Set BIOS Service to "write text in Teletype Mode"
 .get_next_char:
@@ -90,6 +91,7 @@ menuString:
 
 runBrowserMsg:  db "run browser", 0xa, 0xd, 0
 CmdNotFoundMsg: db "command not found", 0xa, 0xd, 0
-shutdownMsg:    db "shutting down, bye!!!", 0xa, 0xd, 0
+haltMsg:        db "enter in infinite loop", 0xa, 0xd, 0
+cmdInput:       db "You pressed: 0", 0xa, 0xd, 0
 
 	times 512-($-$$) db 0 ; padding with 0s
