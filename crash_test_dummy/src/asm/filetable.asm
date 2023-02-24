@@ -7,7 +7,7 @@
 ;;   '{fileName1-sector#, fileName2-sector#, ... }
 ;;
 ;; Bootloader will load us at 0x7E00
-db '{kernel-03, calculator-04}'
+db '{kernel-03, calculator-05}'
 
 	; Sector padding to have a bin generated of 512 bytes (one sector)
 	times 512-($-$$) db 0

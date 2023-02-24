@@ -24,13 +24,16 @@
     mov es, bx     ; es <- 0x0000
     mov bx, 0x7E00 ; Set [es:bx] to 0x7E00,
     mov cx, 0x0002 ; Cylinder: 0, Sector: 2
+    mov al, 0x1    ; Read one sector (512 bytes)
     call load_disk_sector ; Read the kernel from disk
 
     ; Now we can load the kernel from sector 3 at 0x0000:0x80000
+    ; As kernel is 1Ko we need to load two segments
     xor bx, bx
     mov es, bx     ; es <- 0x0000
     mov bx, 0x8000 ; Set [es:bx] to 0x8000,
     mov cx, 0x0003 ; Cylinder: 0, Sector: 3
+    mov al, 0x2    ; Read 2 sectors
     call load_disk_sector ; Read the kernel from disk
 
     ; once loaded jump to the kernel
@@ -42,15 +45,15 @@
 
 ; load_disk_sector:
 ; Inputs:
+;   - AL: Number of sectors to be read
 ;   - CH: Cylinder
 ;   - CL: Sector
 ;   - [ES:BX] the memory where we want to load the sector
-; Clobber:
-;   - SI, AX,  DX
+; Clobbers:
+;   - SI, AH, DX
 
 load_disk_sector:
     ;  - es:bx are set set before calling it
-    push si
     mov si, 0x5 ; disk reads should be retried at least three times
                 ; we use SI because all others registers are needed
 
@@ -59,7 +62,8 @@ load_disk_sector:
     int 0x13
 
     mov ah, 0x2  ; BIOS service: read sectors from drive
-    mov al, 0x1  ; Only read 1 sector
+                 ; AL is set when calling load_disk_sector
+                 ; CH & CL are also already set
     mov dh, 0x0  ; Head 0
     mov dl, 0x80 ; First hard drive
 
@@ -69,7 +73,6 @@ load_disk_sector:
     ; If CF == 1 then there is an error
     jc .failed_to_load_kernel
 
-    pop si
     ret
 
 .failed_to_load_kernel:
