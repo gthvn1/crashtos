@@ -1,4 +1,4 @@
-ata0-master: type=disk, path="bin/mini-os", cylinders=1, heads=1, spt=4
-boot: disk
+floppya: 1_44=bin/mini-os, status=inserted
+boot: a
+megs: 1
 debugger_log: debugger.out
-

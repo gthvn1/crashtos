@@ -65,7 +65,7 @@ load_disk_sector:
                  ; AL is set when calling load_disk_sector
                  ; CH & CL are also already set
     mov dh, 0x0  ; Head 0
-    mov dl, 0x80 ; First hard drive
+    mov dl, 0x0  ; Read floppy
 
     int 0x13 ; 0x13 BIOS service
 
