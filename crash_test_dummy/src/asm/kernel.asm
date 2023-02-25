@@ -49,8 +49,12 @@ process_input:
     jmp process_input
 
 .browser:
-    mov si, 0x7E00 ; Put the address of the File table into si
+    ; clear screen by setting video mode
+    call reset_screen
+    ; Put the address of the File table into si
+    mov si, 0x7E00
     call print_str
+    ; wait to key pressed before returning to main menu
     jmp process_input.wait_press_key
 
 .print_registers:
@@ -119,7 +123,7 @@ printRegsHeader:
     db "Register     MemLocation", 0xa, 0xd
     db "--------     -----------", 0xa, 0xd, 0
 
-pressKeyMsg:    db 0xa, 0xd, "press any keys to return to main menu", 0
+pressKeyMsg:    db 0xa, 0xa, 0xd, "press any keys to return to main menu", 0
 runBrowserMsg:  db "run browser", 0xa, 0xd, 0
 cmdNotFoundMsg: db "command not found", 0xa, 0xd, 0
 haltMsg:        db "enter in infinite loop", 0xa, 0xd, 0
