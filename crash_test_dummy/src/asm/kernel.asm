@@ -129,5 +129,5 @@ cmdNotFoundMsg: db "command not found", 0xa, 0xd, 0
 haltMsg:        db "enter in infinite loop", 0xa, 0xd, 0
 cmdInput:       db "you pressed: 0", 0xa, 0xd, 0
 
-    ; kernel size can be 1KB max
-    times 1024-($-$$) db 0 ; padding with 0s
+    ; kernel size can be 2KB max
+    times 2048-($-$$) db 0 ; padding with 0s

@@ -33,7 +33,7 @@
     mov es, bx     ; es <- 0x0000
     mov bx, 0x8000 ; Set [es:bx] to 0x8000,
     mov cx, 0x0003 ; Cylinder: 0, Sector: 3
-    mov al, 0x2    ; Read 2 sectors
+    mov al, 0x4    ; Read 4 sectors
     call load_disk_sector ; Read the kernel from disk
 
     ; once loaded jump to the kernel
