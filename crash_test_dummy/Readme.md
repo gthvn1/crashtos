@@ -53,4 +53,10 @@ be cool to try to have it working on real HW...
   , cleanup the screen and go back to menu.
 - [x] Display registers
 - [x] Display file table
-- [ ] Implement a prompt
+- [ ] Implement a prompt instead of menu
+  - `> ls`: Print file table
+  - `> regs`: Print registers
+  - `> halt`: Halt the computer
+  - `> reboot`: Reboot
+- [ ] Add a command to play with graphics
+- [ ] Once file table displayed allow to enter a filename and load it if possible.
