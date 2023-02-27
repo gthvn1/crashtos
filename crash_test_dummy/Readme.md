@@ -52,4 +52,5 @@ be cool to try to have it working on real HW...
 - [x] After running a command add a "return to menu" message, wait for key input
   , cleanup the screen and go back to menu.
 - [x] Display registers
-- [ ] Display file table
+- [x] Display file table
+- [ ] Implement a prompt

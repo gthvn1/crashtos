@@ -1,6 +1,11 @@
+;; print_str.asm
+
+; -----------------------------------------------------------------------------
 ; print_str
 ; Inputs:
 ;   - SI: contains address of the string to be printed
+; Clobbers:
+;   - SI
 print_str:
     pusha        ; save all registers
     mov ah, 0x0e ; Set BIOS Service to "write text in Teletype Mode"
