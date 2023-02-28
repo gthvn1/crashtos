@@ -60,3 +60,7 @@ be cool to try to have it working on real HW...
   - `> reboot`: Reboot
 - [ ] Add a command to play with graphics
 - [ ] Once file table displayed allow to enter a filename and load it if possible.
+
+## Bugs
+
+- [ ] Check why there is an empy line after registers headers

@@ -19,7 +19,7 @@ $(MINIOS_FLOPPY): $(BOOTLOADER) $(FILETABLE) $(KERNEL) $(CALCULATOR)
 	dd if=$(CALCULATOR) of=$(MINIOS_FLOPPY) bs=512 seek=6 conv=notrunc
 
 # Explicitly call `make run` to start bochs
-run: $(MINIOS)
+run: $(MINIOS_FLOPPY)
 	bochs -q
 
 # BIN format puts NASM by default in 16-bit mode

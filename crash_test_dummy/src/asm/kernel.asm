@@ -10,16 +10,25 @@
 ;; [BIOS Services](https://grandidierite.github.io/bios-interrupts)
 ;; [Video Colors](https://en.wikipedia.org/wiki/BIOS_color_attributes)
 
+;; ----------------------------------------------------------------------------
+;; MACROS
+
+%macro PRINT_NEW_LINE 0
+    mov si, newLineStr
+    call print_str
+%endmacro
+
 kernel:
     org 0x8000
 
-display_menu:
     call reset_screen
-
-    mov si, menuHdr ; si "points" to helloStr
+    mov si, welcomeHdr
     call print_str
 
-.process_input:
+print_prompt:
+    mov si, promptStr
+    call print_str
+
     mov ah, 0x0 ; wait for keypress and read character
     int 0x16    ; BIOS interrupt for keyboard services
 
@@ -27,64 +36,55 @@ display_menu:
     ; AH will contain the keyboard scan code
     ;   -> https://www.fountainware.com/EXPL/bios_key_codes.htm
     ; AL will contain the ASCII character or zero
-    mov si, cmdInput   ; set source index to cmdInput string
-    mov [si + 13], al  ; Relace the 13th character by ASCII char found in AL
-    call print_str     ; Print the input
+    mov [cmdStr], al
+    mov si, cmdStr
+    call print_str
+    PRINT_NEW_LINE
 
     ; Let's compare the key pressed by the used with our known code
     ; Let's check if it is [F]ile browser...
     cmp al, 0x66 ; Compare AL to 'F'
-    jne display_menu.check_p   ; If not equal check if it is [P]rint registers
+    jne print_prompt.check_p   ; If not equal check if it is [P]rint registers
 
     call browser ; If it is equal call browser
-    jmp display_menu.wait_press_key
+    jmp print_prompt
 
 .check_p:
     cmp al, 0x70 ; Compare AL to 'P'
-    jne display_menu.check_q ; If not equam check if it is [Q]uit
+    jne print_prompt.check_q ; If not equam check if it is [Q]uit
 
     call print_registers
-    jmp display_menu.wait_press_key
+    jmp print_prompt
 
 .check_q:
     cmp al, 0x71 ; Compare AL to 'Q'
-    jne display_menu.check_r  ; If not equal check if it is [R]eboot
+    jne print_prompt.check_r  ; If not equal check if it is [R]eboot
 
-    mov si, haltMsg
+    mov si, haltStr
     call print_str
     cli
     hlt
 
 .check_r:
     cmp al, 0x72 ; Compare AL to 'R'
-    jne display_menu.not_found ; If not equal the command is not found
+    jne print_prompt.not_found ; If not equal the command is not found
 
     jmp 0xFFFF:0x0000 ; jump to the vector reset
 
 .not_found:
     ; no match found so print command not found and process next input.
-    mov si, cmdNotFoundMsg
+    mov si, notFoundStr
     call print_str
 
-    jmp display_menu.process_input
+    jmp print_prompt
 
-.wait_press_key:
-    mov si, pressKeyMsg
-    call print_str
-
-    mov ah, 0x0 ; wait for keypress and read character
-    int 0x16    ; BIOS interrupt for keyboard services
-    jmp display_menu
-;; End of display_menu
+;; End of print_prompt
 
 ;; ----------------------------------------------------------------------------
 ;; browser
 ;; Display File table
 browser:
     pusha
-
-    ; clear screen by setting video mode
-    call reset_screen
 
     ; Display the print file table header
     mov si, fileTableHdr
@@ -169,8 +169,6 @@ browser:
 
 ;; ----------------------------------------------------------------------------
 print_registers:
-    ; clear screen by setting video mode
-    call reset_screen
     ; Display the print registers header
     mov si, printRegsHdr
     call print_str
@@ -202,29 +200,38 @@ reset_screen:
 %include "src/asm/print_hex.asm"
 %include "src/asm/print_regs.asm"
 
-menuHdr:
-    db "Crash Test Dummy loaded!", 0xA, 0xD
-    db "------------------------", 0xA, 0xD,
-    db "[F]ile & Program Browser/Loader", 0xA, 0xD,
-    db "[P]rint registers", 0xA, 0xD,
-    db "[R]eboot", 0xA, 0xD,
-    db "[Q]uit", 0xA, 0xD, 0
+;; ----------------------------------------------------------------------------
+;; VARIABLES
+
+welcomeHdr:
+    db "-------------------------------------", 0xA, 0xD
+    db " Crash Test Dummy OS has been loaded ", 0xA, 0xD
+    db "-------------------------------------", 0xA, 0xD
+    db " Available commands are:             ", 0xA, 0xD 
+    db "   [F]ile & Program Browser/Loader   ", 0xA, 0xD
+    db "   [P]rint registers                 ", 0xA, 0xD
+    db "   [R]eboot                          ", 0xA, 0xD
+    db "   [Q]uit                            ", 0xA, 0xD
+    db "-------------------------------------", 0xA, 0xD
+    db 0
     ; 0xA is line feed (move cursor down to next line)
     ; 0xD is carriage return (return to the beginning)
 
 fileTableHdr:
-    db " Filename   Ext  Dir     Sector  Size", 0xA, 0xD
+    db "----------  ---  ------  ------  ------", 0xA, 0xD
+    db "Filename    Ext  Dir     Sector  Size  ", 0xA, 0xD
     db "----------  ---  ------  ------  ------", 0xA, 0xD, 0
 
-
 printRegsHdr:
+    db "--------     -----------", 0xA, 0xD
     db "Register     MemLocation", 0xA, 0xD
     db "--------     -----------", 0xA, 0xD, 0
 
-pressKeyMsg:    db 0xA, 0xA, 0xD, "press any keys to return to main menu", 0
-cmdNotFoundMsg: db "command not found", 0xA, 0xD, 0
-haltMsg:        db "enter in infinite loop", 0xA, 0xD, 0
-cmdInput:       db "you pressed: 0", 0xA, 0xD, 0
+cmdStr:      times 10 db 0 ; command is less than 10 bytes
+newLineStr:  db 0xA, 0xD, 0
+promptStr:   db 0xA, 0xD, "> ", 0
+haltStr:     db "!!! enter in infinite loooooop...", 0xA, 0xD, 0
+notFoundStr: db "ERROR: command not found", 0xA, 0xD, 0
 
-    ; kernel size can be 2KB max
-    times 2048-($-$$) db 0 ; padding with 0s
+    ; kernel size is 2KB so padding with 0s
+    times 2048-($-$$) db 0
