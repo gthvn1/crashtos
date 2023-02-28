@@ -155,11 +155,11 @@ browser:
     jz .done ; There is no more entry
 
     ;; If there is another character display the next entry
-    mov al, 0xA ;  line feed (move cursor down to next line)
+    mov al, 0xA ; line feed (move cursor down to next line)
     int 0x10
-    mov al, 0xD ;  carriage return (return to the beginning)
+    mov al, 0xD ; carriage return (return to the beginning)
     int 0x10
-    dec si      ; Go one step beyond
+    dec si      ; Go one step back
     mov cx, 0xA ; Filename is 10 bytes max
     jmp browser.print_filename
 
