@@ -25,20 +25,20 @@
 ;; 0x000F_0000 - 0x000F_FFFF | 64KB  | Motherboard BIOS
 ;;
 ;; We will use the 64KB from 0x0001_0000 - 0x0001_FFFF:
-;;   - Load File Table at: 0x0001_0000 - 0x0001_01FF (512B)
-;;   - Kernel at         : 0x0001_0200 - 0x0001_09FF (2KB)
+;;   - File Table : 0x0001_0000 - 0x0001_01FF (512B)
+;;   - Kernel     : 0x0001_0200 - 0x0001_09FF (2KB)
 ;; We keep the file table and the kernel on the same segments. Otherwise when
 ;; we will access file table data from kernel we need to make far jump.
 
     ; First we will load sector 2 (the File Table) at 0x1000:0x0000
     ; It is 512 bytes after the bootloader
     mov bx, 0x1000
-    mov es, bx     ; es <- 0x1000
+    mov es, bx      ; es <- 0x1000
 
-    xor bx, bx     ; bx <- 0x0
-                   ; Set [es:bx] to 0x0001_0000,
+    xor bx, bx      ; bx <- 0x0
+                    ; Set [es:bx] to 0x0001_0000,
     mov cx, 0x00_02 ; Cylinder: 0, Sector: 2
-    mov al, 0x1    ; Read one sector (512 bytes)
+    mov al, 0x1     ; Read one sector (512 bytes)
     call load_disk_sector ; Read the file table from disk
 
     ; Now we can load the kernel from sector 3 at 0x1000:0x0200
