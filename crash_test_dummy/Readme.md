@@ -60,9 +60,9 @@ be cool to try to have it working on real HW...
   - `> reboot`: Reboot
 - [ ] Add a command to play with graphics
 - [ ] Once file table displayed allow to enter a filename and load it if possible.
-- [x] Load kernel at 0x1000:0x0000
+- [x] Load file table at 0x1000:0x0000
+- [x] Load kernel at 0x1000:0x0200
 
 ## Bugs
 
-- [ ] Check why there is an empty line after registers headers
 - [ ] Check that cmdStr doesn't overflow (max 30 bytes)

@@ -2,6 +2,9 @@
 ;; print_file_table.asm
 ;;
 ;; Display File table
+;; The bootloader loaded the file table into 0x0000:0x7E00
+;; As the kernel is not on the same segment we need to modify 
+;; ES to be able to get file table.
 print_file_table:
     pusha
 
@@ -9,8 +12,9 @@ print_file_table:
     mov si, fileTableHdr
     call print_str
 
+    mov si, 0x0 ; Put the address of the File table into ES:SI
+
     mov ah, 0x0e   ; Set BIOS Service to "write text in Teletype Mode"
-    mov si, 0x7E00 ; Put the address of the File table into si
     mov cx, 0xA    ; Filename is 10 bytes max
 
 .print_filename:
@@ -87,6 +91,7 @@ print_file_table:
 
 
 fileTableHdr:
+    db 0xA, 0xD
     db "----------  ---  ------  ------  ------", 0xA, 0xD
     db "Filename    Ext  Dir     Sector  Size  ", 0xA, 0xD
     db "----------  ---  ------  ------  ------", 0xA, 0xD, 0

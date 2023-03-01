@@ -81,6 +81,6 @@ printRegsHdr:
     db 0xA, 0xD
     db "--------     -----------", 0xA, 0xD
     db "Register     MemLocation", 0xA, 0xD
-    db "--------     -----------", 0xA, 0xD, 0
+    db "--------     -----------", 0
 
 regString: db 0xa, 0xd, 'dx             ', 0

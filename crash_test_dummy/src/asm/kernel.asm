@@ -18,6 +18,8 @@
     call print_str
 %endmacro
 
+org 0x0200
+
 kernel:
     call reset_screen
 
