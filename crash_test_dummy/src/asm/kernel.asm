@@ -5,7 +5,7 @@
 ;;    - setup screen mode
 ;;    - display the menu
 ;;
-;; Bootloader will load us at 0x8000
+;; Bootloader will load us at 0x1000:0x0000
 ;;
 ;; [BIOS Services](https://grandidierite.github.io/bios-interrupts)
 ;; [Video Colors](https://en.wikipedia.org/wiki/BIOS_color_attributes)
@@ -19,17 +19,20 @@
 %endmacro
 
 kernel:
-    org 0x8000
-
     call reset_screen
+
     mov si, welcomeHdr
+    call print_str
+
+    mov si, helpHdr
     call print_str
 
 print_prompt:
     mov si, promptStr
     call print_str
 
-    mov di, cmdStr
+    mov di, cmdStr ; Set destination index to the start of cmdStr
+
 .get_user_input:
     mov ah, 0x0 ; wait for keypress and read character
     int 0x16    ; BIOS interrupt for keyboard services
@@ -47,49 +50,65 @@ print_prompt:
     ; else echo the character
     mov ah, 0xE ; set TTY service
     int 0x10    ; print the character
-    ; and add it into cmdStr
-    mov [di], al
-    inc di
+    stosb       ; Store AL at ES:DI
     jmp .get_user_input
 
-.compare_user_input
-    ; Let's compare the key pressed by the used with our known code
-    ; Let's check if it is [F]ile browser...
-    cmp al, 0x66 ; Compare AL to 'F'
-    jne print_prompt.check_p   ; If not equal check if it is [P]rint registers
+.compare_user_input:
+    mov byte [di], 0 ; add 0 at the end of cmdStr. DI has been incremented when
+                     ; echoing the character.
 
-    call browser ; If it is equal call browser
+    mov si, cmdStr
+
+    ; Check if command is equal to "ls"
+    mov cx, [lsCmdSize] ; Set cx with the size of "ls" incremented by the end char
+    mov si, lsCmdStr  ; Set source index to the start of lsCmdStr
+    mov di, cmdStr    ; Set destination index to the start of cmdStr
+    repe cmpsb        ; Repeat compare string byte while equal.
+                      ; Compares DS:SI and ES:DI
+    je .ls_found;
+
+    ; if not, check if command is equal to "regs"
+    mov cx, [regsCmdSize]
+    mov si, regsCmdStr
+    mov di, cmdStr
+    repe cmpsb
+    je .regs_found ; Jump if there is a match
+
+    ; if not, check if command is equal to "halt"
+    mov cx, [haltCmdSize]
+    mov si, haltCmdStr
+    mov di, cmdStr
+    repe cmpsb
+    je .halt_found
+
+    ; if not, check if command is equal to "reboot"
+    mov cx, [rebootCmdSize]
+    mov si, rebootCmdStr
+    mov di, cmdStr
+    repe cmpsb
+    je .reboot_found
+
+    ; No matches, so command is not found, print help and retry
+    mov si, notFoundStr
+    call print_str
+    mov si, helpHdr
+    call print_str
     jmp print_prompt
 
-.check_p:
-    cmp al, 0x70 ; Compare AL to 'P'
-    jne print_prompt.check_q ; If not equam check if it is [Q]uit
-
-    call print_registers
+.ls_found:
     jmp print_prompt
 
-.check_q:
-    cmp al, 0x71 ; Compare AL to 'Q'
-    jne print_prompt.check_r  ; If not equal check if it is [R]eboot
+.regs_found:
+    jmp print_prompt
 
+.halt_found:
     mov si, haltStr
     call print_str
     cli
     hlt
 
-.check_r:
-    cmp al, 0x72 ; Compare AL to 'R'
-    jne print_prompt.not_found ; If not equal the command is not found
-
-    jmp 0xFFFF:0x0000 ; jump to the vector reset
-
-.not_found:
-    ; no match found so print command not found and process next input.
-    mov si, notFoundStr
-    call print_str
-
-    jmp print_prompt
-
+.reboot_found:
+    jmp 0xFFFF:0x0000 ; far jump to the vector reset
 ;; End of print_prompt
 
 ;; ----------------------------------------------------------------------------
@@ -112,7 +131,7 @@ browser:
     jnz .al_not_null
     mov al, ' '          ; if al is 0x0 replace it with a space
 .al_not_null:
-    int 0x10             ; print the character 
+    int 0x10             ; print the character
     loop .print_filename ; loop if CX is not null.
 
     ; Print 2 spaces
@@ -217,16 +236,12 @@ reset_screen:
 welcomeHdr:
     db "-------------------------------------", 0xA, 0xD
     db " Crash Test Dummy OS has been loaded ", 0xA, 0xD
-    db "-------------------------------------", 0xA, 0xD
-    db " Available commands are:             ", 0xA, 0xD 
-    db "   [F]ile & Program Browser/Loader   ", 0xA, 0xD
-    db "   [P]rint registers                 ", 0xA, 0xD
-    db "   [R]eboot                          ", 0xA, 0xD
-    db "   [Q]uit                            ", 0xA, 0xD
-    db "-------------------------------------", 0xA, 0xD
-    db 0
+    db "-------------------------------------", 0xA, 0xD, 0
     ; 0xA is line feed (move cursor down to next line)
     ; 0xD is carriage return (return to the beginning)
+
+helpHdr:
+    db 0xA, 0xD, "[HELP] commands are: ls, regs, reboot, halt", 0xA, 0xD, 0
 
 fileTableHdr:
     db "----------  ---  ------  ------  ------", 0xA, 0xD
@@ -241,8 +256,17 @@ printRegsHdr:
 cmdStr:      times 30 db 0 ; command is less than 30 bytes
 newLineStr:  db 0xA, 0xD, 0
 promptStr:   db 0xA, 0xD, "> ", 0
-haltStr:     db "!!! enter in infinite loooooop...", 0xA, 0xD, 0
+haltStr:     db "halted", 0xA, 0xD, 0
 notFoundStr: db "ERROR: command not found", 0xA, 0xD, 0
+
+lsCmdStr:      db "ls", 0   ; list file table command
+lsCmdSize:     dw 0x3
+regsCmdStr:    db "regs", 0 ; print regs command
+regsCmdSize:   dw 0x5
+rebootCmdStr:  db "reboot", 0
+rebootCmdSize: dw 0x7
+haltCmdStr:    db "halt", 0
+haltCmdSize:   dw 0x5
 
     ; kernel size is 2KB so padding with 0s
     times 2048-($-$$) db 0

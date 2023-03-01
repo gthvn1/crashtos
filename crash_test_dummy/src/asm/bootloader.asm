@@ -29,17 +29,23 @@
 
     ; Now we can load the kernel from sector 3 at 0x0000:0x80000
     ; As kernel is 1Ko we need to load two segments
-    xor bx, bx
-    mov es, bx     ; es <- 0x0000
-    mov bx, 0x8000 ; Set [es:bx] to 0x8000,
-    mov cx, 0x0003 ; Cylinder: 0, Sector: 3
+    mov bx, 0x1000 ; Set [es:bx] to 0x1000,
+    mov es, bx     ; es <- 0x1000
+    xor bx, bx     ; Set [es:bx] to 0x1000:0x0000,
+    mov cx, 0x00_03 ; Cylinder: 0, Sector: 3
     mov al, 0x4    ; Read 4 sectors
     call load_disk_sector ; Read the kernel from disk
 
-    ; once loaded jump to the kernel
-    jmp 0x8000
+    ; before jumping to the kernel we need to setup segments
+    mov ax, 0x1000
+    mov ds, ax
+    mov es, ax
+    mov fs, ax
+    mov gs, ax
+    mov ss, ax
+    jmp 0x1000:0x0000
 
-    ; Should not be reached !!!
+    ; Should not be reached because we never returned from kernel space...
     cli
     hlt
 

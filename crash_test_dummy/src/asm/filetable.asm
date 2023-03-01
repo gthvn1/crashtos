@@ -15,6 +15,9 @@
 ;;
 ;; We declare byte per byte because it helps to dectect errors.
 ;;  0    1    2    3    4    5    6    7   8    9    10   11   12   13  14  15
+
+org 0x0000:0x7E00
+
 db 'b', 'o', 'o', 't', 'S', 'e', 'c', 't', 0x0, 0x0, 'b', 'i', 'n', 0x0, 0x1, 0x1
 db 'f', 'i', 'l', 'e', 'T', 'a', 'b', 'l', 'e', 0x0, 't', 'x', 't', 0x0, 0x2, 0x1
 db 'k', 'e', 'r', 'n', 'e', 'l', 0x0, 0x0, 0x0, 0x0, 'b', 'i', 'n', 0x0, 0x3, 0x4
