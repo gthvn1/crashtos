@@ -26,9 +26,8 @@ print_hex:
     mov bl, [si + bx] ; BL constains the corresponding hexa char
     mov [di], bl      ; 3) copy it into hexaOutput
     inc di            ; next car in hexaOutput
-    dec cx            ; do it for the next bits if needed
-    jnz .hexloop
-
+    loop .hexloop     ; do it for the next bits if needed
+                      ; jmp to .hexloop if CX != 0
     mov si, hexaOutput
     call print_str
 
