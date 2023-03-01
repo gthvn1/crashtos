@@ -60,6 +60,7 @@ be cool to try to have it working on real HW...
   - `> reboot`: Reboot
 - [ ] Add a command to play with graphics
 - [ ] Once file table displayed allow to enter a filename and load it if possible.
+- [ ] Load kernel at 0x1000:0x0000
 
 ## Bugs
 
