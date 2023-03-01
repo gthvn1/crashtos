@@ -134,10 +134,10 @@ reset_screen:
     ret
 
 ;; As it is compile at the top we need to include the asm file with its path
-%include "src/asm/print_str.asm"
-%include "src/asm/print_hex.asm"
-%include "src/asm/print_regs.asm"
-%include "src/asm/print_file_table.asm"
+%include "src/include/print_str.asm"
+%include "src/include/print_hex.asm"
+%include "src/include/print_regs.asm"
+%include "src/include/print_file_table.asm"
 
 ;; ----------------------------------------------------------------------------
 ;; VARIABLES

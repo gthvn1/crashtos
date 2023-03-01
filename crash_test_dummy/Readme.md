@@ -58,10 +58,10 @@ be cool to try to have it working on real HW...
   - `> regs`: Print registers
   - `> halt`: Halt the computer
   - `> reboot`: Reboot
-- [ ] Add a command to play with graphics
-- [ ] Once file table displayed allow to enter a filename and load it if possible.
 - [x] Load file table at 0x1000:0x0000
 - [x] Load kernel at 0x1000:0x0200
+- [ ] Add a command to play with graphics
+- [ ] Once file table displayed allow to enter a filename and load it if possible.
 
 ## Bugs
 
