@@ -27,11 +27,11 @@ kernel:
     mov si, helpHdr
     call print_str
 
-print_prompt:
+display_prompt:
     mov si, promptStr
     call print_str
 
-    mov di, cmdStr ; Set destination index to the start of cmdStr
+    mov di, userInputStr ; Set destination index to the start of userInputStr
 
 .get_user_input:
     mov ah, 0x0 ; wait for keypress and read character
@@ -43,7 +43,7 @@ print_prompt:
     ; AL will contain the ASCII character or zero
 
     ; while Enter (0x0D) is not pressed we continue
-    ; currently we don't check that cmdStr is not overflowed
+    ; currently we don't check that userInputStr is not overflowed
     cmp al, 0x0D ; compare with "Enter"
     je .compare_user_input
 
@@ -54,15 +54,15 @@ print_prompt:
     jmp .get_user_input
 
 .compare_user_input:
-    mov byte [di], 0 ; add 0 at the end of cmdStr. DI has been incremented when
+    mov byte [di], 0 ; add 0 at the end of userInputStr. DI has been incremented when
                      ; echoing the character.
 
-    mov si, cmdStr
+    mov si, userInputStr
 
     ; Check if command is equal to "ls"
     mov cx, [lsCmdSize] ; Set cx with the size of "ls" incremented by the end char
     mov si, lsCmdStr  ; Set source index to the start of lsCmdStr
-    mov di, cmdStr    ; Set destination index to the start of cmdStr
+    mov di, userInputStr    ; Set destination index to the start of userInputStr
     repe cmpsb        ; Repeat compare string byte while equal.
                       ; Compares DS:SI and ES:DI
     je .ls_found;
@@ -70,21 +70,21 @@ print_prompt:
     ; if not, check if command is equal to "regs"
     mov cx, [regsCmdSize]
     mov si, regsCmdStr
-    mov di, cmdStr
+    mov di, userInputStr
     repe cmpsb
     je .regs_found ; Jump if there is a match
 
     ; if not, check if command is equal to "halt"
     mov cx, [haltCmdSize]
     mov si, haltCmdStr
-    mov di, cmdStr
+    mov di, userInputStr
     repe cmpsb
     je .halt_found
 
     ; if not, check if command is equal to "reboot"
     mov cx, [rebootCmdSize]
     mov si, rebootCmdStr
-    mov di, cmdStr
+    mov di, userInputStr
     repe cmpsb
     je .reboot_found
 
@@ -93,13 +93,15 @@ print_prompt:
     call print_str
     mov si, helpHdr
     call print_str
-    jmp print_prompt
+    jmp display_prompt
 
 .ls_found:
-    jmp print_prompt
+    call print_file_table
+    jmp display_prompt
 
 .regs_found:
-    jmp print_prompt
+    call print_regs
+    jmp display_prompt
 
 .halt_found:
     mov si, haltStr
@@ -109,103 +111,7 @@ print_prompt:
 
 .reboot_found:
     jmp 0xFFFF:0x0000 ; far jump to the vector reset
-;; End of print_prompt
-
-;; ----------------------------------------------------------------------------
-;; browser
-;; Display File table
-browser:
-    pusha
-
-    ; Display the print file table header
-    mov si, fileTableHdr
-    call print_str
-
-    mov ah, 0x0e   ; Set BIOS Service to "write text in Teletype Mode"
-    mov si, 0x7E00 ; Put the address of the File table into si
-    mov cx, 0xA    ; Filename is 10 bytes max
-
-.print_filename:
-    lodsb                ; al <- DS:SI and inc SI
-    or al, al            ; check if al is 0x0
-    jnz .al_not_null
-    mov al, ' '          ; if al is 0x0 replace it with a space
-.al_not_null:
-    int 0x10             ; print the character
-    loop .print_filename ; loop if CX is not null.
-
-    ; Print 2 spaces
-    mov al, ' '
-    int 0x10
-    int 0x10
-
-    ; print_extension
-    lodsb
-    int 0x10
-    lodsb
-    int 0x10
-    lodsb
-    int 0x10
-
-    mov dh, 0x0
-
-    ; Print 2 spaces
-    mov al, ' '
-    int 0x10
-    int 0x10
-
-    ; print_directory
-    lodsb
-    mov dl, al
-    call print_hex
-
-    ;; Print 2 spaces
-    mov al, ' '
-    int 0x10
-    int 0x10
-
-    ; print_sector
-    lodsb
-    mov dl, al
-    call print_hex
-
-    ; Print 2 spaces
-    mov al, ' '
-    int 0x10
-    int 0x10
-
-    ; print_size:
-    lodsb
-    mov dl, al
-    call print_hex
-
-    ; check if next entry is null or not
-    lodsb
-    or al, al
-    jz .done ; There is no more entry
-
-    ; If there is another character display the next entry
-    mov al, 0xA ; line feed (move cursor down to next line)
-    int 0x10
-    mov al, 0xD ; carriage return (return to the beginning)
-    int 0x10
-    dec si      ; Go one step back
-    mov cx, 0xA ; Filename is 10 bytes max
-    jmp .print_filename
-
-.done:
-    popa
-    ret
-
-;; ----------------------------------------------------------------------------
-print_registers:
-    ; Display the print registers header
-    mov si, printRegsHdr
-    call print_str
-
-    ; print registers
-    call print_regs
-    ret
+;; End of display_prompt
 
 ;; ----------------------------------------------------------------------------
 reset_screen:
@@ -229,6 +135,7 @@ reset_screen:
 %include "src/asm/print_str.asm"
 %include "src/asm/print_hex.asm"
 %include "src/asm/print_regs.asm"
+%include "src/asm/print_file_table.asm"
 
 ;; ----------------------------------------------------------------------------
 ;; VARIABLES
@@ -243,28 +150,22 @@ welcomeHdr:
 helpHdr:
     db 0xA, 0xD, "[HELP] commands are: ls, regs, reboot, halt", 0xA, 0xD, 0
 
-fileTableHdr:
-    db "----------  ---  ------  ------  ------", 0xA, 0xD
-    db "Filename    Ext  Dir     Sector  Size  ", 0xA, 0xD
-    db "----------  ---  ------  ------  ------", 0xA, 0xD, 0
+userInputStr:  times 30 db 0 ; command is less than 30 bytes
+newLineStr:    db 0xA, 0xD, 0
+promptStr:     db 0xA, 0xD, "> ", 0
+haltStr:       db 0xA, 0xD, "System halted", 0
+notFoundStr:   db 0xA, 0xD, "ERROR: command not found", 0xA, 0xD, 0
 
-printRegsHdr:
-    db "--------     -----------", 0xA, 0xD
-    db "Register     MemLocation", 0xA, 0xD
-    db "--------     -----------", 0xA, 0xD, 0
-
-cmdStr:      times 30 db 0 ; command is less than 30 bytes
-newLineStr:  db 0xA, 0xD, 0
-promptStr:   db 0xA, 0xD, "> ", 0
-haltStr:     db "halted", 0xA, 0xD, 0
-notFoundStr: db "ERROR: command not found", 0xA, 0xD, 0
-
-lsCmdStr:      db "ls", 0   ; list file table command
+;; List of commands
+lsCmdStr:      db "ls", 0
 lsCmdSize:     dw 0x3
-regsCmdStr:    db "regs", 0 ; print regs command
+
+regsCmdStr:    db "regs", 0
 regsCmdSize:   dw 0x5
+
 rebootCmdStr:  db "reboot", 0
 rebootCmdSize: dw 0x7
+
 haltCmdStr:    db "halt", 0
 haltCmdSize:   dw 0x5
 

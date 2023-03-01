@@ -4,8 +4,11 @@
 ;; It should be included with print_str and print_hex
 
 print_regs:
+    pusha ; save all registers
 
-    push dx                       ; save dx on the stack
+    ; print the header
+    mov si, printRegsHdr
+    call print_str
 
     ; print ax
     mov byte [regString + 2], 'a' ; replace the 2 char that is the 'd' of regString
@@ -71,7 +74,13 @@ print_regs:
     mov dx, es
     call print_hex
 
-    pop dx
+    popa
     ret
+
+printRegsHdr:
+    db 0xA, 0xD
+    db "--------     -----------", 0xA, 0xD
+    db "Register     MemLocation", 0xA, 0xD
+    db "--------     -----------", 0xA, 0xD, 0
 
 regString: db 0xa, 0xd, 'dx             ', 0
