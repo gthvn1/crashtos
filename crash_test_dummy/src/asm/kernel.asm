@@ -29,6 +29,8 @@ print_prompt:
     mov si, promptStr
     call print_str
 
+    mov di, cmdStr
+.get_user_input:
     mov ah, 0x0 ; wait for keypress and read character
     int 0x16    ; BIOS interrupt for keyboard services
 
@@ -36,11 +38,21 @@ print_prompt:
     ; AH will contain the keyboard scan code
     ;   -> https://www.fountainware.com/EXPL/bios_key_codes.htm
     ; AL will contain the ASCII character or zero
-    mov [cmdStr], al
-    mov si, cmdStr
-    call print_str
-    PRINT_NEW_LINE
 
+    ; while Enter (0x0D) is not pressed we continue
+    ; currently we don't check that cmdStr is not overflowed
+    cmp al, 0x0D ; compare with "Enter"
+    je .compare_user_input
+
+    ; else echo the character
+    mov ah, 0xE ; set TTY service
+    int 0x10    ; print the character
+    ; and add it into cmdStr
+    mov [di], al
+    inc di
+    jmp .get_user_input
+
+.compare_user_input
     ; Let's compare the key pressed by the used with our known code
     ; Let's check if it is [F]ile browser...
     cmp al, 0x66 ; Compare AL to 'F'
@@ -226,7 +238,7 @@ printRegsHdr:
     db "Register     MemLocation", 0xA, 0xD
     db "--------     -----------", 0xA, 0xD, 0
 
-cmdStr:      times 10 db 0 ; command is less than 10 bytes
+cmdStr:      times 30 db 0 ; command is less than 30 bytes
 newLineStr:  db 0xA, 0xD, 0
 promptStr:   db 0xA, 0xD, "> ", 0
 haltStr:     db "!!! enter in infinite loooooop...", 0xA, 0xD, 0

@@ -63,4 +63,5 @@ be cool to try to have it working on real HW...
 
 ## Bugs
 
-- [ ] Check why there is an empy line after registers headers
+- [ ] Check why there is an empty line after registers headers
+- [ ] Check that cmdStr doesn't overflow (max 30 bytes)
