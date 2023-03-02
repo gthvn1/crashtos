@@ -62,8 +62,6 @@ It can be cool to try to have it working on real HW...
 - [x] Load file table at 0x1000:0x0000
 - [x] Load kernel at 0x1000:0x0200
 - [ ] Add a command to play with graphics
-- [ ] Once file table displayed allow to enter a filename and load it if possible.
-
-## Bugs
-
-- [ ] Check that cmdStr doesn't overflow (max 30 bytes)
+- [ ] If we don't find any command look into file table if we find a "txt" file
+      or a "bin" file. If we found a "bin" file execute it, if it is a "txt" file
+      display its contents. If it is another extension do nothing.
