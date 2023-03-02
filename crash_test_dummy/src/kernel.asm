@@ -29,7 +29,14 @@ kernel:
     mov si, helpHdr
     call print_str
 
-display_prompt:
+;; The kernel loop will:
+;;  - display the prompt
+;;  - get user input
+;;  - check if it is a command
+;;  - if it is not a command check if it is a program in File Table
+;;    - if it is a bin execute it
+;;    - if it is a txt display it
+kernel_loop:
     mov si, promptStr
     call print_str
 
@@ -87,76 +94,68 @@ get_user_input:
 
     jmp get_user_input
 
+;; compare_cmd is taken three parameters
+;;   - the size of the command string
+;;   - the command string
+;;   - the label where we jump if userInputStr matches the command string
+%macro compare_cmd 3
+    mov cx, [%1]         ; Set cx with the size of cmd incremented by one
+    mov si, %2           ; Set SI to the start of command string
+    mov di, userInputStr ; Set DI to the start of the user input string
+    repe cmpsb           ; Repeat compare string byte while equal
+    je %3                ; If equal jump to lable (3rd parameter)
+%endmacro
+
 .compare_user_input:
     mov byte [di], 0 ; add 0 at the end of userInputStr. DI has been incremented when
-                     ; echoing the character.
-
-    mov si, userInputStr ; Set source index to point to the beginning of userInputStr
+                     ; echoing the character. It allows to not reset the userInputStr
+                     ; at each loop.
 
     ; Check if command is equal to "ls"
-    mov cx, [lsCmdSize]  ; Set cx with the size of "ls" incremented by the end char
-    mov si, lsCmdStr     ; Set source index to the start of lsCmdStr
-    mov di, userInputStr ; Set destination index to the start of userInputStr
-    repe cmpsb           ; Repeat compare string byte while equal.
-                         ; -> Compares DS:SI and ES:DI
-    je .ls_found;
+    compare_cmd lsCmdSize, lsCmdStr, .exec_ls
 
     ; if not, check if command is equal to "clear"
-    mov cx, [clearCmdSize]
-    mov si, clearCmdStr
-    mov di, userInputStr
-    repe cmpsb
-    je .clear_found ; Jump if there is a match
+    compare_cmd clearCmdSize, clearCmdStr, .exec_clear
 
     ; if not, check if command is equal to "regs"
-    mov cx, [regsCmdSize]
-    mov si, regsCmdStr
-    mov di, userInputStr
-    repe cmpsb
-    je .regs_found ; Jump if there is a match
+    compare_cmd regsCmdSize, regsCmdStr, .exec_regs
 
     ; if not, check if command is equal to "halt"
-    mov cx, [haltCmdSize]
-    mov si, haltCmdStr
-    mov di, userInputStr
-    repe cmpsb
-    je .halt_found
+    compare_cmd haltCmdSize, haltCmdStr, .exec_halt
 
     ; if not, check if command is equal to "reboot"
-    mov cx, [rebootCmdSize]
-    mov si, rebootCmdStr
-    mov di, userInputStr
-    repe cmpsb
-    je .reboot_found
+    compare_cmd rebootCmdSize, rebootCmdStr, .exec_reboot
 
-    ; No matches, so command is not found, print help and retry
+    ; No matches, so print an error message, display the help and try again.
     mov si, notFoundStr
     call print_str
+
     mov si, helpHdr
     call print_str
-    jmp display_prompt
 
-.ls_found:
+    jmp kernel_loop
+
+.exec_ls:
     call print_file_table
-    jmp display_prompt
+    jmp kernel_loop
 
-.clear_found:
+.exec_clear:
     call clear_screen
-    jmp display_prompt
+    jmp kernel_loop
 
-.regs_found:
+.exec_regs:
     call print_regs
-    jmp display_prompt
+    jmp kernel_loop
 
-.halt_found:
+.exec_halt:
     mov si, haltStr
     call print_str
     cli
     hlt
 
-.reboot_found:
+.exec_reboot:
     jmp 0xFFFF:0x0000 ; far jump to the vector reset
-;; End of display_prompt
+;; End of kernel_loop
 
 ;; As it is compile at the top we need to include the asm file with its path
 %include "include/clear_screen.asm"
