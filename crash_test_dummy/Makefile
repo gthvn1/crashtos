@@ -1,4 +1,4 @@
-.PHONY: rebuild run clean
+.PHONY: rebuild clean bochs qemu
 
 SRC_ASM := src
 BIN_DIR := bin
@@ -23,13 +23,16 @@ $(FLOPPY): $(BOOTLOADER) $(FILETABLE) $(KERNEL) $(CALCULATOR)
 	dd if=$(KERNEL)     of=$(FLOPPY) bs=512 seek=2 conv=notrunc
 	dd if=$(CALCULATOR) of=$(FLOPPY) bs=512 seek=6 conv=notrunc
 
-# Explicitly call `make run` to start bochs
-run: $(FLOPPY)
-	bochs -q
-
 # BIN format puts NASM by default in 16-bit mode
 $(BIN_DIR)/%.bin: $(SRC_ASM)/%.asm
 	nasm -f bin -o $@ $<
+
+# Explicitly call `make run` to start bochs
+bochs: $(FLOPPY)
+	bochs -q
+
+qemu: $(FLOPPY)
+	qemu-system-i386 -drive format=raw,if=floppy,file=$(FLOPPY)
 
 clean:
 	rm -rf $(BIN_DIR)
