@@ -4,11 +4,12 @@ We will follow [Amateur Makes an OS](https://www.youtube.com/playlist?list=PLT7N
 
 ## Build
 
-It is easy, just run `make`. It requires [bochs](https://bochs.sourceforge.io/)
+It is easy, just run `make run`. It requires [bochs](https://bochs.sourceforge.io/)
 emulator. To just build the mini os without running it on bochs just run
-`make bin/mini-os`
+`make`.
 
-Currently we only have assembly files that are in **src/asm**.
+Currently we only assembly files that are in **src/asm** that are the "cores" and
+others assembly files in **src/include** that are not.
 
 Build will create a **bin/** directory with the mini-os that is the concatenation
 of the bootloader in the boot sector (the first 512 bytes of the disk) and the kernel
