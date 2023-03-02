@@ -146,15 +146,12 @@ welcomeHdr:
 helpHdr:
     db 0xA, 0xD, "[HELP] commands are: clear, ls, regs, reboot, halt", 0xA, 0xD, 0
 
-userInputStr:  times 30 db 0 ; command is less than 30 bytes
 newLineStr:    db 0xA, 0xD, 0
 promptStr:     db 0xA, 0xD, "> ", 0
 haltStr:       db 0xA, 0xD, "System halted", 0
 notFoundStr:   db 0xA, 0xD, "ERROR: command not found", 0xA, 0xD, 0
 
-;; ----------------------------------------------------------------------------
 ;; List of commands
-
 clearCmdStr:   db "clear", 0
 clearCmdSize:  dw 0x6
 
@@ -169,6 +166,9 @@ rebootCmdSize: dw 0x7
 
 haltCmdStr:    db "halt", 0
 haltCmdSize:   dw 0x5
+
+;; Keep user input at the end of the file so it will grow almost freely...
+userInputStr:  db 0
 
     ; kernel size is 2KB so padding with 0s
     times 2048-($-$$) db 0
