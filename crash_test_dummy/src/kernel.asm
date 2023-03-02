@@ -34,8 +34,9 @@ display_prompt:
     call print_str
 
     mov di, userInputStr ; Set destination index to the start of userInputStr
+    xor cl, cl           ; CL is used to count the number of chars inputted
 
-.get_user_input:
+get_user_input:
     mov ah, 0x0 ; wait for keypress and read character
     int 0x16    ; BIOS interrupt for keyboard services
 
@@ -44,16 +45,47 @@ display_prompt:
     ;   -> https://www.fountainware.com/EXPL/bios_key_codes.htm
     ; AL will contain the ASCII character or zero
 
+    ; Check if backspace is pressed
+    cmp al, 0x08
+    je .erase_last_char
+
     ; while Enter (0x0D) is not pressed we continue
-    ; currently we don't check that userInputStr is not overflowed
     cmp al, 0x0D ; compare with "Enter"
     je .compare_user_input
 
+    ; Check that userInputStr is not full
+    cmp cl, 0x19      ; 31 chars
+    je get_user_input ; Just ignore char and wait for Backspace or Enter
+
     ; else echo the character
-    mov ah, 0xE ; set TTY service
-    int 0x10    ; print the character
-    stosb       ; Store AL at ES:DI
-    jmp .get_user_input
+    mov ah, 0x0E ; set TTY service0
+    int 0x10     ; print the character
+
+    stosb        ; Store AL at ES:DI
+    inc cl       ; Update the number of char
+    jmp get_user_input
+
+.erase_last_char:
+    cmp cl, 0         ; first char pressed ?
+    je get_user_input ; if yes just ignore it
+
+    ; if no then delete the last character from userInputStr
+    dec di
+    mov byte [di], 0
+    dec cl ; need to decrement the number of char already counted
+
+    mov ah, 0x0E ; set TTY
+
+    mov al, 0x08 ; set backspace char
+    int 0x10
+
+    mov al, ' '  ; print a blank char to erase deleted char
+    int 0x10
+
+    mov al, 0x08 ; and set backspace again
+    int 0x10
+
+    jmp get_user_input
 
 .compare_user_input:
     mov byte [di], 0 ; add 0 at the end of userInputStr. DI has been incremented when
@@ -167,8 +199,7 @@ rebootCmdSize: dw 0x7
 haltCmdStr:    db "halt", 0
 haltCmdSize:   dw 0x5
 
-;; Keep user input at the end of the file so it will grow almost freely...
-userInputStr:  db 0
+userInputStr:  times 32 db 0
 
     ; kernel size is 2KB so padding with 0s
     times 2048-($-$$) db 0
