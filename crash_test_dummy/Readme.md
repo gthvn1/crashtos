@@ -4,21 +4,22 @@ We will follow [Amateur Makes an OS](https://www.youtube.com/playlist?list=PLT7N
 
 ## Build
 
-It is easy, just run `make run`. It requires [bochs](https://bochs.sourceforge.io/)
-emulator. To just build the mini os without running it on bochs just run
-`make`.
+To build the mini os just run `make`.
+To test it with [bochs](https://bochs.sourceforge.io/) emulator just run
+`make run`.
 
-Currently we only assembly files that are in **src/asm** that are the "cores" and
-others assembly files in **src/include** that are not.
+Currently main assembly files are in **src/** and others assembly files that are
+not build but just included are in **include/**.
 
 Build will create a **bin/** directory with the mini-os that is the concatenation
-of the bootloader in the boot sector (the first 512 bytes of the disk) and the kernel
-on the second sector.
+of the bootloader in the boot sector (the first 512 bytes of the disk) and 
+kernel and other programs on others sectors. See the description of the Floppy
+for more details.
 
 ## Some notes
 
-Currently it is not working on real hardware. Maybe we just need to add A20. It can
-be cool to try to have it working on real HW...
+Currently it is not working on real hardware. Maybe we just need to add A20.
+It can be cool to try to have it working on real HW...
 
 ### Floppy geometry
 

@@ -1,6 +1,6 @@
 .PHONY: run
 
-SRC_ASM := src/asm
+SRC_ASM := src
 BIN_DIR := bin
 
 $(shell mkdir -p $(BIN_DIR))
