@@ -27,7 +27,6 @@ $(FLOPPY): $(BOOTLOADER) $(FILETABLE) $(KERNEL) $(EDITOR)
 $(BIN_DIR)/%.bin: $(SRC_ASM)/%.asm
 	nasm -f bin -o $@ $<
 
-# Explicitly call `make run` to start bochs
 bochs: $(FLOPPY)
 	bochs -q
 
