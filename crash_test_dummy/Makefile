@@ -1,4 +1,4 @@
-.PHONY: run
+.PHONY: rebuild run clean
 
 SRC_ASM := src
 BIN_DIR := bin
@@ -11,6 +11,10 @@ KERNEL        := $(BIN_DIR)/kernel.bin     # 4 * 512B
 CALCULATOR    := $(BIN_DIR)/calculator.bin # 1 * 512B
 
 FLOPPY := $(BIN_DIR)/mini-os.floppy
+
+rebuild:
+	make clean
+	make $(FLOPPY)
 
 $(FLOPPY): $(BOOTLOADER) $(FILETABLE) $(KERNEL) $(CALCULATOR)
 	dd if=/dev/zero     of=$(FLOPPY) bs=512 count=2880
