@@ -18,7 +18,7 @@ To build the mini os just run `make`.
 
 ### Test
 To test it with [bochs](https://bochs.sourceforge.io/) emulator just run
-`make bochs`. Check *bochsrc.txt* if you need a custom setup.
+`make bochs`. Check [bochsrc.txt](https://github.com/gthvn1/yet-another-kernel/blob/master/crash_test_dummy/bochsrc.txt) if you need a custom setup.
 
 You can also test it on [qemu](https://www.qemu.org/) if you run `make qemu`.
 
