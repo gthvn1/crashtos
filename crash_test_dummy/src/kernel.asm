@@ -21,7 +21,7 @@
 org 0x0200
 
 kernel:
-    call reset_screen
+    call clear_screen
 
     mov si, welcomeHdr
     call print_str
@@ -59,15 +59,22 @@ display_prompt:
     mov byte [di], 0 ; add 0 at the end of userInputStr. DI has been incremented when
                      ; echoing the character.
 
-    mov si, userInputStr
+    mov si, userInputStr ; Set source index to point to the beginning of userInputStr
 
     ; Check if command is equal to "ls"
-    mov cx, [lsCmdSize] ; Set cx with the size of "ls" incremented by the end char
-    mov si, lsCmdStr  ; Set source index to the start of lsCmdStr
-    mov di, userInputStr    ; Set destination index to the start of userInputStr
-    repe cmpsb        ; Repeat compare string byte while equal.
-                      ; Compares DS:SI and ES:DI
+    mov cx, [lsCmdSize]  ; Set cx with the size of "ls" incremented by the end char
+    mov si, lsCmdStr     ; Set source index to the start of lsCmdStr
+    mov di, userInputStr ; Set destination index to the start of userInputStr
+    repe cmpsb           ; Repeat compare string byte while equal.
+                         ; -> Compares DS:SI and ES:DI
     je .ls_found;
+
+    ; if not, check if command is equal to "clear"
+    mov cx, [clearCmdSize]
+    mov si, clearCmdStr
+    mov di, userInputStr
+    repe cmpsb
+    je .clear_found ; Jump if there is a match
 
     ; if not, check if command is equal to "regs"
     mov cx, [regsCmdSize]
@@ -101,6 +108,10 @@ display_prompt:
     call print_file_table
     jmp display_prompt
 
+.clear_found:
+    call clear_screen
+    jmp display_prompt
+
 .regs_found:
     call print_regs
     jmp display_prompt
@@ -115,25 +126,8 @@ display_prompt:
     jmp 0xFFFF:0x0000 ; far jump to the vector reset
 ;; End of display_prompt
 
-;; ----------------------------------------------------------------------------
-reset_screen:
-    push ax
-    push bx
-
-    mov ah, 0x0 ; Set BIOS service to "set video mode"
-    mov al, 0x3 ; 80x25 16 color text
-    int 0x10    ; BIOS interrupt for video services
-
-    mov ah, 0xB ; Set BIOS Service to "set color palette"
-    mov bh, 0x0 ; set background & border color
-    mov bl, 0x5 ; magenta
-    int 0x10
-
-    pop bx
-    pop ax
-    ret
-
 ;; As it is compile at the top we need to include the asm file with its path
+%include "include/clear_screen.asm"
 %include "include/print_str.asm"
 %include "include/print_hex.asm"
 %include "include/print_regs.asm"
@@ -150,7 +144,7 @@ welcomeHdr:
     ; 0xD is carriage return (return to the beginning)
 
 helpHdr:
-    db 0xA, 0xD, "[HELP] commands are: ls, regs, reboot, halt", 0xA, 0xD, 0
+    db 0xA, 0xD, "[HELP] commands are: clear, ls, regs, reboot, halt", 0xA, 0xD, 0
 
 userInputStr:  times 30 db 0 ; command is less than 30 bytes
 newLineStr:    db 0xA, 0xD, 0
@@ -158,7 +152,12 @@ promptStr:     db 0xA, 0xD, "> ", 0
 haltStr:       db 0xA, 0xD, "System halted", 0
 notFoundStr:   db 0xA, 0xD, "ERROR: command not found", 0xA, 0xD, 0
 
+;; ----------------------------------------------------------------------------
 ;; List of commands
+
+clearCmdStr:   db "clear", 0
+clearCmdSize:  dw 0x6
+
 lsCmdStr:      db "ls", 0
 lsCmdSize:     dw 0x3
 

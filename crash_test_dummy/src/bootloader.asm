@@ -31,14 +31,13 @@
 ;; we will access file table data from kernel we need to make far jump.
 
     ; First we will load sector 2 (the File Table) at 0x1000:0x0000
-    ; It is 512 bytes after the bootloader
     mov bx, 0x1000
-    mov es, bx      ; es <- 0x1000
+    mov es, bx            ; es <- 0x1000
+    xor bx, bx            ; bx <- 0x0
+                          ; Set [es:bx] to 0x0001:0x0000,
 
-    xor bx, bx      ; bx <- 0x0
-                    ; Set [es:bx] to 0x0001_0000,
-    mov cx, 0x00_02 ; Cylinder: 0, Sector: 2
-    mov al, 0x1     ; Read one sector (512 bytes)
+    mov cx, 0x00_02       ; Cylinder: 0, Sector: 2
+    mov al, 0x1           ; Read one sector (512 bytes)
     call load_disk_sector ; Read the file table from disk
 
     ; Now we can load the kernel from sector 3 at 0x1000:0x0200
@@ -72,7 +71,7 @@
 
 load_disk_sector:
     ;  - es:bx are set set before calling it
-    mov si, 0x5 ; disk reads should be retried at least three times
+    mov si, 0x3 ; disk reads should be retried at least three times
                 ; we use SI because all others registers are needed
 
     ; Reset the disk before reading it
