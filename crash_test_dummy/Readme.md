@@ -71,3 +71,4 @@ It can be cool to try to have it working on real HW...
 - [ ] If we don't find any command look into file table if we find a "txt" file
       or a "bin" file. If we found a "bin" file execute it, if it is a "txt" file
       display its contents. If it is another extension do nothing.
+      Example: *editor* should start the editor
