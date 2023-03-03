@@ -25,9 +25,10 @@
 ;; 0x000F_0000 - 0x000F_FFFF | 64KB  | Motherboard BIOS
 ;;
 ;; We will use the 64KB from 0x0001_0000 - 0x0001_FFFF:
-;;   - File Table : 0x0001_0000 - 0x0001_01FF (512B)
-;;   - Kernel     : 0x0001_0200 - 0x0001_09FF (2KB)
-;;   - Stack      : 0x0001_A000 - 0x0001_FFFF (24Kb)
+;;   - File Table  : 0x0001_0000 - 0x0001_01FF (512B)
+;;   - Kernel      : 0x0001_0200 - 0x0001_09FF (2KB)
+;;   - Stack       : 0x0001_A000 - 0x0001_FFFF (24Kb)
+;;   - Loaded Prog : 0x0002_0000 - 0x0002_01FF (512B)
 ;; NOTE: The stack is growing in direction of the kernel... so be carfull :-)
 ;; We keep the file table and the kernel on the same segments. Otherwise when
 ;; we will access file table data from kernel we need to make far jump.
@@ -62,45 +63,7 @@
     cli
     hlt
 
-; load_disk_sector:
-; Inputs:
-;   - AL: Number of sectors to be read
-;   - CH: Cylinder
-;   - CL: Sector
-;   - [ES:BX] the memory where we want to load the sector
-; Clobbers:
-;   - SI, AH, DX
-
-load_disk_sector:
-    ;  - es:bx are set set before calling it
-    mov si, 0x3 ; disk reads should be retried at least three times
-                ; we use SI because all others registers are needed
-
-    ; Reset the disk before reading it
-    mov ah, 0x0
-    int 0x13
-
-    mov ah, 0x2  ; BIOS service: read sectors from drive
-                 ; AL is set when calling load_disk_sector
-                 ; CH & CL are also already set
-    mov dh, 0x0  ; Head 0
-    mov dl, 0x0  ; Read floppy
-
-    int 0x13 ; 0x13 BIOS service
-
-    ; Check the result
-    ; If CF == 1 then there is an error
-    jc .failed_to_load_kernel
-
-    ret
-
-.failed_to_load_kernel:
-    dec si
-    jnz load_disk_sector ; if it is not zero we can retry
-
-    ; We failed more than 3 times, it is over !!!
-    cli
-    hlt
+%include "include/load_disk_sector.asm"
 
     times 510-($-$$) db 0    ; padding with 0s
     dw 0xaa55        ; BIOS magic number

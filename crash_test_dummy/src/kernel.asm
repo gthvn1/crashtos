@@ -120,6 +120,10 @@ get_user_input:
     ; if not, check if command is equal to "regs"
     compare_cmd regsCmdSize, regsCmdStr, .exec_regs
 
+    ; if not, check if command is equal to "editor"
+    ; TODO: Make editor an application check from file table instead of command
+    compare_cmd editorCmdSize, editorCmdStr, .exec_editor
+
     ; if not, check if command is equal to "halt"
     compare_cmd haltCmdSize, haltCmdStr, .exec_halt
 
@@ -147,6 +151,26 @@ get_user_input:
     call print_regs
     jmp kernel_loop
 
+.exec_editor:
+    ; load editor from sector 7 at 0x2000:0x0000
+    mov bx, 0x2000
+    mov es, bx            ; es <- 0x1000
+    xor bx, bx            ; bx <- 0x0
+                          ; Set [es:bx] to 0x0002:0x0000,
+
+    mov cx, 0x00_07       ; Cylinder: 0, Sector: 7
+    mov al, 0x1           ; Read one sector (512 bytes)
+    call load_disk_sector ; Read editor from disk
+
+    ; before jumping to editor we need to setup segments
+    mov ax, 0x2000
+    mov ds, ax
+    mov es, ax
+    mov fs, ax
+    mov gs, ax
+    mov ss, ax  ; this will create a new stack
+    jmp 0x2000:0x0000 ; far jump to editor
+
 .exec_halt:
     mov si, haltStr
     call print_str
@@ -158,6 +182,7 @@ get_user_input:
 ;; End of kernel_loop
 
 ;; As it is compile at the top we need to include the asm file with its path
+%include "include/load_disk_sector.asm"
 %include "include/clear_screen.asm"
 %include "include/print_str.asm"
 %include "include/print_hex.asm"
@@ -191,6 +216,9 @@ lsCmdSize:     dw 0x3
 
 regsCmdStr:    db "regs", 0
 regsCmdSize:   dw 0x5
+
+editorCmdStr:  db "editor", 0
+editorCmdSize: dw 0x7
 
 rebootCmdStr:  db "reboot", 0
 rebootCmdSize: dw 0x7
