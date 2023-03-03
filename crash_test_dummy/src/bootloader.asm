@@ -4,6 +4,8 @@
 ;; It will load the kernel by reading the second sector on the first
 ;; disk.
 
+%include "include/constants.asm"
+
     org 0x7C00 ; The code is loaded at 0x7C00 by the bootloader
                ; We need to set it otherwise when later in the code
                ; we will refer to memory location the address will be
@@ -34,7 +36,7 @@
 ;; we will access file table data from kernel we need to make far jump.
 
     ; First we will load sector 2 (the File Table) at 0x1000:0x0000
-    mov bx, 0x1000
+    mov bx, FTABLE_SEG
     mov es, bx            ; es <- 0x1000
     xor bx, bx            ; bx <- 0x0
                           ; Set [es:bx] to 0x0001:0x0000,
@@ -45,19 +47,19 @@
 
     ; Now we can load the kernel from sector 3 at 0x1000:0x0200
     ; As kernel is 1Ko we need to load two segments
-    mov bx, 0x0200        ; Set [es:bx] to 0x0001_0200,
+    mov bx, KERNEL_CODE   ; Set [es:bx] to 0x0001_0200,
     mov cx, 0x00_03       ; Cylinder: 0, Sector: 3
     mov al, 0x4           ; Read 4 sectors (2KB)
     call load_disk_sector ; Read the kernel from disk
 
     ; before jumping to the kernel we need to setup segments
-    mov ax, 0x1000
+    mov ax, KERNEL_SEG
     mov ds, ax
     mov es, ax
     mov fs, ax
     mov gs, ax
     mov ss, ax
-    jmp 0x1000:0x0200 ; far jump to kernel
+    jmp KERNEL_SEG:KERNEL_CODE ; far jump to kernel
 
     ; Should not be reached because we never returned from kernel space...
     cli

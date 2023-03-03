@@ -5,8 +5,6 @@
 ;;    - setup screen mode
 ;;    - display the menu
 ;;
-;; Bootloader will load us at 0x1000:0x0000
-;;
 ;; [BIOS Services](https://grandidierite.github.io/bios-interrupts)
 ;; [Video Colors](https://en.wikipedia.org/wiki/BIOS_color_attributes)
 
@@ -18,7 +16,9 @@
     call print_str
 %endmacro
 
-org 0x0200
+%include "include/constants.asm"
+
+org KERNEL_CODE
 
 kernel:
     call clear_screen
@@ -153,7 +153,7 @@ get_user_input:
 
 .exec_editor:
     ; load editor from sector 7 at 0x2000:0x0000
-    mov bx, 0x2000
+    mov bx, EDITOR_SEG
     mov es, bx            ; es <- 0x1000
     xor bx, bx            ; bx <- 0x0
                           ; Set [es:bx] to 0x0002:0x0000,
@@ -163,13 +163,13 @@ get_user_input:
     call load_disk_sector ; Read editor from disk
 
     ; before jumping to editor we need to setup segments
-    mov ax, 0x2000
+    mov ax, EDITOR_SEG
     mov ds, ax
     mov es, ax
     mov fs, ax
     mov gs, ax
     mov ss, ax  ; this will create a new stack
-    jmp 0x2000:0x0000 ; far jump to editor
+    jmp EDITOR_SEG:EDITOR_CODE ; far jump to editor
 
 .exec_halt:
     mov si, haltStr
