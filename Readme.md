@@ -1,7 +1,6 @@
 # CrashTOS: A Crash Test Operating System
 
-We will follow [Amateur Makes an OS](https://www.youtube.com/playlist?list=PLT7NbkyNWaqajsw8Xh7SP9KJwjfpP8TNX).
-It is really awesome so let us be inspired.
+We will follow [Amateur Makes an OS](https://www.youtube.com/playlist?list=PLT7NbkyNWaqajsw8Xh7SP9KJwjfpP8TNX). It is really interesting so let's do it.
 
 ## Code, Build & Test
 
@@ -19,7 +18,7 @@ To build the mini os just run `make`.
 
 ### Test
 To test it with [bochs](https://bochs.sourceforge.io/) emulator just run
-`make bochs`. Check [bochsrc.txt](https://github.com/gthvn1/yet-another-kernel/blob/master/crash_test_dummy/bochsrc.txt) if you need a custom setup.
+`make bochs`. Check [bochsrc.txt](https://github.com/gthvn1/crashtos/blob/master/bochsrc.txt) if you need a custom setup.
 
 You can also test it on [qemu](https://www.qemu.org/) if you run `make qemu`.
 
@@ -30,7 +29,7 @@ It can be cool to try to have it working on real HW...
 
 ### Memory Layout
 
-- Check [src/bootloader.asm](https://github.com/gthvn1/yet-another-kernel/blob/master/crash_test_dummy/src/bootloader.asm)
+- Check [src/bootloader.asm](https://github.com/gthvn1/crashtos/blob/master/src/bootloader.asm)
 for an up to date layout. Should be sync but who knows...
 ```sh
 ;; MEMORY LAYOUT
