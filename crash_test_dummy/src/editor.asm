@@ -35,7 +35,7 @@ jmp_kernel:
     mov gs, ax
     mov ss, ax
 
-    jmp KERNEL_SEG:KERNEL_CODE ; far jump to kernel
+    jmp KERNEL_SEG:KERNEL_OFFSET ; far jump to kernel
 
 ;; ----------------------------------------------------------------------------
 ;; FUNCTIONS

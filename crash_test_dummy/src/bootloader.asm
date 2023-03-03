@@ -6,10 +6,10 @@
 
 %include "include/constants.asm"
 
-    org 0x7C00 ; The code is loaded at 0x7C00 by the bootloader
-               ; We need to set it otherwise when later in the code
-               ; we will refer to memory location the address will be
-               ; wrong. For example mov al, [outputChar] will not work.
+    org BOOTLO_OFFSET ; The code is loaded at 0x7C00 by the bootloader
+                      ; We need to set it otherwise when later in the code
+                      ; we will refer to memory location the address will be
+                      ; wrong. For example mov al, [outputChar] will not work.
 
 ;; MEMORY LAYOUT
 ;; https://wiki.osdev.org/Memory_Map_(x86)
@@ -47,7 +47,7 @@
 
     ; Now we can load the kernel from sector 3 at 0x1000:0x0200
     ; As kernel is 1Ko we need to load two segments
-    mov bx, KERNEL_CODE   ; Set [es:bx] to 0x0001_0200,
+    mov bx, KERNEL_OFFSET ; Set [es:bx] to 0x0001_0200,
     mov cx, 0x00_03       ; Cylinder: 0, Sector: 3
     mov al, 0x4           ; Read 4 sectors (2KB)
     call load_disk_sector ; Read the kernel from disk
@@ -59,7 +59,7 @@
     mov fs, ax
     mov gs, ax
     mov ss, ax
-    jmp KERNEL_SEG:KERNEL_CODE ; far jump to kernel
+    jmp KERNEL_SEG:KERNEL_OFFSET ; far jump to kernel
 
     ; Should not be reached because we never returned from kernel space...
     cli

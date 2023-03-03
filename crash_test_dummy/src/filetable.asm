@@ -16,6 +16,7 @@
 ;; We declare byte per byte because it helps to dectect errors.
 ;;  0    1    2    3    4    5    6    7   8    9    10   11   12   13   14   15
 
+
 db 'b', 'o', 'o', 't', 'S', 'e', 'c', 't', 00h, 00h, 'b', 'i', 'n', 00h, 01h, 01h
 db 'f', 'i', 'l', 'e', 'T', 'a', 'b', 'l', 'e', 00h, 't', 'x', 't', 00h, 02h, 01h
 db 'k', 'e', 'r', 'n', 'e', 'l', 00h, 00h, 00h, 00h, 'b', 'i', 'n', 00h, 03h, 04h

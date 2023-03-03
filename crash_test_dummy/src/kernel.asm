@@ -18,7 +18,7 @@
 
 %include "include/constants.asm"
 
-org KERNEL_CODE
+org KERNEL_OFFSET
 
 kernel:
     call clear_screen
@@ -168,8 +168,8 @@ get_user_input:
     mov es, ax
     mov fs, ax
     mov gs, ax
-    mov ss, ax  ; this will create a new stack
-    jmp EDITOR_SEG:EDITOR_CODE ; far jump to editor
+    mov ss, ax  ; this will create a new stack I think
+    jmp EDITOR_SEG:EDITOR_OFFSET ; far jump to editor
 
 .exec_halt:
     mov si, haltStr
@@ -178,7 +178,7 @@ get_user_input:
     hlt
 
 .exec_reboot:
-    jmp 0xFFFF:0x0000 ; far jump to the vector reset
+    jmp VECTOR_RESET; far jump to the vector reset
 ;; End of kernel_loop
 
 ;; As it is compile at the top we need to include the asm file with its path
