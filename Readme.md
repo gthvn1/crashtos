@@ -1,6 +1,7 @@
 # CrashTOS: A Crash Test Operating System
 
-We will follow [Amateur Makes an OS](https://www.youtube.com/playlist?list=PLT7NbkyNWaqajsw8Xh7SP9KJwjfpP8TNX). It is really interesting so let's do it.
+We will follow [Amateur Makes an OS](https://www.youtube.com/playlist?list=PLT7NbkyNWaqajsw8Xh7SP9KJwjfpP8TNX).
+It is really awesome so let us be inspired.
 
 ## Code, Build & Test
 
