@@ -15,12 +15,18 @@ org EDITOR_OFFSET
 ;; ----------------------------------------------------------------------------
 ;; MAIN
 editor:
-    ;; In the editor we don't use BIOS interrupts for printing
-    ;; message. We use the Video Memory
+    ; In the editor we don't use BIOS interrupts for printing
+    ; message. We use the Video Memory. We are still in 80x25
 
-    ;; Clear the screen
     mov ax, VIDEO_MEMORY
     mov es, ax  ; In real mode segment is shifted so es:0000 => 0xB8000
+
+    ; To clean screen we can write 80x25 () spaces on the screen
+    mov al, ' '
+    mov ah, 0x1E
+    mov di, 0
+    mov cx, 2000   ; 80x25 (! it is not in hexa :)
+    rep stosw      ; store AX at ES:DI repeated 2000 times
 
     mov si, editorHdr   ; display a welcome message
     call print_string
