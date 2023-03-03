@@ -43,43 +43,45 @@ jmp_kernel:
 ;; FUNCTIONS
 
 print_trampoline:
-	call print_char
+    call print_char
 print_string:
-	lodsb		; load DS:SI into AL and increment SI
-	or al, al	; "or-ing" will set ZF flags to 0 if al == 0
-	jnz print_trampoline ; the trick here is that we jump to the trampoline that
+    lodsb        ; load DS:SI into AL and increment SI
+    or al, al    ; "or-ing" will set ZF flags to 0 if al == 0
+    jnz print_trampoline ; the trick here is that we jump to the trampoline that
                 ; will call the print_char. So when the print_char will return
                 ; the next instruction that will be executed is the lodsb.
-	            ; else al == 0 and so we reach the end of the string, so just go
+                ; else al == 0 and so we reach the end of the string, so just go
                 ; to the next line and return (we don't check if we overflow the
                 ; video's memory)...
-	add byte [ypos], 1 ; we suppose that we don't reach the end of the screen
-	mov byte [xpos], 0 ; go to the beginning of the line
-	ret
+    add byte [ypos], 1 ; we suppose that we don't reach the end of the screen
+    mov byte [xpos], 0 ; go to the beginning of the line
+    ret
 
 print_char:
-	mov ah, 0x1E; 0x1 is for blue background and 0xE is for yellow foreground
-	mov cx, ax  ; save attribute (rememer ASCII has been loaded in AL)
+    mov ah, 0x1E; 0x1 is for blue background and 0xE is for yellow foreground
+    mov cx, ax  ; save attribute (rememer ASCII has been loaded in AL) because
+                ; mul is using AX for the multiplication
 
-	movzx ax, byte [ypos] ; move ypos into ax and extend with zeros
-	mov dx, 160           ; There are 2 bytes and 80 columns
-	mul dx                ; ax = ax * 160 (the offset computed for y)
+    ; Now we need to compute DI that is where we want to print the character
+    movzx ax, byte [ypos] ; move ypos into ax and extend with zeros
+    mov dx, 160           ; There are 2 bytes and 80 columns
+    mul dx                ; dx = ax * 160 (the offset computed for y)
 
-	movzx bx, byte [xpos]
-	shl bx, 1 ; Shift left is equivalent to mult by 2. As there are 2 bytes
-	          ; for attribute if x == 4 then the offset for x is +8
+    movzx bx, byte [xpos]
+    shl bx, 1 ; Shift left is equivalent to mult by 2. As there are 2 bytes
+              ; for attribute if x == 4 then the offset for x is +8
 
-	; So in ax we have the shift according to ypos, in bx we have the shift
-	; according to xpos if we add both we have our position :-)
-	mov di, 0
-	add di, ax
-	add di, bx
+    ; So in ax we have the shift according to ypos, in bx we have the shift
+    ; according to xpos if we add the 2 we have our position :-)
+    mov di, 0   ; di = 0
+    add di, ax  ; di = ax + 0 = ax
+    add di, bx  ; di = ax + bx
 
-	mov ax, cx ; restore the attribute (BG, FG, ASCII code)
-	stosw      ; Store AX at ES:DI => Print the character
+    mov ax, cx ; restore the attribute (BG, FG, ASCII code)
+    stosw      ; Store AX at ES:DI => Print the character
 
-	add byte [xpos], 1 ; Update the position, we don't wrap
-	ret
+    add byte [xpos], 1 ; Update the position, we don't wrap
+    ret
 
 ;; ----------------------------------------------------------------------------
 ;; VARIABLES
@@ -88,5 +90,5 @@ editorHdr db "Inside ctd-editor !!!", 0
 xpos      db 0
 ypos      db 0
 
-	; Sector padding to have a bin generated of 512 bytes (one sector)
-	times 512-($-$$) db 0
+    ; Sector padding to have a bin generated of 512 bytes (one sector)
+    times 512-($-$$) db 0
