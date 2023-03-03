@@ -124,11 +124,11 @@ get_user_input:
     ; TODO: Make editor an application check from file table instead of command
     compare_cmd editorCmdSize, editorCmdStr, .exec_editor
 
-    ; if not, check if command is equal to "halt"
-    compare_cmd haltCmdSize, haltCmdStr, .exec_halt
-
     ; if not, check if command is equal to "reboot"
     compare_cmd rebootCmdSize, rebootCmdStr, .exec_reboot
+
+    ; if not, check if command is equal to "halt"
+    compare_cmd haltCmdSize, haltCmdStr, .exec_halt
 
     ; No matches, so print an error message, display the help and try again.
     mov si, notFoundStr
@@ -170,14 +170,22 @@ get_user_input:
     mov gs, ax
     jmp EDITOR_SEG:EDITOR_OFFSET ; far jump to editor
 
-.exec_halt:
-    mov si, haltStr
-    call print_str
-    cli
-    hlt
-
 .exec_reboot:
     jmp VECTOR_RESET; far jump to the vector reset
+
+.exec_halt:
+    ; https://wiki.osdev.org/Shutdown
+    ; In new version of qemu we can: outw(0x604, 0x2000)
+    ; In bochs and older version of qemu we do: outw(0xB004, 0x2000)
+    mov ax, 0x2000
+    ; Try new version first. It should close the application
+    mov dx, 0x604
+    out dx, ax ; output 0x2000 to the IO port 0x604
+    ; if it doesn't work try older version
+    mov dx, 0xB004
+    out dx, ax
+    ; if it still doesn't work just halt
+    hlt
 ;; End of kernel_loop
 
 ;; As it is compile at the top we need to include the asm file with its path
@@ -203,7 +211,6 @@ helpHdr:
 
 newLineStr:    db 0xA, 0xD, 0
 promptStr:     db 0xA, 0xD, "> ", 0
-haltStr:       db 0xA, 0xD, "System halted", 0
 notFoundStr:   db 0xA, 0xD, "ERROR: command not found", 0xA, 0xD, 0
 
 ;; List of commands
