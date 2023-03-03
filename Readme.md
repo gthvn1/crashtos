@@ -1,89 +1,105 @@
-# Yet Another Kernel
+# Crash Test Dummy Mini OS
 
-  The goal is to try to understand the differents steps from switching your computer
-on until executing kernel. For this we will follow [OSDev tutorials](https://wiki.osdev.org/Tutorials).
+We will follow [Amateur Makes an OS](https://www.youtube.com/playlist?list=PLT7NbkyNWaqajsw8Xh7SP9KJwjfpP8TNX). It is really interesting so let's do it.
 
-## Babysteps
+## Code, Build & Test
 
-Steps to create a basic kernel in assembly are in [Babysteps](https://wiki.osdev.org/Tutorials#Babysteps).
+### Code
+Currently main assembly files are in **src/** and others assembly files that are
+not build but just included are in **include/**.
 
-How to create a basic kernel in assembly:
-- [X] [Babystep1](https://wiki.osdev.org/Babystep1) - Your first boot sector.
-- [X] [Babystep2](https://wiki.osdev.org/Babystep2) - Writing a message using the BIOS.
-- [X] [Babystep3](https://wiki.osdev.org/Babystep3) - A look at machine code
-- [X] [Babystep4](https://wiki.osdev.org/Babystep4) - Printing to the screen without the BIOS
-- [X] [Babystep5](https://wiki.osdev.org/Babystep5) - Interrupts
-- [ ] [Babystep6](https://wiki.osdev.org/Babystep6) - Entering protected mode
-- [ ] [Babystep7](https://wiki.osdev.org/Babystep7) - Unreal Mode
-- [ ] [Babystep8](https://wiki.osdev.org/Babystep0) - 32-bit printing
-- Appendix A - [Additional information](https://wiki.osdev.org/Real_mode_assembly_appendix_A)
+Build will create a **bin/** directory with the mini-os that is the concatenation
+of the bootloader in the boot sector (the first 512 bytes of the disk) and
+kernel and other programs on others sectors. See the description of the Floppy
+for more details.
 
-### Babystep1
+### Build
+To build the mini os just run `make`.
 
-- To debug and check that everything is working as expected you can start qemu as follow:
-  - `qemu-system-i386 -s -S -fda boot.bin`
-- And in another terminal attach gdb:
+### Test
+To test it with [bochs](https://bochs.sourceforge.io/) emulator just run
+`make bochs`. Check [bochsrc.txt](https://github.com/gthvn1/yet-another-kernel/blob/master/crash_test_dummy/bochsrc.txt) if you need a custom setup.
+
+You can also test it on [qemu](https://www.qemu.org/) if you run `make qemu`.
+
+## Some notes
+
+Currently it is not working on real hardware. Maybe we just need to add A20.
+It can be cool to try to have it working on real HW...
+
+### Memory Layout
+
+- Check [src/bootloader.asm](https://github.com/gthvn1/yet-another-kernel/blob/master/crash_test_dummy/src/bootloader.asm)
+for an up to date layout. Should be sync but who knows...
 ```sh
-gdb -ex 'target remote localhost:1234' -ex 'set disassembly-flavor intel'
-(gdb) b *0x7c00
-(gdb) c
-Breakpoint 1, 0x00007c00 in ?? ()
-(gdb) x/2i $pc
-=> 0x7c00:	cli
-   0x7c01:	jmp    0x7c01
+;; MEMORY LAYOUT
+;; https://wiki.osdev.org/Memory_Map_(x86)
+;;
+;; 0x0000_0000 - 0x0000_03FF | 1KB   | Real Mode IVT
+;; 0x0000_0400 - 0x0000_04FF | 256B  | Bios Data Area (BDA)
+;; 0x0000_0500 - 0x0000_7BFF | ~30KB | Conventional memory
+;; 0x0000_7C00 - 0x0000_7DFF | 512B  | It is us, the bootloader
+;; 0x0000_7E00 - 0x0007_FFFF | 480KB | Conventional Memory
+;;
+;; 0x0008_0000 - 0x0009_FFFF | 128KB | EBDA
+;; 0x000A_0000 - 0x000B_FFFF | 128KB | Video display memory
+;; 0x000C_0000 - 0x000C_7FFF | 32KB  | Video BIOS
+;; 0x000C_8000 - 0x000E_FFFF | 160KB | BIOS Expansions
+;; 0x000F_0000 - 0x000F_FFFF | 64KB  | Motherboard BIOS
+;;
+;; We will use the 64KB from 0x0001_0000 - 0x0001_FFFF:
+;;   - File Table : 0x0001_0000 - 0x0001_01FF (512B)
+;;   - Kernel     : 0x0001_0200 - 0x0001_09FF (2KB)
+;;   - Stack      : 0x0001_A000 - 0x0001_FFFF (24Kb)
+;; NOTE: The stack is growing in direction of the kernel... so be carfull :-)
+;; We keep the file table and the kernel on the same segments. Otherwise when
+;; we will access file table data from kernel we need to make far jump.
 ```
-- As you see it is our code that it is running...
+### Floppy geometry
 
-### Babystep2
+- cylinders'size is 512 bytes
+- sector numbers start from 1 (cylinder and head start from 0)
+  - sector 1   -> bootloader (512 bytes ended with magic)
+  - sector 2   -> File table (512 bytes padded with 0s)
+  - sector 3-6 -> kernel (2048 bytes padded with 0s)
+  - sector 7   -> future program... (not yet done)
 
-- Just run `qemu-system-i386 -hda boot.bin` and you should see the famous **Hello, World!**.
-  - `-fda` is working as well.
+### Next steps
 
-### Babystep3
-
-- We use `hexdump` to see binary file:
-```sh
-# hexdump -C boot.bin
-00000000  fa 31 c0 8e d8 be 16 7c  fc ac 08 c0 74 06 b4 0e  |.1.....|....t...|
-00000010  cd 10 eb f5 eb fe 48 65  6c 6c 6f 2c 20 57 6f 72  |......Hello, Wor|
-00000020  6c 64 21 00 00 00 00 00  00 00 00 00 00 00 00 00  |ld!.............|
-00000030  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
-*
-000001f0  00 00 00 00 00 00 00 00  00 00 00 00 00 00 55 aa  |..............U.|
-00000200
-```
-- We see for example *fa* that is the opcode for **cli**.
-- Then *31* that is the opcode for **xor register**. To decode the instruction completely we need
-  to check the [instruction format](http://www.baldwin.cx/386htm/s17_02.htm).
-
-### Babystep4
-
-Nothing really special.
-
-### Babystep5
-
-Now you can press a key and you will see the value read from the keyboard... Cool no?
-
-### Babysteps 6 to 8
-
-They are not really interesting. It is said that we need to setup the GDT to be able
-to jump to protected mode. We already wrote a blog about this and it is almost done
-in [ZigOS](https://github.com/gthvn1/zigos).
-
-## YaK (Yet another Kernel) vs Crash test dummies...
-
-YaK was our first project and it has its own [Readme.md](https://github.com/gthvn1/yet-another-kernel/blob/master/yak/Readme.md) file...
-Then few weeks after starting it we found cool videos from video [Amateur Makes an OS](https://www.youtube.com/playlist?list=PLT7NbkyNWaqajsw8Xh7SP9KJwjfpP8TNX). We are trying to follow them so we create a new repo and as YaK
-it has its own [Readme.md](https://github.com/gthvn1/yet-another-kernel/blob/master/crash_test_dummy/Readme.md).
-
-In any cases the final goal is to be able to load and run an ELF in userspace.
-
-## Some interesting links
-
-- [The little book about OS development](https://ordoflammae.github.io/littleosbook/)
-- [OSDev long mode](https://wiki.osdev.org/Setting_Up_Long_Mode)
-- [Redox bootloader](https://gitlab.redox-os.org/redox-os/bootloader)
-- [BIOS interrupt call](https://en.wikipedia.org/wiki/BIOS_interrupt_call)
-- [OSDev bootloder wiki](https://wiki.osdev.org/Bootloader)
-- [Multiboot headers](https://intermezzos.github.io/book/first-edition/multiboot-headers.html)
-- [A Blog](https://www.thouvenin.eu/blog/) related to these attempts to create a *"kernel"*.
+- [x] In the step3 it is really cool to load the *"kernel"* using a *"bootloader"*.
+  So create an raw image that has the *"bootloader*" in its first sector and the kernel
+  after. A sector is 512 bytes that is the size of the bootloader...
+- [x] To prepare this step we just create an empty kernel that will fill the second sector
+  so the size of the disk will be related to its geometry.
+- [x] Move the kernel into sector 3 and add something else on the second sector. Use kind
+  of filesystem to know where things are stored. The "filesystem" will just be a string with
+  the filename of things stored on sectors. For the moment we store segment by segment.
+- [x] Read input from user
+- [x] Instead of reading the key pressed we can store keys pressed in memory and when
+  user press "Enter" then we check if the command starts from "F" and do appropriate
+  thing, if it starts by "Q" we quit, and otherwise we get another input from the user.
+  The cool thing with that is that later we will be able to have a shell :)
+  - *NOTE*: we just store the key press in memory (in fact we save the caracter in then
+    expected index of the input string to have a nice print message).
+- [x] Add warm reboot (it is a far jump to 0xFFFF:0x0000)
+- [x] Load file table from sector 2
+- [x] Add an entry for printing registers
+- [x] After running a command add a "return to menu" message, wait for key input
+  , cleanup the screen and go back to menu.
+- [x] Display registers
+- [x] Display file table
+- [x] Implement a prompt instead of menu
+  - `> ls`: Print file table
+  - `> regs`: Print registers
+  - `> halt`: Halt the computer
+  - `> reboot`: Reboot
+- [x] Load file table at 0x1000:0x0000
+- [x] Load kernel at 0x1000:0x0200
+- [x] Manage backspace
+- [x] Check that user input doesn't overflow the buffer
+- [ ] Add a command to play with graphics
+- [ ] If we don't find any command look into file table if we find a "txt" file
+      or a "bin" file. If we found a "bin" file execute it, if it is a "txt" file
+      display its contents. If it is another extension do nothing.
+      Example: *editor* should start the editor
+- [ ] Use graphics instead of BIOS interrupt
