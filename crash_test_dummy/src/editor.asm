@@ -41,7 +41,6 @@ jmp_kernel:
     mov es, ax
     mov fs, ax
     mov gs, ax
-    mov ss, ax
 
     jmp KERNEL_SEG:KERNEL_OFFSET ; far jump to kernel
 

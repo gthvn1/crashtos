@@ -168,7 +168,6 @@ get_user_input:
     mov es, ax
     mov fs, ax
     mov gs, ax
-    mov ss, ax  ; this will create a new stack I think
     jmp EDITOR_SEG:EDITOR_OFFSET ; far jump to editor
 
 .exec_halt:

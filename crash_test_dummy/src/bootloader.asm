@@ -29,11 +29,15 @@
 ;; We will use the 64KB from 0x0001_0000 - 0x0001_FFFF:
 ;;   - File Table  : 0x0001_0000 - 0x0001_01FF (512B)
 ;;   - Kernel      : 0x0001_0200 - 0x0001_09FF (2KB)
-;;   - Stack       : 0x0001_A000 - 0x0001_FFFF (24Kb)
 ;;   - Loaded Prog : 0x0002_0000 - 0x0002_01FF (512B)
-;; NOTE: The stack is growing in direction of the kernel... so be carfull :-)
 ;; We keep the file table and the kernel on the same segments. Otherwise when
 ;; we will access file table data from kernel we need to make far jump.
+
+    ; Setup the stack under us
+    mov bp, BOOTLO_OFFSET
+    mov ax, BOOTLO_SEG
+    mov ss, ax
+    mov sp, bp
 
     ; First we will load sector 2 (the File Table) at 0x1000:0x0000
     mov bx, FTABLE_SEG
@@ -58,7 +62,6 @@
     mov es, ax
     mov fs, ax
     mov gs, ax
-    mov ss, ax
     jmp KERNEL_SEG:KERNEL_OFFSET ; far jump to kernel
 
     ; Should not be reached because we never returned from kernel space...
