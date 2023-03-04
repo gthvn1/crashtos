@@ -3,7 +3,9 @@
 ;;
 ;; This stage2 will:
 ;;    - setup screen mode
-;;    - display the menu
+;;    - display a prompt
+;;    - read user input
+;;    - process the user input
 ;;
 ;; [BIOS Services](https://grandidierite.github.io/bios-interrupts)
 ;; [Video Colors](https://en.wikipedia.org/wiki/BIOS_color_attributes)
