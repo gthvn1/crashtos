@@ -8,8 +8,8 @@
 %define FTABLE_SEG    0x1000 ; this is where bootloarder loads file table
 %define FTABLE_OFFSET 0x0000
 
-%define KERNEL_SEG    0x1000 ; this is where the bootloader loaded the kernel
-%define KERNEL_OFFSET 0x0200
+%define STAGE2_SEG    0x1000 ; this is where the bootloader loads stage2
+%define STAGE2_OFFSET 0x0200
 
 %define EDITOR_SEG    0x2000
 %define EDITOR_OFFSET 0x0000

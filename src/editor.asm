@@ -6,7 +6,7 @@
 ;; how to remove it...
 ;;
 ;; Currently we only display a message and wait for a user input. Once user
-;; hit a key we return to kenrel. Nothing fancy...
+;; hit a key we return to stage2. Nothing fancy...
 
 %include "include/constants.asm"
 
@@ -31,18 +31,18 @@ editor:
     mov si, editorHdr   ; display a welcome message
     call print_string
 
-    mov ah, 0x0  ; wait for keypress before jumping back to kernel
+    mov ah, 0x0  ; wait for keypress before jumping back to stage2
     int 0x16     ; BIOS interrupt for keyboard services
 
-jmp_kernel:
-    ; before jumping to the kernel we need to setup segments
-    mov ax, KERNEL_SEG
+jmp_stage2:
+    ; before jumping to the stage2 we need to setup segments
+    mov ax, STAGE2_SEG
     mov ds, ax
     mov es, ax
     mov fs, ax
     mov gs, ax
 
-    jmp KERNEL_SEG:KERNEL_OFFSET ; far jump to kernel
+    jmp STAGE2_SEG:STAGE2_OFFSET ; far jump to stage2
 
 ;; ----------------------------------------------------------------------------
 ;; FUNCTIONS

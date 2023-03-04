@@ -3,7 +3,7 @@
 ;;
 ;; Display File table
 ;; The bootloader loaded the file table into 0x0000:0x7E00
-;; As the kernel is not on the same segment we need to modify 
+;; As the stage2 is not on the same segment we need to modify 
 ;; ES to be able to get file table.
 print_file_table:
     pusha

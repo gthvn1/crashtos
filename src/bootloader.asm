@@ -1,7 +1,7 @@
 ;; ============================================================================
 ;; bootloader.asm
 ;;
-;; It will load the kernel by reading the second sector on the first
+;; It will load the stage2 by reading the second sector on the first
 ;; disk.
 
 %include "include/constants.asm"
@@ -28,10 +28,10 @@
 ;;
 ;; We will use the 64KB from 0x0001_0000 - 0x0001_FFFF:
 ;;   - File Table  : 0x0001_0000 - 0x0001_01FF (512B)
-;;   - Kernel      : 0x0001_0200 - 0x0001_09FF (2KB)
+;;   - Stage2      : 0x0001_0200 - 0x0001_09FF (2KB)
 ;;   - Loaded Prog : 0x0002_0000 - 0x0002_01FF (512B)
-;; We keep the file table and the kernel on the same segments. Otherwise when
-;; we will access file table data from kernel we need to make far jump.
+;; We keep the file table and the stage2 on the same segments. Otherwise when
+;; we will access file table data from stage2 we need to make far jump.
 
     ; Setup the stack under us
     mov bp, BOOTLO_OFFSET
@@ -49,22 +49,22 @@
     mov al, 0x1           ; Read one sector (512 bytes)
     call load_disk_sector ; Read the file table from disk
 
-    ; Now we can load the kernel from sector 3 at 0x1000:0x0200
-    ; As kernel is 1Ko we need to load two segments
-    mov bx, KERNEL_OFFSET ; Set [es:bx] to 0x0001_0200,
+    ; Now we can load the stage2 from sector 3 at 0x1000:0x0200
+    ; As stage2 is 1Ko we need to load two segments
+    mov bx, STAGE2_OFFSET ; Set [es:bx] to 0x0001_0200,
     mov cx, 0x00_03       ; Cylinder: 0, Sector: 3
     mov al, 0x4           ; Read 4 sectors (2KB)
-    call load_disk_sector ; Read the kernel from disk
+    call load_disk_sector ; Read the stage2 from disk
 
-    ; before jumping to the kernel we need to setup segments
-    mov ax, KERNEL_SEG
+    ; before jumping to the stage2 we need to setup segments
+    mov ax, STAGE2_SEG
     mov ds, ax
     mov es, ax
     mov fs, ax
     mov gs, ax
-    jmp KERNEL_SEG:KERNEL_OFFSET ; far jump to kernel
+    jmp STAGE2_SEG:STAGE2_OFFSET ; far jump to stage2
 
-    ; Should not be reached because we never returned from kernel space...
+    ; Should not be reached because we never returned from stage2 space...
     cli
     hlt
 

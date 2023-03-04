@@ -28,11 +28,11 @@ load_disk_sector:
 
     ; Check the result
     ; If CF == 1 then there is an error
-    jc .failed_to_load_kernel
+    jc .failed_to_load_stage2
 
     ret
 
-.failed_to_load_kernel:
+.failed_to_load_stage2:
     dec si
     jnz load_disk_sector ; if it is not zero we can retry
 

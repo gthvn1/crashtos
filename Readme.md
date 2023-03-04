@@ -10,7 +10,7 @@ not build but just included are in **include/**.
 
 Build will create a **bin/** directory with the mini-os that is the concatenation
 of the bootloader in the boot sector (the first 512 bytes of the disk) and
-kernel and other programs on others sectors. See the description of the Floppy
+stage2 and other programs on others sectors. See the description of the Floppy
 for more details.
 
 ### Build
@@ -49,11 +49,11 @@ for an up to date layout. Should be sync but who knows...
 ;;
 ;; We will use the 64KB from 0x0001_0000 - 0x0001_FFFF:
 ;;   - File Table : 0x0001_0000 - 0x0001_01FF (512B)
-;;   - Kernel     : 0x0001_0200 - 0x0001_09FF (2KB)
+;;   - Stage2     : 0x0001_0200 - 0x0001_09FF (2KB)
 ;;   - Stack      : 0x0001_A000 - 0x0001_FFFF (24Kb)
-;; NOTE: The stack is growing in direction of the kernel... so be carfull :-)
-;; We keep the file table and the kernel on the same segments. Otherwise when
-;; we will access file table data from kernel we need to make far jump.
+;; NOTE: The stack is growing in direction of the stage2... so be carfull :-)
+;; We keep the file table and the stage2 on the same segments. Otherwise when
+;; we will access file table data from stage2 we need to make far jump.
 ```
 ### Floppy geometry
 
@@ -61,17 +61,17 @@ for an up to date layout. Should be sync but who knows...
 - sector numbers start from 1 (cylinder and head start from 0)
   - sector 1   -> bootloader (512 bytes ended with magic)
   - sector 2   -> File table (512 bytes padded with 0s)
-  - sector 3-6 -> kernel (2048 bytes padded with 0s)
+  - sector 3-6 -> stage2 (2048 bytes padded with 0s)
   - sector 7   -> future program... (not yet done)
 
 ### Next steps
 
-- [x] In the step3 it is really cool to load the *"kernel"* using a *"bootloader"*.
-  So create an raw image that has the *"bootloader*" in its first sector and the kernel
+- [x] In the step3 it is really cool to load the *"stage2"* using a *"bootloader"*.
+  So create an raw image that has the *"bootloader*" in its first sector and the stage2
   after. A sector is 512 bytes that is the size of the bootloader...
-- [x] To prepare this step we just create an empty kernel that will fill the second sector
+- [x] To prepare this step we just create an empty stage2 that will fill the second sector
   so the size of the disk will be related to its geometry.
-- [x] Move the kernel into sector 3 and add something else on the second sector. Use kind
+- [x] Move the stage2 into sector 3 and add something else on the second sector. Use kind
   of filesystem to know where things are stored. The "filesystem" will just be a string with
   the filename of things stored on sectors. For the moment we store segment by segment.
 - [x] Read input from user
@@ -94,7 +94,7 @@ for an up to date layout. Should be sync but who knows...
   - `> halt`: Halt the computer
   - `> reboot`: Reboot
 - [x] Load file table at 0x1000:0x0000
-- [x] Load kernel at 0x1000:0x0200
+- [x] Load stage2 at 0x1000:0x0200
 - [x] Manage backspace
 - [x] Check that user input doesn't overflow the buffer
 - [ ] Add a command to play with graphics
@@ -105,4 +105,4 @@ for an up to date layout. Should be sync but who knows...
 - [ ] Use graphics instead of BIOS interrupt
 - [ ] Setup GDT
 - [ ] Setup IVT
-- [ ] jump to a higher level language like C, Zig, Rust, ...
+- [ ] jump to a higher level language in C, Zig, Rust, ... It will be the kernel

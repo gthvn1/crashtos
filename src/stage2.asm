@@ -1,7 +1,7 @@
 ;; ============================================================================
-;; kernel.asm
+;; stage2.asm
 ;;
-;; Kernel will:
+;; This stage2 will:
 ;;    - setup screen mode
 ;;    - display the menu
 ;;
@@ -18,9 +18,9 @@
 
 %include "include/constants.asm"
 
-org KERNEL_OFFSET
+org STAGE2_OFFSET
 
-kernel:
+stage2:
     call clear_screen
 
     mov si, welcomeHdr
@@ -29,14 +29,14 @@ kernel:
     mov si, helpHdr
     call print_str
 
-;; The kernel loop will:
+;; The stage2 loop will:
 ;;  - display the prompt
 ;;  - get user input
 ;;  - check if it is a command
 ;;  - if it is not a command check if it is a program in File Table
 ;;    - if it is a bin execute it
 ;;    - if it is a txt display it
-kernel_loop:
+stage2_loop:
     mov si, promptStr
     call print_str
 
@@ -137,19 +137,19 @@ get_user_input:
     mov si, helpHdr
     call print_str
 
-    jmp kernel_loop
+    jmp stage2_loop
 
 .exec_ls:
     call print_file_table
-    jmp kernel_loop
+    jmp stage2_loop
 
 .exec_clear:
     call clear_screen
-    jmp kernel_loop
+    jmp stage2_loop
 
 .exec_regs:
     call print_regs
-    jmp kernel_loop
+    jmp stage2_loop
 
 .exec_editor:
     ; load editor from sector 7 at 0x2000:0x0000
@@ -186,7 +186,7 @@ get_user_input:
     out dx, ax
     ; if it still doesn't work just halt
     hlt
-;; End of kernel_loop
+;; End of stage2_loop
 
 ;; As it is compile at the top we need to include the asm file with its path
 %include "include/load_disk_sector.asm"
@@ -234,5 +234,5 @@ haltCmdSize:   dw 0x5
 
 userInputStr:  times 32 db 0
 
-    ; kernel size is 2KB so padding with 0s
+    ; stage2 size is 2KB so padding with 0s
     times 2048-($-$$) db 0
