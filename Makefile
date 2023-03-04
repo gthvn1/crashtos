@@ -27,10 +27,10 @@ $(FLOPPY): $(BOOTLOADER) $(FILETABLE) $(STAGE2) $(EDITOR)
 $(BIN_DIR)/%.bin: $(SRC_ASM)/%.asm
 	nasm -f bin -o $@ $<
 
-bochs: $(FLOPPY)
+bochs: rebuild $(FLOPPY)
 	bochs -q
 
-qemu: $(FLOPPY)
+qemu: rebuild $(FLOPPY)
 	qemu-system-i386 -drive format=raw,if=floppy,file=$(FLOPPY)
 
 clean:

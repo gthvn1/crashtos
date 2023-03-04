@@ -31,6 +31,16 @@ stage2:
     mov si, helpHdr
     call print_str
 
+    ; Try to use load_file
+    mov si, loadFileParam1
+    push si
+    mov si, loadFileParam2
+    push si
+    mov si, loadFileParam3
+    push si
+
+    call load_file
+
 ;; The stage2 loop will:
 ;;  - display the prompt
 ;;  - get user input
@@ -191,12 +201,13 @@ get_user_input:
 ;; End of stage2_loop
 
 ;; As it is compile at the top we need to include the asm file with its path
-%include "include/load_disk_sector.asm"
 %include "include/clear_screen.asm"
 %include "include/print_str.asm"
 %include "include/print_hex.asm"
 %include "include/print_regs.asm"
 %include "include/print_file_table.asm"
+%include "include/load_disk_sector.asm"
+%include "include/load_file.asm"
 
 ;; ----------------------------------------------------------------------------
 ;; VARIABLES
@@ -214,6 +225,10 @@ helpHdr:
 newLineStr:    db 0xA, 0xD, 0
 promptStr:     db 0xA, 0xD, "> ", 0
 notFoundStr:   db 0xA, 0xD, "ERROR: command not found", 0xA, 0xD, 0
+
+loadFileParam1   db "pass the param1 ", 0
+loadFileParam2   db "then the param2 ", 0
+loadFileParam3   db "and finally the param3 ", 0
 
 ;; List of commands
 clearCmdStr:   db "clear", 0
