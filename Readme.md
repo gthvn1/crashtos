@@ -103,3 +103,6 @@ for an up to date layout. Should be sync but who knows...
       display its contents. If it is another extension do nothing.
       Example: *editor* should start the editor
 - [ ] Use graphics instead of BIOS interrupt
+- [ ] Setup GDT
+- [ ] Setup IVT
+- [ ] jump to a higher level language like C, Zig, Rust, ...
