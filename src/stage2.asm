@@ -202,9 +202,9 @@ get_user_input:
 ;; VARIABLES
 
 welcomeHdr:
-    db "-------------------------------------", 0xA, 0xD
-    db " Crash Test Dummy OS has been loaded ", 0xA, 0xD
-    db "-------------------------------------", 0xA, 0xD, 0
+    db "+---------------------+", 0xA, 0xD
+    db "| Welcome to CrashTOS |", 0xA, 0xD
+    db "+---------------------+", 0xA, 0xD, 0
     ; 0xA is line feed (move cursor down to next line)
     ; 0xD is carriage return (return to the beginning)
 
