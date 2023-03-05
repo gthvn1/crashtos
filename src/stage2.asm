@@ -31,15 +31,15 @@ stage2:
     mov si, helpHdr
     call print_str
 
-    ; Try to use load_file
-    mov si, loadFileParam1
-    push si
-    mov si, loadFileParam2
-    push si
-    mov si, loadFileParam3
-    push si
+    ;; START DEBUG OF LOAD FILE:
+    ; Try to use load_file. We want to load "editor" at 0x2000:0x0000
+    push editorCmdStr
+    push 0x2000
+    push 0x0000
 
     call load_file
+    ;; END DEBUG OF LOAD FILE: we will remove it but we put it here because
+    ;; it is easy to test.
 
 ;; The stage2 loop will:
 ;;  - display the prompt
@@ -225,10 +225,6 @@ helpHdr:
 newLineStr:    db 0xA, 0xD, 0
 promptStr:     db 0xA, 0xD, "> ", 0
 notFoundStr:   db 0xA, 0xD, "ERROR: command not found", 0xA, 0xD, 0
-
-loadFileParam1   db "pass the param1 ", 0
-loadFileParam2   db "then the param2 ", 0
-loadFileParam3   db "and finally the param3 ", 0
 
 ;; List of commands
 clearCmdStr:   db "clear", 0
