@@ -8,6 +8,9 @@
 ;; It will load a filename in ES:BX
 ;; Filename will be found in the file table
 load_file:
+    nop
+    nop
+    nop  ;; allow the identification of the start of the function
     ; Read parameters
     ; The last value pushed on the stack is the IP by the call.
     ; After saving the value of Base Pointer register the stack looks like:
@@ -43,6 +46,7 @@ load_file:
     call print_str
     mov dx, [bp + 6] ; Segment memory @
     call print_hex
+
     mov fs, [bp + 6] ; FS <- Segment from where we load the file
 
     mov si, [bp + 8] ; Filename
@@ -52,11 +56,75 @@ load_file:
     ;; si points to the filename
     ;; TODO: find the sector by reading the file table and if
     ;; found we need to load the file...
+    ;; Currently we are just printing if we found a file or not and if we
+    ;; found it what sector to use.
+
+    mov ax, FTABLE_SEG
+    mov es, ax
+    xor di, di  ; [ES:DI] is the address for the file table in memory
+                ; di <- 0x0 == FTABLE_OFFSET
+
+find_filename:
+    lodsb       ; AL <- [ES:DI] and DI is incremented by one
+    cmp al, 0   ; We reach the end of the file table
+    je file_not_found
+
+    mov dx, ax
+    call print_hex
+    call print_str
+
+    ;; If the first character is the same we can continue the comparaison
+    ;; otherwise try the next entry. An entry of the file table is 16 bytes.
+    cmp al, [si]
+    je compare_filename
+    add di, FTABLE_ENTRY_SIZE - 1 ; DI has already been incremented by one
+    jmp find_filename
+
+compare_filename:
+    mov cx, 0x9 ; filename is less or equal to 10 bytes. As we already
+                ; compared the first char we need to compare at most 9 bytes.
+    inc si      ; si points now to the second character.
+
+    .loop:
+    lodsb           ; AL <- [ES:DI] , DI++
+    cmp al, [si]
+    jne .check_next_entry
+
+    ;; otherwise continue to compare until CX == 0 or AL == 0
+    cmp cx, 0
+    je file_found
+    cmp al, 0
+    je file_found
+
+    ;; Otherwise we have a match but we need to compare other characters.
+    dec cx
+    inc si
+
+    jmp .loop
+
+    .check_next_entry:
+    mov si, [bp + 8] ; reset filename
+    add cx, 5        ; Add the 3 extension bytes + 3 attributes - 1 because
+                     ; DI has been incremented by one when loading into AL
+    mov di, cx
+    jmp find_filename
+
+file_not_found:
+    mov si, fileNotFound
+    call print_str
+    jmp end
+
+file_found:
+    mov si, fileFound
+    call print_str
 
 end:
     pop bp ; restore bp
     ret
 
-param1 db "Filename : ", 0
-param2 db "Segment @: ", 0
-param3 db "Offset   : ", 0
+markStr      db '.', 0
+fileFound    db "File found", 0
+fileNotFound db "File not found", 0
+param1       db "Filename : ", 0
+param2       db "Segment @: ", 0
+param3       db "Offset   : ", 0
