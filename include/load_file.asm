@@ -156,7 +156,7 @@ compare_ext:
                  ; AL is set when calling load_disk_sector
                  ; CH & CL are also already set
     mov dh, 0x0  ; Head 0
-    mov dl, 0x0  ; Read floppy
+    mov dl, 0x80 ; Read first hard drive
 
     int 0x13     ; 0x13 BIOS service
 

@@ -1,4 +1,4 @@
-floppya: 1_44=bin/mini-os.floppy, status=inserted
-boot: a
+ata0-master: type=disk, path="bin/mini-os.bin"
+boot: disk
 megs: 1
 debugger_log: debugger.out

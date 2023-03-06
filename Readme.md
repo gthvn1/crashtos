@@ -59,14 +59,14 @@ for an up to date layout. Should be sync but who knows...
 ;; We keep the file table and the stage2 on the same segments. Otherwise when
 ;; we will access file table data from stage2 we need to make far jump.
 ```
-### Floppy geometry
+### Disk geometry
 
 - cylinders'size is 512 bytes
 - sector numbers start from 1 (cylinder and head start from 0)
   - sector 1   -> bootloader (512 bytes ended with magic)
   - sector 2   -> File table (512 bytes padded with 0s)
   - sector 3-6 -> stage2 (2048 bytes padded with 0s)
-  - sector 7   -> future program... (not yet done)
+  - sector 7   -> user input program
 
 ### Next steps
 

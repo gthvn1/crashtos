@@ -10,28 +10,28 @@ FILETABLE  := $(BIN_DIR)/filetable.bin  # 1 * 512B
 STAGE2     := $(BIN_DIR)/stage2.bin     # 4 * 512B
 EDITOR     := $(BIN_DIR)/editor.bin     # 1 * 512B
 
-FLOPPY := $(BIN_DIR)/mini-os.floppy
+MINIOS := $(BIN_DIR)/mini-os.bin
 
 rebuild:
 	make clean
-	make $(FLOPPY)
+	make $(MINIOS)
 
-$(FLOPPY): $(BOOTLOADER) $(FILETABLE) $(STAGE2) $(EDITOR)
-	dd if=/dev/zero     of=$(FLOPPY) bs=512 count=2880
-	dd if=$(BOOTLOADER) of=$(FLOPPY) bs=512 seek=0 conv=notrunc
-	dd if=$(FILETABLE)  of=$(FLOPPY) bs=512 seek=1 conv=notrunc
-	dd if=$(STAGE2)     of=$(FLOPPY) bs=512 seek=2 conv=notrunc
-	dd if=$(EDITOR)     of=$(FLOPPY) bs=512 seek=6 conv=notrunc
+$(MINIOS): $(BOOTLOADER) $(FILETABLE) $(STAGE2) $(EDITOR)
+	dd if=/dev/zero     of=$(MINIOS) bs=512 count=2880
+	dd if=$(BOOTLOADER) of=$(MINIOS) bs=512 seek=0 conv=notrunc
+	dd if=$(FILETABLE)  of=$(MINIOS) bs=512 seek=1 conv=notrunc
+	dd if=$(STAGE2)     of=$(MINIOS) bs=512 seek=2 conv=notrunc
+	dd if=$(EDITOR)     of=$(MINIOS) bs=512 seek=6 conv=notrunc
 
 # BIN format puts NASM by default in 16-bit mode
 $(BIN_DIR)/%.bin: $(SRC_ASM)/%.asm
 	nasm -f bin -o $@ $<
 
-bochs: rebuild $(FLOPPY)
+bochs: rebuild $(MINIOS)
 	bochs -q
 
-qemu: rebuild $(FLOPPY)
-	qemu-system-i386 -drive format=raw,if=floppy,file=$(FLOPPY)
+qemu: rebuild $(MINIOS)
+	qemu-system-i386 -drive format=raw,if=ide,index=0,media=disk,file=$(MINIOS)
 
 clean:
 	rm -rf $(BIN_DIR)
