@@ -18,14 +18,18 @@ To build the mini os just run `make`.
 
 ### Test
 To test it with [bochs](https://bochs.sourceforge.io/) emulator just run
-`make bochs`. Check [bochsrc.txt](https://github.com/gthvn1/crashtos/blob/master/bochsrc.txt) if you need a custom setup.
+`make bochs`. Check [bochsrc.txt](https://github.com/gthvn1/crashtos/blob/master/bochsrc.txt)
+if you need a custom setup.
 
 You can also test it on [qemu](https://www.qemu.org/) if you run `make qemu`.
 
 ## Some notes
 
-Currently it is not working on real hardware. Maybe we just need to add A20.
-It can be cool to try to have it working on real HW...
+Currently it is not working on real hardware probably because we are reading
+from floppy. We tried to read from drive but it is not working either. There
+is probably something more to do if we want to generate an USB image and load
+programs like stage2 from USB. But it will be cool to see it working on real
+HW...
 
 ### Memory Layout
 
