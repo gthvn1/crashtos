@@ -1,21 +1,21 @@
 ;; ============================================================================
 ;; load_file.asm
 ;;
+;; Load a filename into ES:BX
+;; Filename will be found in the file table
+
 ;; Params:
 ;;   - Filename
 ;;   - Segment memory location
 ;;   - Offset memory location
-;; It will load a filename in ES:BX
-;; Filename will be found in the file table
+;; Return values:
+;;   - success AX will contain 0x0
+;;   - failure AX will contain an error != 0x0
 load_file:
-    nop
-    nop
-    nop  ;; allow the identification of the start of the function
-    ; Read parameters
     ; The last value pushed on the stack is the IP by the call.
     ; After saving the value of Base Pointer register the stack looks like:
     ;
-    ; TOP STACK (0xFFFF)
+    ; TOP STACK (0xFFFF) it is not the real value, it is just to show direction
     ;  +------------+
     ;  | parameter1 |<- BP + 8
     ;  +------------+
@@ -35,23 +35,10 @@ load_file:
     push bp    ; save old base pointer
     mov bp, sp ; use the current stack pointer as new base pointer
 
-    ;; For debugging purpose we print parametres
-    mov si, param3
-    call print_str
-    mov dx, [bp + 4] ; Offset memory @
-    call print_hex
-    mov bx, si       ; So bx -> Offset
-
-    mov si, param2
-    call print_str
-    mov dx, [bp + 6] ; Segment memory @
-    call print_hex
-
-    mov fs, [bp + 6] ; FS <- Segment from where we load the file
-
-    mov si, [bp + 8] ; Filename
-    call print_str
-    mov di, si      ; DI points to the filename
+    ; Read parameters from the stack
+    mov bx, [bp + 4] ; BX = Offset memory @
+    mov fs, [bp + 6] ; FS = Segment memory @ where load the file
+    mov di, [bp + 8] ; DI = Filename
 
     ;; At this point
     ;;   - [FS:BX] points to the address where file must be loaded
@@ -69,9 +56,6 @@ load_file:
 
 find_filename:
     lodsb       ; AL <- [DS:SI] and SI is incremented by one
-
-    mov dx, ax
-    call print_hex
 
     cmp al, 0   ; We reach the end of the file table
     je file_not_found
@@ -113,21 +97,12 @@ compare_filename:
     jmp find_filename
 
 file_not_found:
-    mov si, fileNotFound
-    call print_str
+    mov ax, 0x1      ; Return the error
     jmp end
 
 file_found:
-    mov si, fileFound
-    call print_str
+    xor ax, ax       ; AX = 0, success !!!
 
 end:
     pop bp ; restore bp
     ret
-
-markStr      db '.', 0
-fileFound    db "File found", 0
-fileNotFound db "File not found", 0
-param1       db "Filename : ", 0
-param2       db "Segment @: ", 0
-param3       db "Offset   : ", 0

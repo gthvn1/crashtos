@@ -36,8 +36,45 @@ stage2:
     push editorCmdStr
     push 0x2000
     push 0x0000
+    call load_file ;; should be found
+    add sp, 0x6    ; remove call arguments
+    cmp ax, 0
+    je L1
+    mov si, fileNotFound
+    jmp L2
+    L1:
+    mov si, fileFound
+    L2:
+    call print_str
 
-    call load_file
+    push wrongEditorCmdStr
+    push 0x2000
+    push 0x0000
+    call load_file ; should not be found
+    add sp, 0x6    ; remove call arguments
+    cmp ax, 0
+    je L3
+    mov si, fileNotFound
+    jmp L4
+    L3:
+    mov si, fileFound
+    L4:
+    call print_str
+
+    push regsCmdStr
+    push 0x2000
+    push 0x0000
+    call load_file ;; Should not be found
+    add sp, 0x6    ; remove call arguments
+    cmp ax, 0
+    je L5
+    mov si, fileNotFound
+    jmp L6
+    L5:
+    mov si, fileFound
+    L6:
+    call print_str
+
     ;; END DEBUG OF LOAD FILE: we will remove it but we put it here because
     ;; it is easy to test.
 
@@ -168,7 +205,7 @@ get_user_input:
     mov bx, EDITOR_SEG
     mov es, bx            ; es <- 0x1000
     xor bx, bx            ; bx <- 0x0
-                          ; Set [es:bx] to 0x0002:0x0000,
+                          ; Set [es:bx] to 0x2000:0x0000,
 
     mov cx, 0x00_07       ; Cylinder: 0, Sector: 7
     mov al, 0x1           ; Read one sector (512 bytes)
@@ -226,6 +263,9 @@ newLineStr:    db 0xA, 0xD, 0
 promptStr:     db 0xA, 0xD, "> ", 0
 notFoundStr:   db 0xA, 0xD, "ERROR: command not found", 0xA, 0xD, 0
 
+fileFound:     db "File found", 0xA, 0xD, 0
+fileNotFound:  db "File not found", 0xA, 0xD, 0
+
 ;; List of commands
 clearCmdStr:   db "clear", 0
 clearCmdSize:  dw 0x6
@@ -236,6 +276,7 @@ lsCmdSize:     dw 0x3
 regsCmdStr:    db "regs", 0
 regsCmdSize:   dw 0x5
 
+wrongEditorCmdStr:  db "edito", 0
 editorCmdStr:  db "editor", 0
 editorCmdSize: dw 0x7
 
