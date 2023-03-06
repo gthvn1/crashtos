@@ -15,6 +15,8 @@ org EDITOR_OFFSET
 ;; ----------------------------------------------------------------------------
 ;; MAIN
 editor:
+    pusha
+
     ; In the editor we don't use BIOS interrupts for printing
     ; message. We use the Video Memory. We are still in 80x25
 
@@ -41,6 +43,8 @@ jmp_stage2:
     mov es, ax
     mov fs, ax
     mov gs, ax
+
+    popa
 
     jmp STAGE2_SEG:STAGE2_OFFSET ; far jump to stage2
 

@@ -31,52 +31,17 @@ stage2:
     mov si, helpHdr
     call print_str
 
-    ;; START DEBUG OF LOAD FILE:
-    ; Try to use load_file. We want to load "editor" at 0x2000:0x0000
+    ; Load "editor" at 0x2000:0x0000
     push editorCmdStr
-    push 0x2000
-    push 0x0000
-    call load_file ;; should be found
-    add sp, 0x6    ; remove call arguments
-    cmp ax, 0
-    je L1
-    mov si, fileNotFound
-    jmp L2
-    L1:
-    mov si, fileFound
-    L2:
+    push EDITOR_SEG
+    push EDITOR_OFFSET
+    call load_file
+    add sp, 0x6
+    ; print a message and print the return code
+    mov si, editorLoadedMsg
     call print_str
-
-    push wrongEditorCmdStr
-    push 0x2000
-    push 0x0000
-    call load_file ; should not be found
-    add sp, 0x6    ; remove call arguments
-    cmp ax, 0
-    je L3
-    mov si, fileNotFound
-    jmp L4
-    L3:
-    mov si, fileFound
-    L4:
-    call print_str
-
-    push regsCmdStr
-    push 0x2000
-    push 0x0000
-    call load_file ;; Should not be found
-    add sp, 0x6    ; remove call arguments
-    cmp ax, 0
-    je L5
-    mov si, fileNotFound
-    jmp L6
-    L5:
-    mov si, fileFound
-    L6:
-    call print_str
-
-    ;; END DEBUG OF LOAD FILE: we will remove it but we put it here because
-    ;; it is easy to test.
+    mov dx, ax
+    call print_hex ; Also print the return value
 
 ;; The stage2 loop will:
 ;;  - display the prompt
@@ -170,7 +135,6 @@ get_user_input:
     compare_cmd regsCmdSize, regsCmdStr, .exec_regs
 
     ; if not, check if command is equal to "editor"
-    ; TODO: Make editor an application check from file table instead of command
     compare_cmd editorCmdSize, editorCmdStr, .exec_editor
 
     ; if not, check if command is equal to "reboot"
@@ -201,16 +165,6 @@ get_user_input:
     jmp stage2_loop
 
 .exec_editor:
-    ; load editor from sector 7 at 0x2000:0x0000
-    mov bx, EDITOR_SEG
-    mov es, bx            ; es <- 0x1000
-    xor bx, bx            ; bx <- 0x0
-                          ; Set [es:bx] to 0x2000:0x0000,
-
-    mov cx, 0x00_07       ; Cylinder: 0, Sector: 7
-    mov al, 0x1           ; Read one sector (512 bytes)
-    call load_disk_sector ; Read editor from disk
-
     ; before jumping to editor we need to setup segments
     mov ax, EDITOR_SEG
     mov ds, ax
@@ -263,8 +217,7 @@ newLineStr:    db 0xA, 0xD, 0
 promptStr:     db 0xA, 0xD, "> ", 0
 notFoundStr:   db 0xA, 0xD, "ERROR: command not found", 0xA, 0xD, 0
 
-fileFound:     db "File found", 0xA, 0xD, 0
-fileNotFound:  db "File not found", 0xA, 0xD, 0
+editorLoadedMsg:     db 0xA, 0xD, "Load editor returned code ", 0
 
 ;; List of commands
 clearCmdStr:   db "clear", 0
@@ -276,7 +229,6 @@ lsCmdSize:     dw 0x3
 regsCmdStr:    db "regs", 0
 regsCmdSize:   dw 0x5
 
-wrongEditorCmdStr:  db "edito", 0
 editorCmdStr:  db "editor", 0
 editorCmdSize: dw 0x7
 

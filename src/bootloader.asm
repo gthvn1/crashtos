@@ -39,7 +39,9 @@
     mov ss, ax
     mov sp, bp
 
-    ; First we will load sector 2 (the File Table) at 0x1000:0x0000
+    ; First we will File Table from sector 2 at 0x1000:0x0000
+    ; DON'T use load_file to load the file table because load_file relies on
+    ; the fileTable IN MEMORY to load things...
     mov bx, FTABLE_SEG
     mov es, bx            ; es <- 0x1000
     xor bx, bx            ; bx <- 0x0
@@ -50,11 +52,12 @@
     call load_disk_sector ; Read the file table from disk
 
     ; Now we can load the stage2 from sector 3 at 0x1000:0x0200
-    ; As stage2 is 1Ko we need to load two segments
-    mov bx, STAGE2_OFFSET ; Set [es:bx] to 0x0001_0200,
-    mov cx, 0x00_03       ; Cylinder: 0, Sector: 3
-    mov al, 0x4           ; Read 4 sectors (2KB)
-    call load_disk_sector ; Read the stage2 from disk
+    push stage2Name
+    push STAGE2_SEG
+    push STAGE2_OFFSET
+    call load_file
+    cmp ax, 0
+    jne fatal_error
 
     ; before jumping to the stage2 we need to setup segments
     mov ax, STAGE2_SEG
@@ -65,10 +68,14 @@
     jmp STAGE2_SEG:STAGE2_OFFSET ; far jump to stage2
 
     ; Should not be reached because we never returned from stage2 space...
+fatal_error:
     cli
     hlt
 
+%include "include/load_file.asm"
 %include "include/load_disk_sector.asm"
+
+stage2Name db "stage2", 0
 
     times 510-($-$$) db 0    ; padding with 0s
     dw 0xaa55        ; BIOS magic number

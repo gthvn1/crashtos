@@ -106,6 +106,10 @@ for an up to date layout. Should be sync but who knows...
       or a "bin" file. If we found a "bin" file execute it, if it is a "txt" file
       display its contents. If it is another extension do nothing.
       Example: *editor* should start the editor
+  - NOTE: We don't do that exactly. Currently when stage2 starts we are looking
+          for "editor" in file table and load it. So when the user enter "editor"
+          it is already loaded. And it is still a command... But now information
+          are read from file table.
 - [ ] Use graphics instead of BIOS Video services (interrupt 10h)
 - [ ] Use PIO to access disk instead of BIOS Disk services (interrupt 13h)
 - [ ] Setup GDT
