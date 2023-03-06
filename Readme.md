@@ -106,6 +106,9 @@ for an up to date layout. Should be sync but who knows...
       display its contents. If it is another extension do nothing.
       Example: *editor* should start the editor
   - NOTE: Still need to display content of txt file.
+  - Maybe we should load both text file and binary file in memory. Just have
+    different return value in AX to let the stage2 if we can execute it, display
+    it or of an error occured.
 - [ ] Use graphics instead of BIOS Video services (interrupt 10h)
 - [ ] Use PIO to access disk instead of BIOS Disk services (interrupt 13h)
 - [ ] Setup GDT
