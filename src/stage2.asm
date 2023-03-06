@@ -31,18 +31,6 @@ stage2:
     mov si, helpHdr
     call print_str
 
-    ; Load "editor" at 0x2000:0x0000
-    push editorCmdStr
-    push EDITOR_SEG
-    push EDITOR_OFFSET
-    call load_file
-    add sp, 0x6
-    ; print a message and print the return code
-    mov si, editorLoadedMsg
-    call print_str
-    mov dx, ax
-    call print_hex ; Also print the return value
-
 ;; The stage2 loop will:
 ;;  - display the prompt
 ;;  - get user input
@@ -134,22 +122,36 @@ get_user_input:
     ; if not, check if command is equal to "regs"
     compare_cmd regsCmdSize, regsCmdStr, .exec_regs
 
-    ; if not, check if command is equal to "editor"
-    compare_cmd editorCmdSize, editorCmdStr, .exec_editor
-
     ; if not, check if command is equal to "reboot"
     compare_cmd rebootCmdSize, rebootCmdStr, .exec_reboot
 
     ; if not, check if command is equal to "halt"
     compare_cmd haltCmdSize, haltCmdStr, .exec_halt
 
-    ; No matches, so print an error message, display the help and try again.
+    ; At this point nothing matches, try to load the program from file table.
+    ; If we can load the binary file then run it.
+    push userInputStr
+    push PROGRAM_SEG
+    push PROGRAM_OFFSET
+    call load_file
+    cmp ax, 0
+    jne .failed_to_load_program
+
+    ; Program loaded so jump to it
+    ; before jumping to editor we need to setup segments
+    mov ax, PROGRAM_SEG
+    mov ds, ax
+    mov es, ax
+    mov fs, ax
+    mov gs, ax
+    jmp PROGRAM_SEG:PROGRAM_OFFSET ; far jump to editor
+
+.failed_to_load_program
+    ; Display a message, help and loop
     mov si, notFoundStr
     call print_str
-
     mov si, helpHdr
     call print_str
-
     jmp stage2_loop
 
 .exec_ls:
@@ -163,15 +165,6 @@ get_user_input:
 .exec_regs:
     call print_regs
     jmp stage2_loop
-
-.exec_editor:
-    ; before jumping to editor we need to setup segments
-    mov ax, EDITOR_SEG
-    mov ds, ax
-    mov es, ax
-    mov fs, ax
-    mov gs, ax
-    jmp EDITOR_SEG:EDITOR_OFFSET ; far jump to editor
 
 .exec_reboot:
     jmp VECTOR_RESET; far jump to the vector reset
@@ -217,8 +210,6 @@ newLineStr:    db 0xA, 0xD, 0
 promptStr:     db 0xA, 0xD, "> ", 0
 notFoundStr:   db 0xA, 0xD, "ERROR: command not found", 0xA, 0xD, 0
 
-editorLoadedMsg:     db 0xA, 0xD, "Load editor returned code ", 0
-
 ;; List of commands
 clearCmdStr:   db "clear", 0
 clearCmdSize:  dw 0x6
@@ -228,9 +219,6 @@ lsCmdSize:     dw 0x3
 
 regsCmdStr:    db "regs", 0
 regsCmdSize:   dw 0x5
-
-editorCmdStr:  db "editor", 0
-editorCmdSize: dw 0x7
 
 rebootCmdStr:  db "reboot", 0
 rebootCmdSize: dw 0x7

@@ -10,7 +10,7 @@
 
 %include "include/constants.asm"
 
-org EDITOR_OFFSET
+org PROGRAM_OFFSET
 
 ;; ----------------------------------------------------------------------------
 ;; MAIN

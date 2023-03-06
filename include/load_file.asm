@@ -127,8 +127,8 @@ file_found:
 
 compare_ext:
     lodsb        ; AL <- [DS:SI], SI++
-    cmp al, 't'  ; check if extension is equal to BIN or TXT
-    je text_file_found
+    cmp al, 'b'  ; check if extension is equal to BIN
+    jne bin_file_not_found
 
     ; We found binary file
     add si, 2  ; skip the end of extension
@@ -176,11 +176,10 @@ compare_ext:
     mov ax, FILE_LOAD_ERROR
     jmp end
 
-text_file_found:
+bin_file_not_found:
     mov ax, BIN_FILE_NOT_FOUND
 
 end:
-
     pop fs
     pop es
     pop ds
