@@ -106,7 +106,8 @@ for an up to date layout. Should be sync but who knows...
       or a "bin" file. If we found a "bin" file execute it, if it is a "txt" file
       display its contents. If it is another extension do nothing.
       Example: *editor* should start the editor
-- [ ] Use graphics instead of BIOS interrupt
+- [ ] Use graphics instead of BIOS Video services (interrupt 10h)
+- [ ] Use PIO to access disk instead of BIOS Disk services (interrupt 13h)
 - [ ] Setup GDT
 - [ ] Setup IVT
 - [ ] jump to a higher level language in C, Zig, Rust, ... It will be the kernel
