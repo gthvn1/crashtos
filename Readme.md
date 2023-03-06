@@ -112,5 +112,8 @@ for an up to date layout. Should be sync but who knows...
 - [ ] Use graphics instead of BIOS Video services (interrupt 10h)
 - [ ] Use PIO to access disk instead of BIOS Disk services (interrupt 13h)
 - [ ] Setup GDT
+  - NOTE: BIOS interrupt are not available after switching to protected mode.
+  there is some workaround but a good solution will probably to remove the usage
+  of BIOS interrupt.
 - [ ] Setup IVT
 - [ ] jump to a higher level language in C, Zig, Rust, ... It will be the kernel
