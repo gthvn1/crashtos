@@ -146,7 +146,7 @@ get_user_input:
     mov gs, ax
     jmp PROGRAM_SEG:PROGRAM_OFFSET ; far jump to editor
 
-.failed_to_load_program
+.failed_to_load_program:
     ; Display a message, help and loop
     mov si, notFoundStr
     call print_str
