@@ -53,7 +53,10 @@ read_data:
 
     mov byte [keyPressed], al
     call print_char
-    jmp read_data
+
+    ; If q is pressed return to stage2
+    cmp al, 'q'
+    jne read_data
 
 jmp_stage2:
     ; before jumping to the stage2 we need to setup segments
