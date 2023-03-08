@@ -110,11 +110,7 @@ load_disk_sector:
     jnz load_disk_sector ; if it is not zero we can retry
 
     ; We failed more than 3 times, it is over !!!
-    cli
-    hlt
-
-    times 510-($-$$) db 0    ; padding with 0s
-    dw 0xaa55        ; BIOS magic number
+    call fatal_error
 
 ; =====================[ KINGDOM OF PROTECTED WORLD ]===========================
 
@@ -126,3 +122,5 @@ fatal_error:
     cli
     hlt
 
+    times 510-($-$$) db 0    ; padding with 0s
+    dw 0xaa55        ; BIOS magic number
