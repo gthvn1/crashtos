@@ -31,7 +31,7 @@ is probably something more to do if we want to generate an USB image and load
 programs like stage2 from USB. But it will be cool to see it working on real
 HW...
 
-## Breaking news...
+## Breaking news... Protected mode is coming...
 
 To prepare the transition to protected mode we started to remove the usage of
 BIOS services in the kernel. It is not so easy to do it properly. So we start
@@ -39,8 +39,11 @@ the modification in the bootloader to load the kernel. The goal is to put in
 kernel.asm the same thing that we have in stage2.asm (that is not used any more)
 but without any BIOS interrupt.
 
-In the first step have clean screen, the print of a line and we are trying to
-get input from user. But this part is not working well.
+- [x] In the first step have clean screen, the print of a line and we are
+trying to get input from user. But this part is not working well.
+- [x] Before going further we did the jump, so we did the setup of the GDT...
+- [ ] Now we need to fix the get user input...
+
 
 ### Memory Layout
 
@@ -120,13 +123,13 @@ for an up to date layout. Should be sync but who knows...
   - Maybe we should load both text file and binary file in memory. Just have
     different return value in AX to let the stage2 if we can execute it, display
     it or of an error occured.
-- [ ] Use graphics instead of BIOS Video services (interrupt 10h). We can keep
+- [x] Use graphics instead of BIOS Video services (interrupt 10h). We can keep
       it for bootloader. But for other part remove it because when we will switch
       to protected mode we won't be able to use it.
   - [x] clear screen
-  - [ ] print char
+  - [x] print char
 - [ ] Use PIO to access disk instead of BIOS Disk services (interrupt 13h)
-- [ ] Setup GDT
+- [x] Setup GDT
   - NOTE: BIOS interrupt are not available after switching to protected mode.
   there is some workaround but a good solution will probably to remove the usage
   of BIOS interrupt.
