@@ -14,9 +14,7 @@
 ;;                  - from 00h to FFh
 ;;
 
-%include "include/constants.asm"
-
-org FTABLE_OFFSET
+[ORG 0x7E00]
 
 ;; We declare byte per byte because it helps to dectect errors.
 ;;  0    1    2    3    4    5    6    7   8    9    10   11   12   13   14   15
@@ -24,7 +22,7 @@ org FTABLE_OFFSET
 
 db 'b', 'o', 'o', 't', 'S', 'e', 'c', 't', 00h, 00h, 'b', 'i', 'n', 00h, 01h, 01h
 db 'f', 'i', 'l', 'e', 'T', 'a', 'b', 'l', 'e', 00h, 't', 'x', 't', 00h, 02h, 01h
-db 's', 't', 'a', 'g', 'e', '2', 00h, 00h, 00h, 00h, 'b', 'i', 'n', 00h, 03h, 04h
+db 'k', 'e', 'r', 'n', 'e', 'l', 00h, 00h, 00h, 00h, 'b', 'i', 'n', 00h, 03h, 04h
 db 'e', 'd', 'i', 't', 'o', 'r', 00h, 00h, 00h, 00h, 'b', 'i', 'n', 00h, 07h, 01h
 
 	; Sector padding to have a bin generated of 512 bytes (one sector)

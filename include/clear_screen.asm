@@ -1,19 +1,13 @@
 ;; ----------------------------------------------------------------------------
 ;; clear_screen.asm
 ;;
-;; Disable cursor and clear screen by writing space in Video Memory
+;; clear screen by writing space in Video Memory
 
 clear_screen:
     push ax
     push cx
     push es
     push di
-
-    mov al, 0x0A
-    out 0x03D4, al
-
-    mov al, 0x20
-    out 0x03D5, al
 
     mov ax, 0xB800
     mov es, ax  ; Set ES to video memory

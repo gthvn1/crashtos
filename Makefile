@@ -7,7 +7,7 @@ $(shell mkdir -p $(BIN_DIR))
 
 BOOTLOADER := $(BIN_DIR)/bootloader.bin # 1 * 512B
 FILETABLE  := $(BIN_DIR)/filetable.bin  # 1 * 512B
-STAGE2     := $(BIN_DIR)/stage2.bin     # 4 * 512B
+KERNEL     := $(BIN_DIR)/kernel.bin     # 4 * 512B
 EDITOR     := $(BIN_DIR)/editor.bin     # 1 * 512B
 
 MINIOS := $(BIN_DIR)/mini-os.bin
@@ -16,11 +16,11 @@ rebuild:
 	make clean
 	make $(MINIOS)
 
-$(MINIOS): $(BOOTLOADER) $(FILETABLE) $(STAGE2) $(EDITOR)
+$(MINIOS): $(BOOTLOADER) $(FILETABLE) $(KERNEL) $(EDITOR)
 	dd if=/dev/zero     of=$(MINIOS) bs=512 count=2880
 	dd if=$(BOOTLOADER) of=$(MINIOS) bs=512 seek=0 conv=notrunc
 	dd if=$(FILETABLE)  of=$(MINIOS) bs=512 seek=1 conv=notrunc
-	dd if=$(STAGE2)     of=$(MINIOS) bs=512 seek=2 conv=notrunc
+	dd if=$(KERNEL)     of=$(MINIOS) bs=512 seek=2 conv=notrunc
 	dd if=$(EDITOR)     of=$(MINIOS) bs=512 seek=6 conv=notrunc
 
 # BIN format puts NASM by default in 16-bit mode

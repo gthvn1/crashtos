@@ -31,6 +31,17 @@ is probably something more to do if we want to generate an USB image and load
 programs like stage2 from USB. But it will be cool to see it working on real
 HW...
 
+## Breaking news...
+
+To prepare the transition to protected mode we started to remove the usage of
+BIOS services in the kernel. It is not so easy to do it properly. So we start
+the modification in the bootloader to load the kernel. The goal is to put in
+kernel.asm the same thing that we have in stage2.asm (that is not used any more)
+but without any BIOS interrupt.
+
+In the first step have clean screen, the print of a line and we are trying to
+get input from user. But this part is not working well.
+
 ### Memory Layout
 
 - Check [src/bootloader.asm](https://github.com/gthvn1/crashtos/blob/master/src/bootloader.asm)

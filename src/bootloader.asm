@@ -26,9 +26,9 @@
 ;; 0x000F_0000 - 0x000F_FFFF | 64KB  | Motherboard BIOS
 ;;
 ;; We will use the 64KB from 0x0001_0000 - 0x0001_FFFF:
-;;   - File Table  : 0x0001_0000 - 0x0001_01FF (512B)
-;;   - Stage2      : 0x0001_0200 - 0x0001_09FF (2KB)
-;;   - Loaded Prog : 0x0002_0000 - 0x0002_01FF (512B)
+;;   - File Table  : 0x0000_7E00 - 0x0000_07FF (512B)
+;;   - Kernel      : 0x0000_8000 - 0x0001_87FF (2KB)
+;;   - Loaded Prog : 0x0001_0000 - 0x0001_01FF (512B)
 ;; We keep the file table and the stage2 on the same segments. Otherwise when
 ;; we will access file table data from stage2 we need to make far jump.
 
@@ -44,33 +44,27 @@
     mov al, 0x3 ; 80x25 16 color text
     int 0x10    ; BIOS interrupt for video services
 
-    ; First we will File Table from sector 2 at 0x1000:0x0000
+    ; First we will File Table from sector 2 at 0x0000:0x7E00
     ; DON'T use load_file to load the file table because load_file relies on
     ; the fileTable IN MEMORY to load things...
-    mov bx, 0x1000
-    mov es, bx            ; es <- 0x1000
-    xor bx, bx            ; bx <- 0x0
-                          ; Set [es:bx] to 0x0001:0x0000,
+    xor bx, bx
+    mov es, bx            ; es <- 0x0
+    mov bx, 0x7E00        ; bx <- 0x7E00
+                          ; Set [es:bx] to 0x0000:0x7E00
 
     mov cx, 0x00_02       ; Cylinder: 0, Sector: 2
     mov al, 0x1           ; Load 1 sector (512 bytes)
     call load_disk_sector ; Read the file table from disk
 
-    ; Now we can load the stage2 from sector 3 at 0x1000:0x0200
-    mov bx, 0x1000
+    ; Now we can load the stage2 from sector 3 at 0x0000:0x8000
+    xor bx, bx
     mov es, bx
-    mov bx, 0x0200   ; [ES:BX] <- 0x1000:0x0200
+    mov bx, 0x8000   ; [ES:BX] <- 0x0000:0x8000
     mov cx, 0x00_03  ; Cylinder 0, Sector 3
     mov al, 0x4      ; Load 4 sectors (2KB)
     call load_disk_sector ; Read the file table from disk
 
-    ; before jumping to the stage2 we need to setup segments
-    mov ax, 0x1000
-    mov ds, ax
-    mov es, ax
-    mov fs, ax
-    mov gs, ax
-    jmp 0x1000:0x0200 ; far jump to stage2
+    jmp 0x8000 ; jump to kernel
 
 ;; ============================================================================
 ;; load_disk_sector

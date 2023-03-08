@@ -129,12 +129,12 @@ keyPressed: db 0
 ; Scancode table is used with xlatb to locates a byte entry using the content
 ; of AL. We setup the table using our azerty layout...
 scancodeTable:
-.begin
+.begin:
     db 00h, 01h, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', ')', '=', 0Eh, 0Fh
     db 'a', 'z', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '^', '$', 1Ch, 1Dh, 'q', 's'
     db 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'ù', '*', 2Ah, 'w', 'x', 'c', 'v', 'b'
     db 'n', ',', ';', ':', '!'
-.end
+.end:
 scancodeTableSize: db scancodeTable.end - scancodeTable.begin
 
     ; Sector padding to have a bin generated of 512 bytes (1 sector)
