@@ -109,7 +109,11 @@ for an up to date layout. Should be sync but who knows...
   - Maybe we should load both text file and binary file in memory. Just have
     different return value in AX to let the stage2 if we can execute it, display
     it or of an error occured.
-- [ ] Use graphics instead of BIOS Video services (interrupt 10h)
+- [ ] Use graphics instead of BIOS Video services (interrupt 10h). We can keep
+      it for bootloader. But for other part remove it because when we will switch
+      to protected mode we won't be able to use it.
+  - [x] clear screen
+  - [ ] print char
 - [ ] Use PIO to access disk instead of BIOS Disk services (interrupt 13h)
 - [ ] Setup GDT
   - NOTE: BIOS interrupt are not available after switching to protected mode.

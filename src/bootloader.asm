@@ -39,6 +39,11 @@
     mov ss, ax
     mov sp, bp
 
+    ; Setup video mode
+    mov ah, 0x0 ; Set BIOS service to "set video mode"
+    mov al, 0x3 ; 80x25 16 color text
+    int 0x10    ; BIOS interrupt for video services
+
     ; First we will File Table from sector 2 at 0x1000:0x0000
     ; DON'T use load_file to load the file table because load_file relies on
     ; the fileTable IN MEMORY to load things...
