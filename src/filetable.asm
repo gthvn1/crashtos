@@ -15,6 +15,7 @@
 ;;
 
 [ORG 0x7E00]
+[BITS 32]
 
 ;; We declare byte per byte because it helps to dectect errors.
 ;;  0    1    2    3    4    5    6    7   8    9    10   11   12   13   14   15

@@ -12,23 +12,23 @@
 ;; ============================================================================
 
 move_cursor:
-    push bp    ; save old base pointer
-    mov bp, sp ; use the current stack pointer as new base pointer
+    push ebp    ; save old base pointer
+    mov ebp, esp ; use the current stack pointer as new base pointer
 
     ; save used parameters 
-    push ax
-    push bx
-    push cx
-    push dx
+    push eax
+    push ebx
+    push ecx
+    push edx
 
-    mov ax, [bp + 4] ; Get Row parameter
-    mov bx, [bp + 6] ; Get Column parameter
+    mov eax, [ebp + 8] ; Get Row parameter
+    mov ebx, [ebp + 12] ; Get Column parameter
 
     ; Position is Row * 80 + Col, so let's compute it
-    mov cx, 80
-    mul cx     ; AX <- Row * 80
-    add ax, bx ; AX <- Row * 80 + Col
-    mov bx, ax ; Save it into AX
+    mov ecx, 80
+    mul ecx      ; AX <- Row * 80
+    add eax, ebx ; AX <- Row * 80 + Col
+    mov ebx, eax ; Save it into AX
 
     ; Set low byte index to VGA register
     mov al, 0x0F   ; Indice for "Cursor Location Low Byte"
@@ -49,11 +49,11 @@ move_cursor:
     out dx, al
 
 .done:
-    pop dx
-    pop cx
-    pop bx
-    pop ax
+    pop edx
+    pop ecx
+    pop ebx
+    pop eax
 
-    mov sp, bp
-    pop bp
+    mov esp, ebp
+    pop ebp
     ret

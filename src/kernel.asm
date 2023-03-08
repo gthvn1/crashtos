@@ -21,36 +21,30 @@
     add sp, 6 ; cleanup the stack
 %endmacro
 
-%macro cursor_at 2
+%macro move_cursor_to 2
     push %1
     push %2
     call move_cursor
     add sp, 4
 %endmacro
 
+[BITS 32]
 [ORG 0x8000]
 
 kernel:
     call clear_screen
 
-    ; 0x0A_00 => AH: Black/LightGreen, AL: ASCII char so let to 0x0
-    print_string welcomeHdr2, 0x0A00, 0
-    print_string welcomeHdr1, 0x0A00, 1
-    print_string welcomeHdr2, 0x0A00, 2
+    ; AH: Black/LightGreen, AL: ASCII char so let to 0x0
+    print_string welcomeHdr2, 0x0000_0A00, 0
+    print_string welcomeHdr1, 0x0000_0A00, 1
+    print_string welcomeHdr2, 0x0000_0A00, 2
 
-    ; 0x0E_00    ; AH: Black/Yellow
-    print_string helpHdr, 0x0E00, 4
+    ;;; AH: Black/Yellow
+    print_string helpHdr, 0x0000_0E00, 4
 
-;; The kernel loop will:
-;;  - display the prompt
-;;  - get user input
-;;  - check if it is a command
-;;  - if it is not a command check if it is a program in File Table
-;;    - if it is a bin execute it
-;;    - if it is a txt display it
 kernel_loop:
-    print_string promptStr, 0x0B00, 5
-    cursor_at 2, 5
+    print_string promptStr, 0x0000_0B00, 5
+    move_cursor_to 2, 5
 
     call get_user_input
 

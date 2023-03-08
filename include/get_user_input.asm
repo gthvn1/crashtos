@@ -11,34 +11,28 @@
 ;;   - input strint size
 ;; ============================================================================
 
-%define LAST_ROW        160*24
-%define VIDEO_MEMORY    0xB800 ; this is segment in real mode
-
 get_user_input:
-    push bp    ; save old base pointer
-    mov bp, sp ; use the current stack pointer as new base pointer
+    push ebp    ; save old base pointer
+    mov ebp, esp ; use the current stack pointer as new base pointer
 
     ; save used parameters 
-    push ax
-    push bx
-    push cx
-    push di
-    push ds
-    push dx
-    push es
-    push si
+    push eax
+    push ebx
+    push ecx
+    push edi
+    push edx
+    push esi
 
-    ;;mov cx, [bp + 4] ; Get input string size
-    ;;mov di, [bp + 6] ; Get input string
+    ;;mov cx, [bp + 8] ; Get input string size
+    ;;mov di, [bp + 12] ; Get input string
 
     ; For debugging purpose we will print the enter char on the last line
-    mov ax, VIDEO_MEMORY
-    mov es, ax
-    mov di, LAST_ROW  ; Set it to last row
+    mov eax, 0xB8000
+    add eax, 160 * 24 ; Add (80 * 2) * 24 because for a column is 2 bytes
+    mov edi, eax
 
-    mov ah, 0x1E
-    mov al, "T"
-    stosw 
+    xor eax, eax
+    mov ah, 0xFC ; For debugging we choose white background and red foreground
 
 .loop:
     in al, 0x64 ; Read the status byte to check if a scancode is available
@@ -65,24 +59,24 @@ get_user_input:
     cmp al, 0x1C
     je .done
 
-    stosw
+    mov [EDI], ax
+    add edi, 2
     jmp .loop
 
 .done:
-    pop si
-    pop es
-    pop dx
-    pop ds
-    pop di
-    pop cx
-    pop bx
-    pop ax
+    pop esi
+    pop edx
+    pop edi
+    pop ecx
+    pop ebx
+    pop eax
 
-    mov sp, bp
-    pop bp
+    mov esp, ebp
+    pop ebp
     ret
 
 keyPressed: db 0
+
 ; 01h:Escape  0Eh:Backspace  0Fh:Tab  1Ch:Enter  1Dh:LeftCtrl...
 scancodeTable:
 .begin:

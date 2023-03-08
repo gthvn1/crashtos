@@ -4,7 +4,6 @@
 ;; It will load the stage2 by reading the second sector on the first
 ;; disk.
 
-[BITS 16]    ; This is the real world
 [ORG 0x7C00] ; The code is loaded at 0x7C00 by the bootloader
              ; We need to set it otherwise when later in the code
              ; we will refer to memory location the address will be
@@ -31,6 +30,9 @@
 ;;   - Loaded Prog : 0x0001_0000 - 0x0001_01FF (512B)
 ;; We keep the file table and the stage2 on the same segments. Otherwise when
 ;; we will access file table data from stage2 we need to make far jump.
+
+;; ==================[ WELCOME TO THE REALM OF REAL MODE ]=====================
+[BITS 16]
 
     ; Setup the stack under us
     mov bp, 0x7C00
@@ -64,7 +66,14 @@
     mov al, 0x4      ; Load 4 sectors (2KB)
     call load_disk_sector ; Read the file table from disk
 
-    jmp 0x8000 ; jump to kernel
+    ; Setup GDT: http://www.osdever.net/tutorials/view/the-world-of-protected-mode
+    ; after the setup of the GDT we will far jump to kernel so we won't be back.
+    jmp setup_gdt
+
+unreachable:
+    cli
+    hlt
+    jmp unreachable
 
 ;; ============================================================================
 ;; load_disk_sector
@@ -104,17 +113,102 @@ load_disk_sector:
     jnz load_disk_sector ; if it is not zero we can retry
 
     ; We failed more than 3 times, it is over !!!
-    call fatal_error
-
-; =====================[ KINGDOM OF PROTECTED WORLD ]===========================
-
-[BITS 32] ; This is the protected kingdom... Currently we cannot cross that line
-          ; because in this world we need to get GDT sword.... Crossing this
-          ; border now will be fatal !!!!
-
-fatal_error:
+.fatal_error:
     cli
     hlt
+    jmp .fatal_error
 
-    times 510-($-$$) db 0    ; padding with 0s
-    dw 0xaa55        ; BIOS magic number
+;; ============================================================================
+;; GDT
+; We followed the Long Mode Setup from https://wiki.osdev.org/GDT_Tutorial
+; GDT entry are 8 bytes long
+;
+; An entry is:
+; +-------------------------------------------------------------------------------+
+; | Base @(24-31) |G|DB| |A|Limit (16-19)|P|DPL(13-14)|S|Type(8-11)|Base @(16-23) |
+; +-------------------------------------------------------------------------------+
+; |    Base address (Bit 0-15)           |      Segment Limit                     |
+; +-------------------------------------------------------------------------------+
+;
+; 0x00: keep it NULL
+; 0x08: Kernel Code Seg (Base: 0x00000, Limit: 0xFFFFF, Access Byte: 0x9A, Flags: 0xC)
+; 0x10: Kernel Data Seg (Base: 0x00000, Limit: 0xFFFFF, Access Byte: 0x92, Flags: 0xC)
+; 0x18: User Code Seg   (Base: 0x10000, Limit: 0xFFFFF, Access Byte: 0xFA, Flags: 0xC)
+; 0x20: User Data Seg   (Base: 0x10000, Limit: 0xFFFFF, Access Byte: 0xF2, Flags: 0xC)
+; 0x28: Task State Seg  ...TO BE DONE
+
+gdt:
+.start:       ; Offset 0x00
+	dd 0      ; null descriptor
+	dd 0
+
+.kernel_code: ; Offset 0x08
+	dw 0xFFFF ; Segment Limit
+	dw 0x0    ; Base@ low
+	db 0x0    ; Base@ mid
+	db 0x9A   ; Access Byte: 1001_1010
+	db 0xCF   ; Flags + limit(16-19): 1100_1111
+	db 0x0    ; Base@ hi
+
+.kernel_data: ; Offset 0x10
+	dw 0xFFFF ; Segment Limit
+	dw 0x0    ; Base@ low
+	db 0x0    ; Base@ mid
+	db 0x92   ; Access Byte: 1001_0010
+	db 0xCF   ; Flags + limit(16-19)
+	db 0x0    ; Base@ hi
+
+.user_code:   ; Offset 0x18
+	dw 0xFFFF ; Segment Limit
+	dw 0x0    ; Base@ low
+	db 0x1    ; Base@ mid
+	db 0xFA   ; Access Byte: 1111_1010
+	db 0xCF   ; Flags + limit(16-19)
+	db 0x0    ; Base@ hi
+
+.user_data:   ; Offset 0x20
+	dw 0xFFFF ; Segment Limit
+	dw 0x0    ; Base@ low
+	db 0x1    ; Base@ mid
+	db 0xF2   ; Access Byte: 1111_0010
+	db 0xCF   ; Flags + limit(16-19)
+	db 0x0    ; Base@ hi
+.end:
+
+; We can now define the GDT descriptor that will be passed to lgdt
+; https://wiki.osdev.org/Global_Descriptor_Table#GDTR
+gdt_desc:
+	dw gdt.end - gdt.start - 1 ; size of the table in bytes subtracted by 1
+	dd gdt.start               ; the linear address of the GDT
+
+setup_gdt:
+    cli        ; ensure that interrupts are disabled
+    xor ax, ax ; AX <- 0
+    mov ds, ax ; ensure that DS is set to 0x0000 where our GDT is located
+
+    lgdt [gdt_desc]
+
+    mov eax, cr0
+    or eax, 1
+    mov cr0, eax  ; At this point we are in protected mode !!!
+
+    ; We need to clear the instruction pipeline.
+    ; A far jump will do the job and send us out into protected world!
+    jmp 0x8:jump_32bits
+
+;; ==================[ ENTER THE REALM OF PROTECTED MODE ]=====================
+
+[BITS 32]
+jump_32bits:
+    ; Setup segment, kernel data is 0x10 in GDT
+    mov ax, 0x10
+    mov ds, ax
+    mov es, ax
+    mov fs, ax
+    mov gs, ax
+    mov ss, ax
+
+    jmp 0x8:0x8000 ; Far jump to kernel...
+
+    times 510-($-$$) db 0 ; padding with 0s
+    dw 0xaa55             ; BIOS magic number

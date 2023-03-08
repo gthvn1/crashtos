@@ -14,6 +14,7 @@
 ;; When a key is pressed, a scancode is sent to the controller, converted and
 ;; placed in the input buffer.
 
+[BITS 32]
 [ORG 0x0]
 
 ;; ----------------------------------------------------------------------------
