@@ -24,7 +24,7 @@ editor:
     ; To clean screen we can write 80x25 () spaces on the screen
     ; We use our own clear screen to have different colors.
     mov al, ' '
-    mov ah, 0x1E  ; BG: dark, FG: Yellow
+    mov ah, 0x1E  ; BG: Blue, FG: Yellow
     mov di, 0
     mov cx, 80*25 ; 80x25 (! it is not in hexa :)
     rep stosw     ; store AX at ES:DI repeated 2000 times
@@ -106,10 +106,10 @@ print_char:
 ;; ----------------------------------------------------------------------------
 ;; VARIABLES
 
-editorHdr  db "Inside ctd-editor !!!", 0
-xpos       db 0
-ypos       db 0
-keyPressed db 0
+editorHdr:  db "Inside ctd-editor !!!", 0
+xpos:       db 0
+ypos:       db 0
+keyPressed: db 0
 
 ; Scancode table is used with xlatb to locates a byte entry using the content
 ; of AL. We setup the table using our azerty layout...

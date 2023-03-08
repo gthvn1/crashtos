@@ -34,5 +34,5 @@ print_hex:
     popa
     ret
 
-hexaOutput db "0x0000", 0 ; the last four digits will be updated in the loop
-hexaString db "0123456789ABCDEF"
+hexaOutput: db "0x0000", 0 ; the last four digits will be updated in the loop
+hexaString: db "0123456789ABCDEF"
