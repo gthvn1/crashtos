@@ -2,11 +2,17 @@
 ;; editor.asm
 ;;
 ;; In the editor we will remove the use of BIOS interrupt. For video we are
-;; using the Video Memory. We still use the keyboard BIOS service but we check
-;; how to remove it...
+;; using the Video Memory.
 ;;
-;; Currently we only display a message and wait for a user input. Once user
-;; hit a key we return to stage2. Nothing fancy...
+;; To remove the BIOS keyboard service we will use PIO. Qemu is emulating then
+;; PS/2 keyboard controller by default.
+;; http://www-ug.eecg.toronto.edu/msl/nios_devices/datasheets/PS2%20Keyboard%20Protocol.htm
+;; Three registers are directly accessible via port 0x60 and 0x64.
+;;   - One byte input buffer:    0x60
+;;   - One byte output buffer:   0x60
+;;   - One byte status register: 0x64
+;; When a key is pressed, a scancode is sent to the controller, converted and
+;; placed in the input buffer.
 
 [ORG 0x0]
 
@@ -33,8 +39,14 @@ editor:
     call print_string
 
 read_data:
-    ; Keyboard data port 0x60
-    in al, 0x60  ; Get key pressed scancode from data port
+    in al, 0x64 ; Read the status byte to check if a scancode is available
+    and al, 0000_0010b ; Check IBF (Input Buffer Full)
+    jnz read_data
+
+    in al, 0x60  ; Read the input buffer
+
+    cmp al, [scancodeTableSize]
+    jg read_data
 
     cmp al, [keyPressed]
     je read_data
@@ -79,7 +91,7 @@ print_char:
     xlatb ; Use the content of AL to lookup in scancodeTable and write back the
           ; contents
     mov ah, 0x1E; 0x1 is for blue background and 0xE is for yellow foreground
-    mov cx, ax  ; save attribute (rememer ASCII has been loaded in AL) because
+    mov cx, ax  ; save attribute (remember ASCII code is in AL) because
                 ; mul is using AX for the multiplication
 
     ; Now we need to compute DI that is where we want to print the character
@@ -114,10 +126,13 @@ keyPressed: db 0
 ; Scancode table is used with xlatb to locates a byte entry using the content
 ; of AL. We setup the table using our azerty layout...
 scancodeTable:
+.begin
     db 00h, 01h, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', ')', '=', 0Eh, 0Fh
     db 'a', 'z', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '^', '$', 1Ch, 1Dh, 'q', 's'
     db 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'ù', '*', 2Ah, 'w', 'x', 'c', 'v', 'b'
-    db 'n', ',', ';', ':', '!', 0
+    db 'n', ',', ';', ':', '!'
+.end
+scancodeTableSize: db scancodeTable.end - scancodeTable.begin
 
     ; Sector padding to have a bin generated of 512 bytes (1 sector)
     times 512-($-$$) db 0
