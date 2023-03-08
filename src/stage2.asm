@@ -13,19 +13,9 @@
 ;; ----------------------------------------------------------------------------
 ;; MACROS
 
-%macro print_string 3
-    push %1   ; string to print
-    push %2   ; AH: Black/LightGreen, AL: ASCII char so let to 0x0
-    push %3   ; Print on the first line
-    call print_line
-    add sp, 6 ; cleanup the stack
-%endmacro
-
-%macro cursor_at 2
-    push %1
-    push %2
-    call move_cursor
-    add sp, 4
+%macro PRINT_NEW_LINE 0
+    mov si, newLineStr
+    call print_str
 %endmacro
 
 %include "include/constants.asm"
@@ -35,13 +25,11 @@ org STAGE2_OFFSET
 stage2:
     call clear_screen
 
-    ; 0x0A_00 => AH: Black/LightGreen, AL: ASCII char so let to 0x0
-    print_string welcomeHdr2, 0x0A00, 0
-    print_string welcomeHdr1, 0x0A00, 1
-    print_string welcomeHdr2, 0x0A00, 2
+    mov si, welcomeHdr
+    call print_str
 
-    ; 0x0E_00    ; AH: Black/Yellow
-    print_string helpHdr, 0x0E00, 4
+    mov si, helpHdr
+    call print_str
 
 ;; The stage2 loop will:
 ;;  - display the prompt
@@ -51,10 +39,9 @@ stage2:
 ;;    - if it is a bin execute it
 ;;    - if it is a txt display it
 stage2_loop:
-    print_string promptStr, 0x0B00, 5
-    cursor_at 2, 5
+    mov si, promptStr
+    call print_str
 
-%ifdef COMMENT
     mov di, userInputStr ; Set destination index to the start of userInputStr
     xor cl, cl           ; CL is used to count the number of chars inputted
 
@@ -159,12 +146,12 @@ get_user_input:
     mov gs, ax
     jmp PROGRAM_SEG:PROGRAM_OFFSET ; far jump to editor
 
-.failed_to_load_program:
+.failed_to_load_program
     ; Display a message, help and loop
     mov si, notFoundStr
-    call print_line
+    call print_str
     mov si, helpHdr
-    call print_line
+    call print_str
     jmp stage2_loop
 
 .exec_ls:
@@ -197,28 +184,30 @@ get_user_input:
     hlt
 ;; End of stage2_loop
 
-%endif 
-
-infinite_loop:
-    hlt
-    jmp infinite_loop
-
 ;; As it is compile at the top we need to include the asm file with its path
 %include "include/clear_screen.asm"
-%include "include/move_cursor.asm"
-%include "include/print_line.asm"
+%include "include/print_str.asm"
+%include "include/print_hex.asm"
+%include "include/print_regs.asm"
+%include "include/print_file_table.asm"
+%include "include/load_disk_sector.asm"
+%include "include/load_file.asm"
 
 ;; ----------------------------------------------------------------------------
 ;; VARIABLES
 
-welcomeHdr1:   db "| Welcome to CrashTOS |", 0
-welcomeHdr2:   db "+---------------------+", 0
+welcomeHdr:
+    db "+---------------------+", 0xA, 0xD
+    db "| Welcome to CrashTOS |", 0xA, 0xD
+    db "+---------------------+", 0xA, 0xD, 0
+    ; 0xA is line feed (move cursor down to next line)
+    ; 0xD is carriage return (return to the beginning)
 
-helpHdr:       db "[HELP] commands are: clear, ls, regs, reboot, halt", 0
-
-promptStr:     db ">", 0
+helpHdr:
+    db 0xA, 0xD, "[HELP] commands are: clear, ls, regs, reboot, halt", 0xA, 0xD, 0
 
 newLineStr:    db 0xA, 0xD, 0
+promptStr:     db 0xA, 0xD, "> ", 0
 notFoundStr:   db 0xA, 0xD, "ERROR: command not found", 0xA, 0xD, 0
 
 ;; List of commands
