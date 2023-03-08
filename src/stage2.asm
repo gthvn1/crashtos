@@ -190,7 +190,6 @@ get_user_input:
 %include "include/print_hex.asm"
 %include "include/print_regs.asm"
 %include "include/print_file_table.asm"
-%include "include/load_disk_sector.asm"
 %include "include/load_file.asm"
 
 ;; ----------------------------------------------------------------------------
