@@ -53,13 +53,6 @@ get_user_input:
     cmp al, [scancodeTableSize] ; If AL is too big don't do the loopkup
     jg .loop
 
-    cmp al, [keyPressed] ; If the key is already press just skip. Currently
-                         ; we have lot of garbage so until we got clean char
-                         ; let's do this...
-    je .loop
-
-    mov byte [keyPressed], al ; Saved the key pressed for future comparison
-
     mov bx, scancodeTable ; AL contains the scancode, do the translation
     xlatb ; Use the content of AL to lookup in scancodeTable and write back the
           ; contents
@@ -100,7 +93,6 @@ get_user_input:
     pop ebp
     ret
 
-keyPressed: db 0
 keyTranslated: db 0, 0 ; Add an extra 0 because we will print the character
 
 ; 01h:Escape  0Eh:Backspace  0Fh:Tab  1Ch:Enter  1Dh:LeftCtrl...
