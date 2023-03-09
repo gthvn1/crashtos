@@ -22,15 +22,10 @@ print_line:
 
 .get_next_char:
     ; We need to compute the row according to the current position
-    mov eax, [yPos]
-    mov edx, 160 ; One line is 80 columns and one character has 2 bytes
-    mul edx      ; ax = yPos * 160 so we have the offset now where to write
-    add eax, 0xB8000
-    mov edx, [xPos]
-    shl edx, 1   ; shift left is equivalent to multiply by 2. As already said
-                 ; we print two bytes (attribute, ascii) for each "pixel".
-    add eax, edx ; ax = (yPos * 160) + xPos
-    mov edi, eax ; edi = (yPos * 160) + xPos
+    imul edi, [xPos], 2   ; edx = 2 * x, one print is 2 bytes
+    imul eax, [yPos], 160 ; eax = y * (80 * 2), 80 columns of 2 bytes
+    add edi, 0xB8000
+    add edi, eax      ; edi = B8000h + y * 160 + x * 2
 
     mov eax, [bp + 8] ; get the color attribute
     mov al, [esi]     ; get the ASCII code to be printed
@@ -42,9 +37,7 @@ print_line:
     jne .check_carriage_return
 
     ;; move cursor down to next line
-    mov edx, [yPos]
-    inc edx
-    mov [yPos], edx ; yPos = yPos + 1
+    inc dword [yPos]
     inc esi         ; Read next character
     jmp .get_next_char
 
@@ -53,8 +46,7 @@ print_line:
     jne .normal_update
 
     ;; return to the beginning
-    xor eax, eax
-    mov [xPos], eax ; Xpos = 0
+    mov dword [xPos], 0
     inc esi         ; Read next character
     jmp .get_next_char
 
@@ -68,9 +60,7 @@ print_line:
     jle .only_update_x
 
     ; We need to increment yPos and set xPos to 0
-    mov edx, [yPos]
-    inc edx
-    mov [yPos], edx   ; yPos = yPos + 1
+    inc dword [yPos]
 
     xor eax, eax     ; Xpos = 0
 
