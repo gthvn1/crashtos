@@ -18,7 +18,7 @@ print_line:
     push edx
     push esi
 
-    mov esi, [bp + 12] ; Get the string to be printed
+    mov esi, [ebp + 12] ; Get the string to be printed
 
 .get_next_char:
     ; We need to compute the row according to the current position
@@ -27,7 +27,7 @@ print_line:
     add edi, 0xB8000
     add edi, eax      ; edi = B8000h + y * 160 + x * 2
 
-    mov eax, [bp + 8] ; get the color attribute
+    mov eax, [ebp + 8] ; get the color attribute
     mov al, [esi]     ; get the ASCII code to be printed
 
     or al, al         ; check if al is 0, oring will set ZF if it is zero

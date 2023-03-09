@@ -27,8 +27,8 @@ get_user_input:
     push edx
     push esi
 
-    mov ecx, [bp + 8]  ; Get input string size
-    mov edi, [bp + 12] ; Get input string
+    mov ecx, dword [ebp + 8]  ; Get input string size
+    mov edi, dword [ebp + 12] ; Get input string
 
 .loop:
     in al, 0x64 ; Read the status byte to check if a scancode is available
@@ -61,16 +61,10 @@ get_user_input:
     cmp al, 0x1C
     je .done
 
-    ; check that we are not overflowing the user input. If we reach the limit
-    ; just return.
-    or ecx, ecx
-    jz .done
-
     ; if there is still some room then store the data and echo it
     mov byte [keyTranslated], al ; update it for printing
 
     stosb   ; store AL into user input
-    dec ecx ; We store one more character
 
     push keyTranslated ; print the translation of the key pressed
     push 0x0000_0A00   ; Black/LightGreen
@@ -79,9 +73,15 @@ get_user_input:
 
     call move_cursor ; update the cursor position
 
-    jmp .loop
+    dec ecx ; We store one more character. Check that we still have place for
+            ; the next one.
+    or ecx, ecx
+    jnz .loop
 
 .done:
+    xor al, al
+    stosb   ; Size is given without the 0 at the end. So we can add it now.
+
     pop esi
     pop edx
     pop edi
