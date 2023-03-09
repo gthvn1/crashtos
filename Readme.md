@@ -31,58 +31,8 @@ is probably something more to do if we want to generate an USB image and load
 programs like stage2 from USB. But it will be cool to see it working on real
 HW...
 
-## Breaking news... Protected mode is coming...
 
-To prepare the transition to protected mode we started to remove the usage of
-BIOS services in the kernel. It is not so easy to do it properly. So we start
-the modification in the bootloader to load the kernel. The goal is to put in
-kernel.asm the same thing that we have in stage2.asm (that is not used any more)
-but without any BIOS interrupt.
-
-- [x] In the first step have clean screen, the print of a line and we are
-trying to get input from user. But this part is not working well.
-- [x] Before going further we did the jump, so we did the setup of the GDT...
-- [ ] Now we need to fix the get user input...
-
-
-### Memory Layout
-
-- Check [src/bootloader.asm](https://github.com/gthvn1/crashtos/blob/master/src/bootloader.asm)
-for an up to date layout. Should be sync but who knows...
-```sh
-;; MEMORY LAYOUT
-;; https://wiki.osdev.org/Memory_Map_(x86)
-;;
-;; 0x0000_0000 - 0x0000_03FF | 1KB   | Real Mode IVT
-;; 0x0000_0400 - 0x0000_04FF | 256B  | Bios Data Area (BDA)
-;; 0x0000_0500 - 0x0000_7BFF | ~30KB | Conventional memory
-;; 0x0000_7C00 - 0x0000_7DFF | 512B  | It is us, the bootloader
-;; 0x0000_7E00 - 0x0007_FFFF | 480KB | Conventional Memory
-;;
-;; 0x0008_0000 - 0x0009_FFFF | 128KB | EBDA
-;; 0x000A_0000 - 0x000B_FFFF | 128KB | Video display memory
-;; 0x000C_0000 - 0x000C_7FFF | 32KB  | Video BIOS
-;; 0x000C_8000 - 0x000E_FFFF | 160KB | BIOS Expansions
-;; 0x000F_0000 - 0x000F_FFFF | 64KB  | Motherboard BIOS
-;;
-;; We will use the 64KB from 0x0001_0000 - 0x0001_FFFF:
-;;   - File Table : 0x0001_0000 - 0x0001_01FF (512B)
-;;   - Stage2     : 0x0001_0200 - 0x0001_09FF (2KB)
-;;   - Stack      : 0x0001_A000 - 0x0001_FFFF (24Kb)
-;; NOTE: The stack is growing in direction of the stage2... so be carfull :-)
-;; We keep the file table and the stage2 on the same segments. Otherwise when
-;; we will access file table data from stage2 we need to make far jump.
-```
-### Disk geometry
-
-- cylinders'size is 512 bytes
-- sector numbers start from 1 (cylinder and head start from 0)
-  - sector 1   -> bootloader (512 bytes ended with magic)
-  - sector 2   -> File table (512 bytes padded with 0s)
-  - sector 3-6 -> stage2 (2048 bytes padded with 0s)
-  - sector 7   -> user input program
-
-### Next steps
+### Steps
 
 - [x] In the step3 it is really cool to load the *"stage2"* using a *"bootloader"*.
   So create an raw image that has the *"bootloader*" in its first sector and the stage2
@@ -128,10 +78,78 @@ for an up to date layout. Should be sync but who knows...
       to protected mode we won't be able to use it.
   - [x] clear screen
   - [x] print char
-- [ ] Use PIO to access disk instead of BIOS Disk services (interrupt 13h)
 - [x] Setup GDT
   - NOTE: BIOS interrupt are not available after switching to protected mode.
   there is some workaround but a good solution will probably to remove the usage
   of BIOS interrupt.
-- [ ] Setup IVT
-- [ ] jump to a higher level language in C, Zig, Rust, ... It will be the kernel
+
+#### Breaking news... Protected mode is here...
+
+To prepare the transition to protected mode we started to remove the usage of
+BIOS services in the kernel. It is not so easy to do it properly. So we start
+the modification in the bootloader to load the kernel. The goal is to put in
+kernel.asm the same thing that we have in stage2.asm (that is not used any more)
+but without any BIOS interrupt.
+
+- [x] In the first step have clean screen, the print of a line and we are
+trying to get input from user. But this part is not working well.
+- [x] Before going further we did the jump, so we did the setup of the GDT...
+- [x] Now we need to fix the get user input... It is fixed.
+- [ ] Add the print of file table
+- [ ] Use PIO to access disk instead of BIOS Disk services (interrupt 13h)
+- [ ] load editor
+- [ ] play a little bit with editor
+- [ ] set ITV to get interrupt from keyboard
+- [ ] jump to C, Rust, Zig ???
+
+### Kernel is protected
+
+We fixed the issue to get user input. So now the bootloader is running in real
+mode. It sets:
+  - the video mode
+  - load the file table
+  - load the kernel
+  - setup GDT
+  - jump in kernel in protected mode
+
+Once inside the kernel all is in protected mode. Currently we are using PIO to
+get input from keyboard and the screen is managed using the video memory. We
+still need to manage disk and once done we will propably use a higer level language
+than C.
+
+### Memory Layout
+
+- Check [src/bootloader.asm](https://github.com/gthvn1/crashtos/blob/master/src/bootloader.asm)
+for an up to date layout. Should be sync but who knows...
+```sh
+;; MEMORY LAYOUT
+;; https://wiki.osdev.org/Memory_Map_(x86)
+;;
+;; 0x0000_0000 - 0x0000_03FF | 1KB   | Real Mode IVT
+;; 0x0000_0400 - 0x0000_04FF | 256B  | Bios Data Area (BDA)
+;; 0x0000_0500 - 0x0000_7BFF | ~30KB | Conventional memory
+;; 0x0000_7C00 - 0x0000_7DFF | 512B  | It is us, the bootloader
+;; 0x0000_7E00 - 0x0007_FFFF | 480KB | Conventional Memory
+;;
+;; 0x0008_0000 - 0x0009_FFFF | 128KB | EBDA
+;; 0x000A_0000 - 0x000B_FFFF | 128KB | Video display memory
+;; 0x000C_0000 - 0x000C_7FFF | 32KB  | Video BIOS
+;; 0x000C_8000 - 0x000E_FFFF | 160KB | BIOS Expansions
+;; 0x000F_0000 - 0x000F_FFFF | 64KB  | Motherboard BIOS
+;;
+;; We will use the 64KB from 0x0001_0000 - 0x0001_FFFF:
+;;   - File Table : 0x0001_0000 - 0x0001_01FF (512B)
+;;   - Stage2     : 0x0001_0200 - 0x0001_09FF (2KB)
+;;   - Stack      : 0x0001_A000 - 0x0001_FFFF (24Kb)
+;; NOTE: The stack is growing in direction of the stage2... so be carfull :-)
+;; We keep the file table and the stage2 on the same segments. Otherwise when
+;; we will access file table data from stage2 we need to make far jump.
+```
+### Disk geometry
+
+- cylinders'size is 512 bytes
+- sector numbers start from 1 (cylinder and head start from 0)
+  - sector 1   -> bootloader (512 bytes ended with magic)
+  - sector 2   -> File table (512 bytes padded with 0s)
+  - sector 3-6 -> stage2 (2048 bytes padded with 0s)
+  - sector 7   -> user input program
