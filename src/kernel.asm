@@ -13,25 +13,25 @@
 ;; ----------------------------------------------------------------------------
 ;; MACROS
 
-%macro PRINT_STRING 2
+%macro print_str_macro 2
     push %1         ; string to print
     push %2         ; AH: Black/LightGreen, AL: ASCII char so let to 0x0
     call print_line ; call the function
     add sp, 8       ; cleanup the stack
 %endmacro
 
-%macro GET_USER_INPUT 0
+%macro read_cmd_macro 0
     push userInput             ; the string where we will store the input
     push dword [userInputSize] ; the max size of the string
     call get_user_input        ; call the functin
     add sp, 8                  ; cleanup the stack
 %endmacro
 
-;; COMPARE_CMD is taken three parameters
+;; compare_cmd_macro is taken three parameters
 ;;   - the size of the command string
 ;;   - the command string
 ;;   - the label where we jump if userInput matches the command string
-%macro COMPARE_CMD 3
+%macro compare_cmd_macro 3
     mov cx, [%1]      ; Set cx with the size of cmd incremented by one
     mov si, %2        ; Set SI to the start of command string
     mov di, userInput ; Set DI to the start of the user input string
@@ -46,25 +46,36 @@ kernel:
     call clear_screen
 
     ; AH: Black/LightGreen, AL: ASCII char so let to 0x0
-    PRINT_STRING welcomeHdr, 0x0000_0A00
+    print_str_macro welcomeHdr, 0x0000_0A00
 
     ;;; AH: Black/Yellow
-    PRINT_STRING helpHdr, 0x0000_0E00
+    print_str_macro helpHdr, 0x0000_0E00
 
 kernel_loop:
-    PRINT_STRING promptStr, 0x0000_0B00
+    print_str_macro promptStr, 0x0000_0B00
 
     call move_cursor    ; move cursor to the current position
 
-    GET_USER_INPUT
+    read_cmd_macro
 
-.compare_user_input:
-    ; check if command is equal to "reboot"
-    COMPARE_CMD rebootCmdSize, rebootCmdStr, .exec_reboot
+    ; We can now compare the command given by the user with commands supported
+    ; by our kernel.
 
-    ; if not, check if command is equal to "halt"
-    COMPARE_CMD haltCmdSize, haltCmdStr, .exec_halt
+    compare_cmd_macro lsCmdSize,     lsCmdStr,     .exec_ls
+    compare_cmd_macro clearCmdSize,  clearCmdStr,  .exec_clear
+    compare_cmd_macro regsCmdSize,   regsCmdStr,   .exec_regs
+    compare_cmd_macro rebootCmdSize, rebootCmdStr, .exec_reboot
+    compare_cmd_macro haltCmdSize,   haltCmdStr,   .exec_halt
 
+    ; Unknown command so try again
+    print_str_macro cmdNotFound, 0x0000_0C00
+    jmp kernel_loop
+
+.exec_ls:
+.exec_clear:
+.exec_regs:
+    ; TODO
+    print_str_macro cmdNotImplemented, 0x0000_0D00
     jmp kernel_loop
 
 .exec_reboot:
@@ -127,6 +138,10 @@ rebootCmdSize: dw 0x7
 
 haltCmdStr:    db "halt", 0
 haltCmdSize:   dw 0x5
+
+;; Error messages
+cmdNotImplemented: db 0xA, 0xD, "Warning: command not implemented", 0
+cmdNotFound:       db 0xA, 0xD, "Error: command not found command" , 0
 
     ; kernel size is 2KB so padding with 0s
     times 2048-($-$$) db 0
