@@ -3,6 +3,9 @@
 ;;
 ;; Read user input from keyboard
 ;;
+;; scan code:
+;; https://www.win.tue.nl/~aeb/linux/kbd/scancodes-1.html
+;;
 ;; http://www.brokenthorn.com/Resources/OSDev10.html
 ;; http://www.brokenthorn.com/Resources/OSDev7.html
 ;; https://wiki.osdev.org/%228042%22_PS/2_Controller
@@ -47,6 +50,13 @@ get_user_input:
     jnz .loop
 
     in al, 0x60  ; Read the input buffer
+
+    ; When a pressed key is released an additional scan code is sent. This
+    ; additional code is called a 'break' code. The code is obtained by setting
+    ; the high order but (adding 0x80). So check this and if it is a break
+    ; skip it.
+    test al, 0x80
+    jnz .loop 
 
     cmp al, [scancodeTableSize] ; If AL is too big don't do the loopkup
     jg .loop
