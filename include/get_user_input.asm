@@ -5,6 +5,7 @@
 ;;
 ;; http://www.brokenthorn.com/Resources/OSDev10.html
 ;; http://www.brokenthorn.com/Resources/OSDev7.html
+;; https://wiki.osdev.org/%228042%22_PS/2_Controller
 ;;
 ;; Params:
 ;;   - input string
@@ -36,7 +37,13 @@ get_user_input:
 
 .loop:
     in al, 0x64 ; Read the status byte to check if a scancode is available
-    and al, 0000_0010b ; Check IBF (Input Buffer Full)
+
+    and al, 0000_0001b ; "Output Buffer Status" must be set before reading data
+                       ; from IO Port 0x60
+    jz .loop
+
+    and al, 0000_0010b ; Check that "Input Buffer Full" is clear before reading
+                       ; data from IO Port 0x60
     jnz .loop
 
     in al, 0x60  ; Read the input buffer
