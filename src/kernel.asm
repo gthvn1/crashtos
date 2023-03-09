@@ -53,10 +53,10 @@ infinite_loop:
     jmp infinite_loop
 
 ;; As it is compile at the top we need to include the asm file with its path
-%include "include/clear_screen.asm"
-%include "include/move_cursor.asm"
-%include "include/print_line.asm"
-%include "include/get_user_input.asm"
+%include "include/screen/clear_screen.asm"
+%include "include/screen/move_cursor.asm"
+%include "include/screen/print_line.asm"
+%include "include/keyboard/get_user_input.asm"
 
 ;; ----------------------------------------------------------------------------
 ;; VARIABLES
