@@ -17,7 +17,7 @@
     push %1   ; string to print
     push %2   ; AH: Black/LightGreen, AL: ASCII char so let to 0x0
     call print_line
-    add sp, 4 ; cleanup the stack
+    add sp, 8 ; cleanup the stack
 %endmacro
 
 [BITS 32]
