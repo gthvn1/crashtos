@@ -20,123 +20,37 @@
 ;; ----------------------------------------------------------------------------
 ;; MAIN
 editor:
-    pusha
+    call clear_screen
 
-    ; In the editor we don't use BIOS interrupts for printing
-    ; message. We use the Video Memory. We are still in 80x25
+    push editorHdr
+    push 0x0000_1E00  ; BG: blue, FG: Yellow
+    call print_line
+    add sp, 8         ; cleanup the stack
 
-    mov ax, 0xB800
-    mov es, ax  ; In real mode segment is shifted so es:0000 => 0xB8000
-
-    ; To clean screen we can write 80x25 () spaces on the screen
-    ; We use our own clear screen to have different colors.
-    mov al, ' '
-    mov ah, 0x1E  ; BG: Blue, FG: Yellow
-    mov di, 0
-    mov cx, 80*25 ; 80x25 (! it is not in hexa :)
-    rep stosw     ; store AX at ES:DI repeated 2000 times
-
-    mov si, editorHdr   ; display a welcome message
-    call print_string
-
-read_data:
-    in al, 0x64 ; Read the status byte to check if a scancode is available
-    and al, 0000_0010b ; Check IBF (Input Buffer Full)
-    jnz read_data
-
-    in al, 0x60  ; Read the input buffer
-
-    cmp al, [scancodeTableSize]
-    jg read_data
-
-    cmp al, [keyPressed]
-    je read_data
-
-    mov byte [keyPressed], al
-    call print_char
-
-    ; If q is pressed return to stage2
-    cmp al, 'q'
-    jne read_data
+    ; Just wait that enter is pressed before returning to kernel space
+    call get_user_input
 
 jmp_stage2:
-    ; before jumping to the stage2 we need to setup segments
-    mov ax, 0x1000
+    ; Setup segment, kernel data is 0x10 in GDT
+    mov ax, 0x10
     mov ds, ax
     mov es, ax
     mov fs, ax
     mov gs, ax
+    mov ss, ax
 
-    popa
+    jmp 0x8:0x8000 ; Far jump to kernel...
 
-    jmp 0x1000:0x0200 ; far jump to stage2
-
-;; ----------------------------------------------------------------------------
-;; FUNCTIONS
-
-print_trampoline:
-    call print_char
-print_string:
-    lodsb        ; load DS:SI into AL and increment SI
-    or al, al    ; "or-ing" will set ZF flags to 0 if al == 0
-    jnz print_trampoline ; the trick here is that we jump to the trampoline that
-                ; will call the print_char. So when the print_char will return
-                ; the next instruction that will be executed is the lodsb.
-                ; else al == 0 and so we reach the end of the string, so just go
-                ; to the next line and return (we don't check if we overflow the
-                ; video's memory)...
-    add byte [ypos], 1 ; we suppose that we don't reach the end of the screen
-    mov byte [xpos], 0 ; go to the beginning of the line
-    ret
-
-print_char:
-    ; AL contains the scancode, do the translation
-    mov bx, scancodeTable
-    xlatb ; Use the content of AL to lookup in scancodeTable and write back the
-          ; contents
-    mov ah, 0x1E; 0x1 is for blue background and 0xE is for yellow foreground
-    mov cx, ax  ; save attribute (remember ASCII code is in AL) because
-                ; mul is using AX for the multiplication
-
-    ; Now we need to compute DI that is where we want to print the character
-    movzx ax, byte [ypos] ; move ypos into ax and extend with zeros
-    mov dx, 160           ; There are 2 bytes and 80 columns
-    mul dx                ; dx = ax * 160 (the offset computed for y)
-
-    movzx bx, byte [xpos]
-    shl bx, 1 ; Shift left is equivalent to mult by 2. As there are 2 bytes
-              ; for attribute if x == 4 then the offset for x is +8
-
-    ; So in ax we have the shift according to ypos, in bx we have the shift
-    ; according to xpos if we add the 2 we have our position :-)
-    mov di, 0   ; di = 0
-    add di, ax  ; di = ax + 0 = ax
-    add di, bx  ; di = ax + bx
-
-    mov ax, cx ; restore the attribute (BG, FG, ASCII code)
-    stosw      ; Store AX at ES:DI => Print the character
-
-    add byte [xpos], 1 ; Update the position, we don't wrap
-    ret
+%include "include/screen/clear_screen.asm"
+%include "include/screen/print_line.asm"
+%include "include/keyboard/get_user_input.asm"
 
 ;; ----------------------------------------------------------------------------
 ;; VARIABLES
 
 editorHdr:  db "Inside ctd-editor !!!", 0
-xpos:       db 0
-ypos:       db 0
-keyPressed: db 0
-
-; Scancode table is used with xlatb to locates a byte entry using the content
-; of AL. We setup the table using our azerty layout...
-scancodeTable:
-.begin:
-    db 00h, 01h, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', ')', '=', 0Eh, 0Fh
-    db 'a', 'z', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '^', '$', 1Ch, 1Dh, 'q', 's'
-    db 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'ù', '*', 2Ah, 'w', 'x', 'c', 'v', 'b'
-    db 'n', ',', ';', ':', '!'
-.end:
-scancodeTableSize: db scancodeTable.end - scancodeTable.begin
+xPos:       dd 0 ; required if we include screen files
+yPos:       dd 0
 
     ; Sector padding to have a bin generated of 512 bytes (1 sector)
     times 512-($-$$) db 0
