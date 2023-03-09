@@ -120,32 +120,9 @@ than C.
 
 ### Memory Layout
 
-- Check [src/bootloader.asm](https://github.com/gthvn1/crashtos/blob/master/src/bootloader.asm)
-for an up to date layout. Should be sync but who knows...
-```sh
-;; MEMORY LAYOUT
-;; https://wiki.osdev.org/Memory_Map_(x86)
-;;
-;; 0x0000_0000 - 0x0000_03FF | 1KB   | Real Mode IVT
-;; 0x0000_0400 - 0x0000_04FF | 256B  | Bios Data Area (BDA)
-;; 0x0000_0500 - 0x0000_7BFF | ~30KB | Conventional memory
-;; 0x0000_7C00 - 0x0000_7DFF | 512B  | It is us, the bootloader
-;; 0x0000_7E00 - 0x0007_FFFF | 480KB | Conventional Memory
-;;
-;; 0x0008_0000 - 0x0009_FFFF | 128KB | EBDA
-;; 0x000A_0000 - 0x000B_FFFF | 128KB | Video display memory
-;; 0x000C_0000 - 0x000C_7FFF | 32KB  | Video BIOS
-;; 0x000C_8000 - 0x000E_FFFF | 160KB | BIOS Expansions
-;; 0x000F_0000 - 0x000F_FFFF | 64KB  | Motherboard BIOS
-;;
-;; We will use the 64KB from 0x0001_0000 - 0x0001_FFFF:
-;;   - File Table : 0x0001_0000 - 0x0001_01FF (512B)
-;;   - Stage2     : 0x0001_0200 - 0x0001_09FF (2KB)
-;;   - Stack      : 0x0001_A000 - 0x0001_FFFF (24Kb)
-;; NOTE: The stack is growing in direction of the stage2... so be carfull :-)
-;; We keep the file table and the stage2 on the same segments. Otherwise when
-;; we will access file table data from stage2 we need to make far jump.
-```
+The memory layout is described in
+[src/bootloader.asm](https://github.com/gthvn1/crashtos/blob/master/src/bootloader.asm).
+
 ### Disk geometry
 
 - cylinders'size is 512 bytes
