@@ -96,6 +96,7 @@ trying to get input from user. But this part is not working well.
 - [x] Before going further we did the jump, so we did the setup of the GDT...
 - [x] Now we need to fix the get user input... It is fixed.
 - [ ] Manage backspace
+- [ ] manage the fact that we reach the end of the screen...
 - [ ] Add the print of file table
 - [ ] Use PIO to access disk instead of BIOS Disk services (interrupt 13h)
 - [ ] load editor
