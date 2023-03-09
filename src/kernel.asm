@@ -14,10 +14,17 @@
 ;; MACROS
 
 %macro PRINT_STRING 2
-    push %1   ; string to print
-    push %2   ; AH: Black/LightGreen, AL: ASCII char so let to 0x0
-    call print_line
-    add sp, 8 ; cleanup the stack
+    push %1         ; string to print
+    push %2         ; AH: Black/LightGreen, AL: ASCII char so let to 0x0
+    call print_line ; call the function
+    add sp, 8       ; cleanup the stack
+%endmacro
+
+%macro GET_USER_INPUT 0
+    push userInput      ; the string where we will store the input
+    push userInputSize  ; the max size of the string
+    call get_user_input ; call the functin
+    add sp, 8           ; cleanup the stack
 %endmacro
 
 [BITS 32]
@@ -36,17 +43,20 @@ kernel_loop:
     PRINT_STRING promptStr, 0x0000_0B00
 
     call move_cursor    ; move cursor to the current position
-    call get_user_input
+
+    GET_USER_INPUT
+
+    jmp kernel_loop
 
 infinite_loop:
     hlt
     jmp infinite_loop
 
 ;; As it is compile at the top we need to include the asm file with its path
-%include "include/screen/print_line.asm"
 %include "include/screen/clear_screen.asm"
 %include "include/screen/move_cursor.asm"
-%include "include/keyboard/get_user_input.asm"
+%include "include/screen/print_line.asm"
+%include "include/keyboard/get_user_input.asm" ; keep it after screen
 
 ;; ----------------------------------------------------------------------------
 ;; VARIABLES
@@ -55,9 +65,12 @@ welcomeHdr: db "+---------------------+", 0xA, 0xD
             db "| Welcome to CrashTOS |", 0xA, 0xD
             db "+---------------------+", 0xA, 0xD, 0
 
-helpHdr: db "[HELP] commands are: clear, ls, regs, reboot, halt", 0xA, 0xD, 0
+helpHdr:    db "[HELP] commands are: clear, ls, regs, reboot, halt", 0xA, 0xD, 0
 
-promptStr: db ">", 0
+promptStr:  db 0xA, 0xD, "> ", 0
+
+userInput:     db 0,0,0,0,0,0,0,0,0,0,0
+userInputSize: db 10 ; we can store at most 10 bytes
 
 xPos: dd 0 ; aligned to 32 bits regs
 yPos: dd 0

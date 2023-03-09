@@ -19,7 +19,7 @@ get_user_input:
     push ebp    ; save old base pointer
     mov ebp, esp ; use the current stack pointer as new base pointer
 
-    ; save used parameters 
+    ; save used parameters
     push eax
     push ebx
     push ecx
@@ -27,16 +27,8 @@ get_user_input:
     push edx
     push esi
 
-    ;;mov cx, [bp + 8] ; Get input string size
-    ;;mov di, [bp + 12] ; Get input string
-
-    ; For debugging purpose we will print the enter char on the last line
-    mov eax, 0xB8000
-    add eax, 160 * 24 ; Add (80 * 2) * 24 because for a column is 2 bytes
-    mov edi, eax
-
-    xor eax, eax
-    mov ah, 0xFC ; For debugging we choose white background and red foreground
+    mov ecx, [bp + 8]  ; Get input string size
+    mov edi, [bp + 12] ; Get input string
 
 .loop:
     in al, 0x64 ; Read the status byte to check if a scancode is available
@@ -56,7 +48,7 @@ get_user_input:
     ; the high order but (adding 0x80). So check this and if it is a break
     ; skip it.
     test al, 0x80
-    jnz .loop 
+    jnz .loop
 
     cmp al, [scancodeTableSize] ; If AL is too big don't do the loopkup
     jg .loop
@@ -76,8 +68,24 @@ get_user_input:
     cmp al, 0x1C
     je .done
 
-    mov [EDI], ax
-    add edi, 2
+    ; check that we are not overflowing the user input. If we reach the limit
+    ; just return.
+    or ecx, ecx
+    jz .done
+
+    ; if there is still some room then store the data and echo it
+    mov byte [keyTranslated], al ; update it for printing
+
+    stosb   ; store AL into user input
+    dec ecx ; We store one more character
+
+    push keyTranslated ; print the translation of the key pressed
+    push 0x0000_0A00   ; Black/LightGreen
+    call print_line    ; do the call
+    add sp, 8          ; clean up the stack
+
+    call move_cursor ; update the cursor position
+
     jmp .loop
 
 .done:
@@ -93,6 +101,7 @@ get_user_input:
     ret
 
 keyPressed: db 0
+keyTranslated: db 0, 0 ; Add an extra 0 because we will print the character
 
 ; 01h:Escape  0Eh:Backspace  0Fh:Tab  1Ch:Enter  1Dh:LeftCtrl...
 scancodeTable:

@@ -1,18 +1,9 @@
 ;; ============================================================================
 ;; editor.asm
 ;;
-;; In the editor we will remove the use of BIOS interrupt. For video we are
-;; using the Video Memory.
-;;
-;; To remove the BIOS keyboard service we will use PIO. Qemu is emulating then
-;; PS/2 keyboard controller by default.
-;; http://www-ug.eecg.toronto.edu/msl/nios_devices/datasheets/PS2%20Keyboard%20Protocol.htm
-;; Three registers are directly accessible via port 0x60 and 0x64.
-;;   - One byte input buffer:    0x60
-;;   - One byte output buffer:   0x60
-;;   - One byte status register: 0x64
-;; When a key is pressed, a scancode is sent to the controller, converted and
-;; placed in the input buffer.
+;; It does nothing for now. It will be used to test the usage of code and
+;; data segment. Once done we will add some stuff... or not.
+;; ============================================================================
 
 [BITS 32]
 [ORG 0x0]
@@ -28,7 +19,10 @@ editor:
     add sp, 8         ; cleanup the stack
 
     ; Just wait that enter is pressed before returning to kernel space
-    call get_user_input
+    push userInput      ; the string where we will store the input
+    push userInputSize  ; the max size of the string
+    call get_user_input ; call the functin
+    add sp, 8           ; cleanup the stack
 
 jmp_stage2:
     ; Setup segment, kernel data is 0x10 in GDT
@@ -42,15 +36,18 @@ jmp_stage2:
     jmp 0x8:0x8000 ; Far jump to kernel...
 
 %include "include/screen/clear_screen.asm"
+%include "include/screen/move_cursor.asm"
 %include "include/screen/print_line.asm"
-%include "include/keyboard/get_user_input.asm"
+%include "include/keyboard/get_user_input.asm" ; keep it after screen
 
 ;; ----------------------------------------------------------------------------
 ;; VARIABLES
 
-editorHdr:  db "Inside ctd-editor !!!", 0
-xPos:       dd 0 ; required if we include screen files
-yPos:       dd 0
+editorHdr:     db "Inside ctd-editor !!!", 0
+userInput:     db 0,0,0,0,0,0,0,0,0,0,0
+userInputSize: db 10 ; we can store at most 10 bytes
+xPos:          dd 0 ; required if we include screen files
+yPos:          dd 0
 
     ; Sector padding to have a bin generated of 512 bytes (1 sector)
     times 512-($-$$) db 0
