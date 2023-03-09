@@ -1,28 +1,20 @@
 ;; ============================================================================
 ;; move_cursor.asm
 ;;
-;; Move the cursor at a given position passed as parameters.
-;; We suppose that video mode is set on 80x25.
+;; Move the cursor to (xPos, yPos) location
 ;;
 ;; http://www.brokenthorn.com/Resources/OSDev10.html
-;;
-;; Params:
-;;   - col
-;;   - row
 ;; ============================================================================
 
 move_cursor:
-    push ebp    ; save old base pointer
-    mov ebp, esp ; use the current stack pointer as new base pointer
-
     ; save used parameters 
     push eax
     push ebx
     push ecx
     push edx
 
-    mov eax, [ebp + 8] ; Get Row parameter
-    mov ebx, [ebp + 12] ; Get Column parameter
+    mov eax, [yPos] ; Get Row parameter
+    mov ebx, [xPos] ; Get Column parameter
 
     ; Position is Row * 80 + Col, so let's compute it
     mov ecx, 80
@@ -53,7 +45,4 @@ move_cursor:
     pop ecx
     pop ebx
     pop eax
-
-    mov esp, ebp
-    pop ebp
     ret

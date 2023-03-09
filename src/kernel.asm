@@ -13,19 +13,11 @@
 ;; ----------------------------------------------------------------------------
 ;; MACROS
 
-%macro print_string 3
+%macro PRINT_STRING 2
     push %1   ; string to print
     push %2   ; AH: Black/LightGreen, AL: ASCII char so let to 0x0
-    push %3   ; Print on the first line
     call print_line
-    add sp, 6 ; cleanup the stack
-%endmacro
-
-%macro move_cursor_to 2
-    push %1
-    push %2
-    call move_cursor
-    add sp, 4
+    add sp, 4 ; cleanup the stack
 %endmacro
 
 [BITS 32]
@@ -35,17 +27,15 @@ kernel:
     call clear_screen
 
     ; AH: Black/LightGreen, AL: ASCII char so let to 0x0
-    print_string welcomeHdr2, 0x0000_0A00, 0
-    print_string welcomeHdr1, 0x0000_0A00, 1
-    print_string welcomeHdr2, 0x0000_0A00, 2
+    PRINT_STRING welcomeHdr, 0x0000_0A00
 
     ;;; AH: Black/Yellow
-    print_string helpHdr, 0x0000_0E00, 4
+    PRINT_STRING helpHdr, 0x0000_0E00
 
 kernel_loop:
-    print_string promptStr, 0x0000_0B00, 5
-    move_cursor_to 2, 5
+    PRINT_STRING promptStr, 0x0000_0B00
 
+    call move_cursor    ; move cursor to the current position
     call get_user_input
 
 infinite_loop:
@@ -53,20 +43,24 @@ infinite_loop:
     jmp infinite_loop
 
 ;; As it is compile at the top we need to include the asm file with its path
+%include "include/screen/print_line.asm"
 %include "include/screen/clear_screen.asm"
 %include "include/screen/move_cursor.asm"
-%include "include/screen/print_line.asm"
 %include "include/keyboard/get_user_input.asm"
 
 ;; ----------------------------------------------------------------------------
 ;; VARIABLES
 
-welcomeHdr1:   db "| Welcome to CrashTOS |", 0
-welcomeHdr2:   db "+---------------------+", 0
+welcomeHdr: db "+---------------------+", 0xA, 0xD
+            db "| Welcome to CrashTOS |", 0xA, 0xD
+            db "+---------------------+", 0xA, 0xD, 0
 
-helpHdr:       db "[HELP] commands are: clear, ls, regs, reboot, halt", 0
+helpHdr: db "[HELP] commands are: clear, ls, regs, reboot, halt", 0xA, 0xD, 0
 
-promptStr:     db ">", 0
+promptStr: db ">", 0
+
+xPos: dd 0 ; aligned to 32 bits regs
+yPos: dd 0
 
     ; kernel size is 2KB so padding with 0s
     times 2048-($-$$) db 0
