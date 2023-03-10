@@ -36,7 +36,7 @@ jmp_stage2:
     jmp 0x8:0x8000 ; Far jump to kernel...
 
 %include "include/display.asm"
-%include "include/keyboard/get_user_input.asm" ; keep it after display.asm
+%include "include/keyboard.asm" ; keep it after display.asm
 
 ;; ----------------------------------------------------------------------------
 ;; VARIABLES

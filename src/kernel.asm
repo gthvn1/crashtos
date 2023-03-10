@@ -99,7 +99,7 @@ infinite_loop:
 
 ;; As it is compile at the top we need to include the asm file with its path
 %include "include/display.asm"
-%include "include/keyboard/get_user_input.asm" ; keep it after display.asm
+%include "include/keyboard.asm" ; keep it after display.asm
 
 ;; ----------------------------------------------------------------------------
 ;; VARIABLES

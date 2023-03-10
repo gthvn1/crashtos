@@ -1,20 +1,24 @@
 ;; ============================================================================
-;; get_user_input.asm
+;; keyboard.asm
 ;;
+;; This file provides functions related to keyboard.
+;;    - get_user_input
+;;
+;; Related links:
+;;   scan code:
+;;   - https://www.win.tue.nl/~aeb/linux/kbd/scancodes-1.html
+;;
+;;   - http://www.brokenthorn.com/Resources/OSDev10.html
+;;   - http://www.brokenthorn.com/Resources/OSDev7.html
+;;   - https://wiki.osdev.org/%228042%22_PS/2_Controller
+;; ============================================================================
+
+;; ----------------------------------------------------------------------------
 ;; Read user input from keyboard
-;;
-;; scan code:
-;; https://www.win.tue.nl/~aeb/linux/kbd/scancodes-1.html
-;;
-;; http://www.brokenthorn.com/Resources/OSDev10.html
-;; http://www.brokenthorn.com/Resources/OSDev7.html
-;; https://wiki.osdev.org/%228042%22_PS/2_Controller
 ;;
 ;; Params:
 ;;   - input string
 ;;   - input strint size
-;; ============================================================================
-
 get_user_input:
     push ebp    ; save old base pointer
     mov ebp, esp ; use the current stack pointer as new base pointer
