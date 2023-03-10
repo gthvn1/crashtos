@@ -12,7 +12,7 @@
 ;;    14        Starting sector (ie: 06h -> start at sector 6)
 ;;    15        File sector size:
 ;;                  - from 00h to FFh
-;;
+;; ============================================================================
 
 [ORG 0x7E00]
 [BITS 32]
