@@ -37,6 +37,14 @@ clear_screen:
     jmp .loop
 
 .end:
+    ; Reset xPos and yPos
+    mov dword [xPos], 0
+    mov dword [yPos], 0
+
+    ; Update the position of the cursor
+    call move_cursor
+
+    ; and restore values
     pop edi
     pop es
     pop ecx
