@@ -70,10 +70,17 @@ kernel_loop:
     jmp kernel_loop
 
 .exec_ls:
-.exec_clear:
-.exec_regs:
     ; TODO
     print_str_macro cmdNotImplemented, 0x0000_0D00
+    jmp kernel_loop
+.exec_clear:
+    ; TODO
+    print_str_macro cmdNotImplemented, 0x0000_0D00
+    jmp kernel_loop
+.exec_regs:
+    push 0x12345678
+    call print_hexa
+    add sp, 4 ; clean the stack
     jmp kernel_loop
 
 .exec_reboot:
