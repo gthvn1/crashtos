@@ -1,8 +1,9 @@
 ;; ============================================================================
 ;; bootloader.asm
 ;;
-;; It will load the stage2 by reading the second sector on the first
-;; disk.
+;; Loads file table and kernel by reading disks. It sets up the GDT and do the
+;; far jump to kernel in 32 bits protected mode.
+;; ============================================================================
 
 [ORG 0x7C00] ; The code is loaded at 0x7C00 by the bootloader
              ; We need to set it otherwise when later in the code
