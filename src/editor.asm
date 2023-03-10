@@ -15,7 +15,7 @@ editor:
 
     push editorHdr
     push 0x0000_1E00  ; BG: blue, FG: Yellow
-    call print_line
+    call print_string
     add sp, 8         ; cleanup the stack
 
     ; Just wait that enter is pressed before returning to kernel space
@@ -35,10 +35,8 @@ jmp_stage2:
 
     jmp 0x8:0x8000 ; Far jump to kernel...
 
-%include "include/screen/clear_screen.asm"
-%include "include/screen/move_cursor.asm"
-%include "include/screen/print_line.asm"
-%include "include/keyboard/get_user_input.asm" ; keep it after screen
+%include "include/display.asm"
+%include "include/keyboard/get_user_input.asm" ; keep it after display.asm
 
 ;; ----------------------------------------------------------------------------
 ;; VARIABLES
@@ -49,5 +47,5 @@ userInputSize: db 10 ; we can store at most 10 bytes
 xPos:          dd 0 ; required if we include screen files
 yPos:          dd 0
 
-    ; Sector padding to have a bin generated of 512 bytes (1 sector)
-    times 512-($-$$) db 0
+    ; Sector padding to have a bin generated of 1024 bytes (2 sectors)
+    times 1024-($-$$) db 0

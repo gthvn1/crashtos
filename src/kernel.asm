@@ -12,10 +12,10 @@
 ;; MACROS
 
 %macro print_str_macro 2
-    push %1         ; string to print
-    push %2         ; AH: Black/LightGreen, AL: ASCII char so let to 0x0
-    call print_line ; call the function
-    add sp, 8       ; cleanup the stack
+    push %1           ; string to print
+    push %2           ; AH: Black/LightGreen, AL: ASCII char so let to 0x0
+    call print_string ; call the function
+    add sp, 8         ; cleanup the stack
 %endmacro
 
 %macro read_cmd_macro 0
@@ -98,10 +98,8 @@ infinite_loop:
     jmp infinite_loop
 
 ;; As it is compile at the top we need to include the asm file with its path
-%include "include/screen/clear_screen.asm"
-%include "include/screen/move_cursor.asm"
-%include "include/screen/print_line.asm"
-%include "include/keyboard/get_user_input.asm" ; keep it after screen
+%include "include/display.asm"
+%include "include/keyboard/get_user_input.asm" ; keep it after display.asm
 
 ;; ----------------------------------------------------------------------------
 ;; VARIABLES
