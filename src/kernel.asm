@@ -30,11 +30,11 @@
 ;;   - the command string
 ;;   - the label where we jump if userInput matches the command string
 %macro compare_cmd_macro 3
-    mov cx, [%1]      ; Set cx with the size of cmd incremented by one
-    mov si, %2        ; Set SI to the start of command string
-    mov di, userInput ; Set DI to the start of the user input string
-    repe cmpsb        ; Repeat compare string byte while equal
-    je %3             ; If equal jump to lable (3rd parameter)
+    mov ecx, [%1]      ; Set ECX with the size of cmd incremented by one
+    mov esi, %2        ; Set ESI to the start of command string
+    mov edi, userInput ; Set EDI to the start of the user input string
+    repe cmpsb         ; Repeat compare string byte EXC times while equal
+    je %3              ; If equal jump to label (3rd parameter)
 %endmacro
 
 [BITS 32]
@@ -129,19 +129,19 @@ yPos: dd 0
 
 ;; List of commands
 clearCmdStr:   db "clear", 0
-clearCmdSize:  dw 0x6
+clearCmdSize:  dd 0x6
 
 lsCmdStr:      db "ls", 0
-lsCmdSize:     dw 0x3
+lsCmdSize:     dd 0x3
 
 regsCmdStr:    db "regs", 0
-regsCmdSize:   dw 0x5
+regsCmdSize:   dd 0x5
 
 rebootCmdStr:  db "reboot", 0
-rebootCmdSize: dw 0x7
+rebootCmdSize: dd 0x7
 
 haltCmdStr:    db "halt", 0
-haltCmdSize:   dw 0x5
+haltCmdSize:   dd 0x5
 
 ;; Error messages
 cmdNotImplemented: db 0xA, 0xD, "Warning: command not implemented", 0
