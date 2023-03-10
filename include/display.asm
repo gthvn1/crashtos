@@ -101,6 +101,9 @@ move_cursor:
 ;; Params:
 ;;   - string to print
 ;;   - color attribute
+;; Clobber:
+;;   - Update xPos
+;;   - Update yPos
 print_string:
     push ebp    ; save old base pointer
     mov ebp, esp ; use the current stack pointer as new base pointer

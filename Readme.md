@@ -95,7 +95,7 @@ but without any BIOS interrupt.
 trying to get input from user. But this part is not working well.
 - [x] Before going further we did the jump, so we did the setup of the GDT...
 - [x] Now we need to fix the get user input... It is fixed.
-- [ ] Manage backspace
+- [x] Manage backspace
 - [x] print registers (in protected mode)
 - [ ] manage the fact that we reach the end of the screen...
 - [ ] Add the print of file table

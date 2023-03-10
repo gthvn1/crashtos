@@ -65,10 +65,40 @@ get_user_input:
     cmp al, 0x1C
     je .done
 
+    ; Check if it is the Backspace
+    cmp al, 0x0E
+    jne .not_backspace
+
+    cmp ecx, dword [ebp + 8]  ; it is the first character pressed so just return
+    je .loop
+
+    ; if no then delete the last character
+    dec edi             ; go to last char
+    xor al, al
+    mov byte [edi], al  ; replace it by '0'
+    inc ecx             ; we have one more character available for user string
+
+    ; Now that user input has been updated we need to erase the last char by
+    ; printing a blank char instead.
+    ; Note: as we cannot have string with more than 10 bytes we don't go to
+    ; next line. We can safly decrement xPos.
+    dec dword [xPos]
+    mov byte [keyTranslated], ' ' ; add space into keytranslated
+    push keyTranslated
+    push 0x0000_0A00
+    call print_string
+    add sp, 8
+    ; At this point we print a space to erase the last char. So now we just
+    ; need to decrement xPos once again and we are done.
+    dec dword [xPos]
+    call move_cursor ; update the position of the cursor before looping
+    jmp .loop
+
+.not_backspace:
     ; if there is still some room then store the data and echo it
     mov byte [keyTranslated], al ; update it for printing
 
-    stosb   ; store AL into user input
+    stosb   ; store AL into user input, ES:EDI <- AL, EDI is incremented
 
     push keyTranslated ; print the translation of the key pressed
     push 0x0000_0A00   ; Black/LightGreen
