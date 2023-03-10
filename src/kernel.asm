@@ -59,8 +59,8 @@ kernel_loop:
     ; We can now compare the command given by the user with commands supported
     ; by our kernel.
 
-    compare_cmd_macro lsCmdSize,     lsCmdStr,     .exec_ls
     compare_cmd_macro clearCmdSize,  clearCmdStr,  .exec_clear
+    compare_cmd_macro lsCmdSize,     lsCmdStr,     .exec_ls
     compare_cmd_macro regsCmdSize,   regsCmdStr,   .exec_regs
     compare_cmd_macro rebootCmdSize, rebootCmdStr, .exec_reboot
     compare_cmd_macro haltCmdSize,   haltCmdStr,   .exec_halt
@@ -69,14 +69,15 @@ kernel_loop:
     print_str_macro cmdNotFound, 0x0000_0C00
     jmp kernel_loop
 
+.exec_clear:
+    call clear_screen
+    jmp kernel_loop
+
 .exec_ls:
     ; TODO
     print_str_macro cmdNotImplemented, 0x0000_0D00
     jmp kernel_loop
-.exec_clear:
-    ; TODO
-    print_str_macro cmdNotImplemented, 0x0000_0D00
-    jmp kernel_loop
+
 .exec_regs:
     push 0x12345678
     call print_hexa
