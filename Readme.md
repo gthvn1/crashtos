@@ -133,3 +133,8 @@ The memory layout is described in
   - sector 2   -> File table (512 bytes padded with 0s)
   - sector 3-6 -> stage2 (2048 bytes padded with 0s)
   - sector 7   -> user input program
+
+## Screenshots
+
+- These screenshot is after the implementation of the backspace. Command `ls` is not implemented, `regs` just display the test register.  
+![screenshot:513389a](https://github.com/gthvn1/crashtos/blob/master/screenshots/qemu_crashtos_513389a.png)
