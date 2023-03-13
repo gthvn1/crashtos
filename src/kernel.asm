@@ -79,9 +79,10 @@ kernel_loop:
     jmp kernel_loop
 
 .exec_regs:
+    push regsTestStr
     push 0x12345678
     call print_hexa
-    add sp, 4 ; clean the stack
+    add sp, 8 ; clean the stack
     jmp kernel_loop
 
 .exec_reboot:
@@ -119,6 +120,8 @@ welcomeHdr: db "+---------------------+", 0xA, 0xD
 helpHdr:    db "[HELP] commands are: clear, ls, regs, reboot, halt", 0xA, 0xD, 0
 
 promptStr:  db 0xA, 0xD, "> ", 0
+
+regsTestStr: db 0xA, 0xD, "Regs test: ", 0
 
 userInput:     db 0,0,0,0,0,0,0,0,0,0,0
 userInputSize: dd 10 ; we can store at most 10 bytes (without counting last

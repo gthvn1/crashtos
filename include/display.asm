@@ -180,6 +180,7 @@ print_string:
 ;; print the hexadecimal value of parameter1
 ;;
 ;; Params:
+;;   - message to print before printing the hexadecimal value
 ;;   - value to print
 print_hexa:
     push ebp    ; save old base pointer
@@ -191,6 +192,11 @@ print_hexa:
     push ecx
     push edi
     push esi
+
+    mov eax, [ebp + 12] ; message to print
+    push eax
+    push 0x0000_0A00
+    call print_string
 
     mov eax, [ebp + 8] ; Get the value to be printed
 
