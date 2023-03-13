@@ -7,6 +7,7 @@
 ;;    - print_string
 ;;    - print_hexa
 ;;    - print_regs
+;;    - print_file_table
 ;;
 ;; Related links:
 ;;   - https://wiki.osdev.org/VGA_Hardware
@@ -206,7 +207,7 @@ print_hexa:
     mov edi, hexaOutput + 2 ; Skip "0x"
 
 .hexloop:
-    ; We want to translate EAX into readable hexadecial string.
+    ; We want to translate EAX into readable hexadecimal string.
     ; For example:
     ; EAX = 0x12345678 should print "0x12345678"
     ; in binary it is 0001_0010_0011_0100_0101_0110_0111_1000
@@ -263,6 +264,25 @@ print_regs:
     print_regs_macro esiStr, esi
     ret
 
+;; ----------------------------------------------------------------------------
+;; print the content of the file table that is loaded at 0x10:0x7E00
+print_file_table:
+    push fileTableHdr
+    push 0x0000_0A00
+    call print_string
+    add esp, 8
+
+    ; TODO: display contents
+    ret
+
+; Data used to print file table
+fileTableHdr:
+    db 0xA, 0xD
+    db "----------  ---  ------  ------  ------", 0xA, 0xD
+    db "Filename    Ext  Dir     Sector  Size  ", 0xA, 0xD
+    db "----------  ---  ------  ------  ------", 0xA, 0xD, 0
+
+; Data Used to print regs
 eaxStr: db 0xA, 0xD, "EAX: ", 0
 ebxStr: db 0xA, 0xD, "EBX: ", 0
 ecxStr: db 0xA, 0xD, "ECX: ", 0
@@ -272,5 +292,6 @@ ebpStr: db 0xA, 0xD, "EBP: ", 0
 ediStr: db 0xA, 0xD, "EDI: ", 0
 esiStr: db 0xA, 0xD, "ESI: ", 0
 
+; Data used to print hexadecimal value
 hexaOutput: db "0x00000000 ", 0 ; last 8 digits will be updated in the loop
 hexaString: db "0123456789ABCDEF"

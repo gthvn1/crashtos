@@ -78,8 +78,7 @@ kernel_loop:
     jmp kernel_loop
 
 .exec_ls:
-    ; TODO
-    print_str_macro cmdNotImplemented, 0x0000_0D00
+    call print_file_table
     jmp kernel_loop
 
 .exec_regs:
