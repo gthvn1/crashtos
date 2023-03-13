@@ -267,12 +267,67 @@ print_regs:
 ;; ----------------------------------------------------------------------------
 ;; print the content of the file table that is loaded at 0x10:0x7E00
 print_file_table:
+    ; save registers
+    push eax
+    push ecx
+    push edi
+    push esi
+
     push fileTableHdr
     push 0x0000_0A00
     call print_string
     add esp, 8
 
     ; TODO: display contents
+    mov esi, 0x7E00
+    mov edi, ftName
+    mov ecx, 10
+
+.copy_filename:
+    lodsb  ; AL <- character read from DS:ESI and ESI++
+    or al, al;
+    jz .filename_read
+
+    stosb   ; ES:EDI <- AL , EDI ++
+    dec ecx ; we copy one character so decrement ecx
+    jz .ecx_empty
+
+    ; ecx is not empty so we can continue to read characters
+    jmp .copy_filename
+
+.filename_read:
+    cmp ecx, 0
+    je .ecx_empty
+
+    ; we don't read 10 chars from filename so we can skip the remaining 0
+    inc esi
+    dec ecx
+    jmp .filename_read
+
+.ecx_empty:
+    ; So we can add the '.'
+    mov ah, '.'
+    stosb ; ES:EDI <- '.' and EDI++
+
+    ; extension is 3 bytes and ESI should be at the right location
+    lodsb ; First char of the extension
+    stosb
+    lodsb ; Second char of the extension
+    stosb
+    lodsb ; Third char of the extension
+    stosb
+
+    ; DEBUG: print full filename
+    push ftName
+    push 0x0000_0B00
+    call print_string
+    add esp, 8
+
+    ; restore registers
+    pop esi
+    pop edi
+    pop ecx
+    pop eax
     ret
 
 ; Data used to print file table
@@ -281,6 +336,12 @@ fileTableHdr:
     db "----------  ---  ------  ------  ------", 0xA, 0xD
     db "Filename    Ext  Dir     Sector  Size  ", 0xA, 0xD
     db "----------  ---  ------  ------  ------", 0xA, 0xD, 0
+
+; full name is at most 14 bytes: 10 (filename) + 1 (.) + 3 (extension).
+ftName:   db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; 15 cause end with '0'
+ftDir:    db 0
+ftSector: db 0
+ftSize:   db 0
 
 ; Data Used to print regs
 eaxStr: db 0xA, 0xD, "EAX: ", 0

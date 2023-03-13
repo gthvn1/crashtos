@@ -47,5 +47,5 @@ userInputSize: db 10 ; we can store at most 10 bytes
 xPos:          dd 0 ; required if we include screen files
 yPos:          dd 0
 
-    ; Sector padding to have a bin generated of 1024 bytes (2 sectors)
-    times 1024-($-$$) db 0
+    ; Sector padding to have a bin generated of 2048 bytes (4 sectors)
+    times 2048-($-$$) db 0

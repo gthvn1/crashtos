@@ -24,7 +24,7 @@
 db 'b', 'o', 'o', 't', 'S', 'e', 'c', 't', 00h, 00h, 'b', 'i', 'n', 00h, 01h, 01h
 db 'f', 'i', 'l', 'e', 'T', 'a', 'b', 'l', 'e', 00h, 't', 'x', 't', 00h, 02h, 01h
 db 'k', 'e', 'r', 'n', 'e', 'l', 00h, 00h, 00h, 00h, 'b', 'i', 'n', 00h, 03h, 04h
-db 'e', 'd', 'i', 't', 'o', 'r', 00h, 00h, 00h, 00h, 'b', 'i', 'n', 00h, 07h, 02h
+db 'e', 'd', 'i', 't', 'o', 'r', 00h, 00h, 00h, 00h, 'b', 'i', 'n', 00h, 07h, 04h
 
 	; Sector padding to have a bin generated of 512 bytes (one sector)
 	times 512-($-$$) db 0
