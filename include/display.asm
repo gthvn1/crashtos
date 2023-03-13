@@ -6,6 +6,7 @@
 ;;    - move_cursor
 ;;    - print_string
 ;;    - print_hexa
+;;    - print_regs
 ;;
 ;; Related links:
 ;;   - https://wiki.osdev.org/VGA_Hardware
@@ -230,7 +231,7 @@ print_hexa:
     push hexaOutput
     push 0x0000_0A00
     call print_string
-    add sp, 8 ; clean the stack
+    add esp, 8 ; clean the stack
 
     pop esi
     pop edi
@@ -241,6 +242,35 @@ print_hexa:
     mov esp, ebp
     pop ebp
     ret
+
+;; ----------------------------------------------------------------------------
+;; print regs eax, ebx, ecx, edx, esi, edi
+%macro print_regs_macro 2
+    push %1
+    push %2
+    call print_hexa
+    add esp, 8
+%endmacro
+
+print_regs:
+    print_regs_macro eaxStr, eax
+    print_regs_macro ebxStr, ebx
+    print_regs_macro ecxStr, ecx
+    print_regs_macro edxStr, edx
+    print_regs_macro espStr, esp
+    print_regs_macro ebpStr, ebp
+    print_regs_macro ediStr, edi
+    print_regs_macro esiStr, esi
+    ret
+
+eaxStr: db 0xA, 0xD, "EAX: ", 0
+ebxStr: db 0xA, 0xD, "EBX: ", 0
+ecxStr: db 0xA, 0xD, "ECX: ", 0
+edxStr: db 0xA, 0xD, "EDX: ", 0
+espStr: db 0xA, 0xD, "ESP: ", 0
+ebpStr: db 0xA, 0xD, "EBP: ", 0
+ediStr: db 0xA, 0xD, "EDI: ", 0
+esiStr: db 0xA, 0xD, "ESI: ", 0
 
 hexaOutput: db "0x00000000 ", 0 ; last 8 digits will be updated in the loop
 hexaString: db "0123456789ABCDEF"

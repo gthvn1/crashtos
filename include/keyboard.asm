@@ -87,7 +87,7 @@ get_user_input:
     push keyTranslated
     push 0x0000_0A00
     call print_string
-    add sp, 8
+    add esp, 8
     ; At this point we print a space to erase the last char. So now we just
     ; need to decrement xPos once again and we are done.
     dec dword [xPos]
@@ -103,7 +103,7 @@ get_user_input:
     push keyTranslated ; print the translation of the key pressed
     push 0x0000_0A00   ; Black/LightGreen
     call print_string  ; do the call
-    add sp, 8          ; clean up the stack
+    add esp, 8          ; clean up the stack
 
     call move_cursor ; update the cursor position
 

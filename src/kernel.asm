@@ -15,14 +15,14 @@
     push %1           ; string to print
     push %2           ; AH: Black/LightGreen, AL: ASCII char so let to 0x0
     call print_string ; call the function
-    add sp, 8         ; cleanup the stack
+    add esp, 8         ; cleanup the stack
 %endmacro
 
 %macro read_cmd_macro 0
     push userInput             ; the string where we will store the input
     push dword [userInputSize] ; the max size of the string
     call get_user_input        ; call the functin
-    add sp, 8                  ; cleanup the stack
+    add esp, 8                  ; cleanup the stack
 %endmacro
 
 ;; compare_cmd_macro is taken three parameters
@@ -83,10 +83,7 @@ kernel_loop:
     jmp kernel_loop
 
 .exec_regs:
-    push regsTestStr
-    push 0x12345678
-    call print_hexa
-    add sp, 8 ; clean the stack
+    call print_regs
     jmp kernel_loop
 
 .exec_reboot:
@@ -112,7 +109,7 @@ kernel_loop:
     push 0x18         ; the segment where to load the editor
     push 0x0          ; the offset
     call load_file
-    add sp, 12        ; cleanup call stack
+    add esp, 12        ; cleanup call stack
 
     jmp kernel_loop
 
@@ -135,8 +132,6 @@ welcomeHdr: db "+---------------------+", 0xA, 0xD
 helpHdr:    db "[HELP] commands are: clear, ls, regs, reboot, halt", 0xA, 0xD, 0
 
 promptStr:  db 0xA, 0xD, "> ", 0
-
-regsTestStr: db 0xA, 0xD, "Regs test: ", 0
 
 userInput:     db 0,0,0,0,0,0,0,0,0,0,0
 userInputSize: dd 10 ; we can store at most 10 bytes (without counting last

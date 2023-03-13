@@ -16,13 +16,13 @@ editor:
     push editorHdr
     push 0x0000_1E00  ; BG: blue, FG: Yellow
     call print_string
-    add sp, 8         ; cleanup the stack
+    add esp, 8         ; cleanup the stack
 
     ; Just wait that enter is pressed before returning to kernel space
     push userInput      ; the string where we will store the input
     push userInputSize  ; the max size of the string
     call get_user_input ; call the functin
-    add sp, 8           ; cleanup the stack
+    add esp, 8           ; cleanup the stack
 
 jmp_stage2:
     ; Setup segment, kernel data is 0x10 in GDT
