@@ -28,7 +28,7 @@
 ;; We will use the 64KB from 0x0001_0000 - 0x0001_FFFF:
 ;;   - File Table  : 0x0000_7E00 - 0x0000_07FF (512B)
 ;;   - Kernel      : 0x0000_8000 - 0x0001_87FF (2KB)
-;;   - Loaded Prog : 0x0001_0000 - 0x0001_01FF (512B)
+;;   - Loaded Prog : 0x0001_0000 - 0x0001_FFFF (64KB)
 ;; We keep the file table and the stage2 on the same segments. Otherwise when
 ;; we will access file table data from stage2 we need to make far jump.
 

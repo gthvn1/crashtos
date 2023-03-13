@@ -65,7 +65,11 @@ kernel_loop:
     compare_cmd_macro rebootCmdSize, rebootCmdStr, .exec_reboot
     compare_cmd_macro haltCmdSize,   haltCmdStr,   .exec_halt
 
-    ; Unknown command so try again
+    ; Unknown command so try again let's check if the command is editor.
+    ; TODO: Instead of hard coded the value editor look up into file table.
+    compare_cmd_macro editorCmdSize, editorCmdStr, .load_editor
+
+    ; Ok now let's try again
     print_str_macro cmdNotFound, 0x0000_0C00
     jmp kernel_loop
 
@@ -102,12 +106,23 @@ kernel_loop:
     ; if it still doesn't work just halt
     hlt
 
+.load_editor:
+    ; WIP: just call the load function for now...
+    push editorCmdStr ; we push the filename
+    push 0x18         ; the segment where to load the editor
+    push 0x0          ; the offset
+    call load_file
+    add sp, 12        ; cleanup call stack
+
+    jmp kernel_loop
+
 infinite_loop:
     hlt
     jmp infinite_loop
 
 ;; As it is compile at the top we need to include the asm file with its path
 %include "include/display.asm"
+%include "include/disks.asm"
 %include "include/keyboard.asm" ; keep it after display.asm
 
 ;; ----------------------------------------------------------------------------
@@ -130,21 +145,25 @@ userInputSize: dd 10 ; we can store at most 10 bytes (without counting last
 xPos: dd 0 ; aligned to 32 bits regs
 yPos: dd 0
 
+;; Available programs
+editorCmdStr:  db "editor", 0
+editorCmdSize: dd 7
+
 ;; List of commands
 clearCmdStr:   db "clear", 0
-clearCmdSize:  dd 0x6
+clearCmdSize:  dd 6
 
 lsCmdStr:      db "ls", 0
-lsCmdSize:     dd 0x3
+lsCmdSize:     dd 3
 
 regsCmdStr:    db "regs", 0
-regsCmdSize:   dd 0x5
+regsCmdSize:   dd 5
 
 rebootCmdStr:  db "reboot", 0
-rebootCmdSize: dd 0x7
+rebootCmdSize: dd 7
 
 haltCmdStr:    db "halt", 0
-haltCmdSize:   dd 0x5
+haltCmdSize:   dd 5
 
 ;; Error messages
 cmdNotImplemented: db 0xA, 0xD, "Warning: command not implemented", 0
