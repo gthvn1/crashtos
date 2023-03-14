@@ -284,12 +284,14 @@ print_file_table:
     mov ecx, 10
 
 .copy_filename:
-    lodsb  ; AL <- character read from DS:ESI and ESI++
-    or al, al;
+    lodsb     ; AL <- character read from DS:ESI and ESI++
+    dec ecx   ; ecx is decremented when we read one character
+
+    or al, al ; check if AL is 0 because filename can be less than 10 bytes
     jz .filename_read
 
-    stosb   ; ES:EDI <- AL , EDI ++
-    dec ecx ; we copy one character so decrement ecx
+    stosb      ; ES:EDI <- AL , EDI ++
+    cmp ecx, 0 ; Check if it was the last character
     jz .ecx_empty
 
     ; ecx is not empty so we can continue to read characters
@@ -299,14 +301,14 @@ print_file_table:
     cmp ecx, 0
     je .ecx_empty
 
-    ; we don't read 10 chars from filename so we can skip the remaining 0
+    ; we don't read 10 chars from filename so we can skip remaining '0'
     inc esi
     dec ecx
     jmp .filename_read
 
 .ecx_empty:
     ; So we can add the '.'
-    mov ah, '.'
+    mov al, '.'
     stosb ; ES:EDI <- '.' and EDI++
 
     ; extension is 3 bytes and ESI should be at the right location
