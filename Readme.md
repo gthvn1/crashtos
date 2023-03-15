@@ -139,5 +139,5 @@ The memory layout is described in
 - These screenshot is after the implementation of the backspace. Command `ls` is not implemented, `regs` just display the test register.  
 ![screenshot:513389a](https://github.com/gthvn1/crashtos/blob/master/screenshots/qemu_crashtos_513389a.png)
 
-- `ls` is working now:
+- `ls` is working now and `regs` displays registers:
 ![screenshot:767956b](https://github.com/gthvn1/crashtos/blob/master/screenshots/bochs_crashtos_767956b.png)
