@@ -97,8 +97,8 @@ trying to get input from user. But this part is not working well.
 - [x] Now we need to fix the get user input... It is fixed.
 - [x] Manage backspace
 - [x] print registers (in protected mode)
+- [x] Add the print of file table
 - [ ] manage the fact that we reach the end of the screen...
-- [ ] Add the print of file table
 - [ ] Use PIO to access disk instead of BIOS Disk services (interrupt 13h)
 - [ ] load editor
 - [ ] play a little bit with editor
@@ -138,3 +138,5 @@ The memory layout is described in
 
 - These screenshot is after the implementation of the backspace. Command `ls` is not implemented, `regs` just display the test register.  
 ![screenshot:513389a](https://github.com/gthvn1/crashtos/blob/master/screenshots/qemu_crashtos_513389a.png)
+
+

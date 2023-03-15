@@ -15,6 +15,22 @@
 ;; ============================================================================
 
 ;; ----------------------------------------------------------------------------
+;; MACROS
+%macro print_regs_macro 2
+    push %1
+    push %2
+    call print_hexa
+    add esp, 8
+%endmacro
+
+%macro print_string_macro 1
+    push %1           ; string to print
+    push 0x0000_0A00  ; color to use
+    call print_string ; call the function
+    add esp, 8        ; cleanup the stack
+%endmacro
+
+;; ----------------------------------------------------------------------------
 ;; Clear screen by writing space in Video Memory
 clear_screen:
     push eax
@@ -199,6 +215,7 @@ print_hexa:
     push eax
     push 0x0000_0A00
     call print_string
+    add esp, 8 ; clean the stack
 
     mov eax, [ebp + 8] ; Get the value to be printed
 
@@ -246,13 +263,6 @@ print_hexa:
 
 ;; ----------------------------------------------------------------------------
 ;; print regs eax, ebx, ecx, edx, esi, edi
-%macro print_regs_macro 2
-    push %1
-    push %2
-    call print_hexa
-    add esp, 8
-%endmacro
-
 print_regs:
     print_regs_macro eaxStr, eax
     print_regs_macro ebxStr, ebx
@@ -273,12 +283,16 @@ print_file_table:
     push edi
     push esi
 
+    push newLine
+    push 0x0000_0A00
+    call print_string
+    add esp, 8
+
     push fileTableHdr
     push 0x0000_0A00
     call print_string
     add esp, 8
 
-    ; TODO: display contents
     mov esi, 0x7E00
     mov edi, ftName
     mov ecx, 10
@@ -319,12 +333,47 @@ print_file_table:
     lodsb ; Third char of the extension
     stosb
 
-    ; DEBUG: print full filename
-    push ftName
-    push 0x0000_0B00
-    call print_string
-    add esp, 8
+    ; Now we can check if it is a directory
+    cmp byte [ESI], 0
+    je .not_dir
+    mov al, 'Y'
+    jmp .dir_done
+.not_dir:
+    mov al, 'N'
+.dir_done:
+    mov byte [ftDir], al
+    inc ESI ; increment ESI by hand because we don't use lodsb
 
+    ; Read sector
+    xor eax, eax ; EAX = 0
+    lodsb        ; AL = Sector
+    mov dword [ftSector], eax
+
+    ; Read size
+    lodsb        ; AL = Size
+    mov dword [ftSize], eax
+
+    ; print the entry
+    print_string_macro ftName
+    print_string_macro separateChar
+    print_string_macro ftDir
+    print_regs_macro separateChar, dword [ftSector]
+    print_regs_macro separateChar, dword [ftSize]
+
+    ; Read next byte
+    xor eax, eax
+    mov al, byte [esi]
+    cmp al, 0
+    je .done
+
+    print_string_macro newLine  ; if AL is not null there is another entry
+    mov ecx, 10                 ; restore counter
+    mov edi, ftName             ; reset edi
+    mov dword[ftName], 0x0      ; cleanup the ftName
+    mov dword[ftName + 8] , 0x0 ; finish the cleanup of ftName
+    jmp .copy_filename
+
+.done
     ; restore registers
     pop esi
     pop edi
@@ -333,17 +382,19 @@ print_file_table:
     ret
 
 ; Data used to print file table
-fileTableHdr:
-    db 0xA, 0xD
-    db "----------  ---  ------  ------  ------", 0xA, 0xD
-    db "Filename    Ext  Dir     Sector  Size  ", 0xA, 0xD
-    db "----------  ---  ------  ------  ------", 0xA, 0xD, 0
+newLine:      db 0xA, 0xD, 0
+separateChar: db ", ", 0
 
-; full name is at most 14 bytes: 10 (filename) + 1 (.) + 3 (extension).
-ftName:   db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; 15 cause end with '0'
-ftDir:    db 0
-ftSector: db 0
-ftSize:   db 0
+fileTableHdr:
+    db "Filename, Dir, Sector, Size", 0xA, 0xD
+    db "---------------------------", 0xA, 0xD, 0
+
+; full name is at most 14 bytes: 10 (filename) + 1 (.) + 3 (extension)
+; We use 16 bytes so it is easy to reset (2 dwords)
+ftName:   db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+ftDir:    db 0, 0 ; It will be 'Y' or 'N'
+ftSector: dd 0x0
+ftSize:   dd 0x0
 
 ; Data Used to print regs
 eaxStr: db 0xA, 0xD, "EAX: ", 0
