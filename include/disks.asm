@@ -33,11 +33,23 @@ load_file_from_disk:
     push fs
 
     ; Get parameters from stack
-    mov esi, [ebp + 8]  ; the offset
-    mov fs,  [ebp + 12] ; the segment
-    mov ebx, [ebp + 16] ; the filename
+    mov eax, [ebp + 8]  ; the offset
+    mov ebx, [ebp + 12] ; the segment
+    mov esi, [ebp + 16] ; the filename
 
     ; TODO: for debugging purpose just print args...
+    ; As it is loaded after display.asm we can use macros
+    mov edi, fileParam
+.loop:
+    lodsb  ; AL <- ds:esi, esi++
+    stosb  ; fs:edi <- AL, edi++
+    cmp al, 0
+    jne .loop
+
+    print_string_display_macro inputStr
+    print_regs_display_macro twoSpaces, ebx
+    print_regs_display_macro twoSpaces, eax
+
 .done:
     pop fs
     pop esi
@@ -50,3 +62,7 @@ load_file_from_disk:
     mov esp, ebp
     pop ebp
     ret
+
+inputStr: db 0xA, 0xD ; we don't add 0 so it will print \n\rfileParam
+fileParam: db 0,0,0,0,0,0,0,0,0,0
+twoSpaces: db "  ", 0

@@ -16,14 +16,16 @@
 
 ;; ----------------------------------------------------------------------------
 ;; MACROS
-%macro print_regs_macro 2
+;; To avoid conflict with other macros if included we prepend them with
+;; _display_macro... not perfect but it does the job.
+%macro print_regs_display_macro 2
     push %1
     push %2
     call print_hexa
     add esp, 8
 %endmacro
 
-%macro print_string_macro 1
+%macro print_string_display_macro 1
     push %1           ; string to print
     push 0x0000_0A00  ; color to use
     call print_string ; call the function
@@ -264,14 +266,14 @@ print_hexa:
 ;; ----------------------------------------------------------------------------
 ;; print regs eax, ebx, ecx, edx, esi, edi
 print_regs:
-    print_regs_macro eaxStr, eax
-    print_regs_macro ebxStr, ebx
-    print_regs_macro ecxStr, ecx
-    print_regs_macro edxStr, edx
-    print_regs_macro espStr, esp
-    print_regs_macro ebpStr, ebp
-    print_regs_macro ediStr, edi
-    print_regs_macro esiStr, esi
+    print_regs_display_macro eaxStr, eax
+    print_regs_display_macro ebxStr, ebx
+    print_regs_display_macro ecxStr, ecx
+    print_regs_display_macro edxStr, edx
+    print_regs_display_macro espStr, esp
+    print_regs_display_macro ebpStr, ebp
+    print_regs_display_macro ediStr, edi
+    print_regs_display_macro esiStr, esi
     ret
 
 ;; ----------------------------------------------------------------------------
@@ -354,11 +356,11 @@ print_file_table:
     mov dword [ftSize], eax
 
     ; print the entry
-    print_string_macro ftName
-    print_string_macro separateChar
-    print_string_macro ftDir
-    print_regs_macro separateChar, dword [ftSector]
-    print_regs_macro separateChar, dword [ftSize]
+    print_string_display_macro ftName
+    print_string_display_macro separateChar
+    print_string_display_macro ftDir
+    print_regs_display_macro separateChar, dword [ftSector]
+    print_regs_display_macro separateChar, dword [ftSize]
 
     ; Read next byte
     xor eax, eax
@@ -366,7 +368,7 @@ print_file_table:
     cmp al, 0
     je .done
 
-    print_string_macro newLine  ; if AL is not null there is another entry
+print_string_display_macro newLine  ; if AL is not null there is another entry
     mov ecx, 10                 ; restore counter
     mov edi, ftName             ; reset edi
     mov dword[ftName], 0x0      ; cleanup the ftName
