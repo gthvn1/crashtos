@@ -48,8 +48,6 @@
     int 0x10    ; BIOS interrupt for video services
 
     ; First we will File Table from sector 2 at 0x0000:0x7E00
-    ; DON'T use load_file to load the file table because load_file relies on
-    ; the fileTable IN MEMORY to load things...
     xor bx, bx
     mov es, bx            ; es <- 0x0
     mov bx, 0x7E00        ; bx <- 0x7E00

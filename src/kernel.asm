@@ -107,7 +107,7 @@ kernel_loop:
     push editorCmdStr ; we push the filename
     push 0x18         ; the segment where to load the editor
     push 0x0          ; the offset
-    call load_file
+    call load_file_from_disk
     add esp, 12        ; cleanup call stack
 
     jmp kernel_loop

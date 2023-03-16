@@ -3,7 +3,7 @@
 ;;
 ;; This file provides functions to read disks using ATA PIO Ports in order to
 ;; be able to load a file.
-;;    - load_file
+;;    - load_file_from_disk
 ;;
 ;; Related links:
 ;;  - [ATA read/write sectors](https://wiki.osdev.org/ATA_read/write_sectors)
@@ -19,7 +19,7 @@
 ;;   - filename
 ;;   - memory segment to load file to
 ;;   - memory offset to load file to
-load_file:
+load_file_from_disk:
     push ebp     ; save old base pointer
     mov ebp, esp ; use the current stack pointer as new base pointer
 
