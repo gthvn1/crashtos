@@ -2,7 +2,7 @@
 ;; disks.asm
 ;;
 ;; This file provides functions to read disks using ATA PIO Ports in order to
-;; be able to load a file.
+;; be able to load a file from the first hard drive.
 ;;    - load_file_from_disk
 ;;
 ;; Related links:
@@ -33,22 +33,47 @@ load_file_from_disk:
     push fs
 
     ; Get parameters from stack
-    mov eax, [ebp + 8]  ; the offset
-    mov ebx, [ebp + 12] ; the segment
-    mov esi, [ebp + 16] ; the filename
+    ; We will use INSB instruction (Input from Port to String) to copy data and
+    ; this instruction input byte from I/O port specified in EDX into memory
+    ; location specified in ES:EDI. So put parameters directly in right
+    ; registers.
+    ;mov esi, [ebp + 8]  ; the filename (not used yet, currently we hard coded)
+    mov es, [ebp + 12]  ; the segment
+    mov edi, [ebp + 16] ; the address of buffer to put data obtained from disk
 
-    ; TODO: for debugging purpose just print args...
-    ; As it is loaded after display.asm we can use macros
-    mov edi, fileParam
-.loop:
-    lodsb  ; AL <- ds:esi, esi++
-    stosb  ; fs:edi <- AL, edi++
-    cmp al, 0
-    jne .loop
+    ; we know the editor has 4 sectors starting at 7
+    ; TODO: Get 4 and 7 from file table
+    mov edx, 0x1F6   ; port to send driver & head numbers
+    xor al, al       ; head index is 0
+    or al, 10100000b ; default 1010b in high nibble
+    out dx, al
 
-    print_string_display_macro inputStr
-    print_regs_display_macro twoSpaces, ebx
-    print_regs_display_macro twoSpaces, eax
+    mov edx, 0x1F2   ; Sector count port
+    mov al, 0x4      ; let's hard code it for the moment
+    out dx, al
+
+    mov edx, 0x1F3   ; Sector number port
+    mov al, 0x7      ; let's hard code it for the moment
+    out dx, al
+
+    mov edx, 0x1F4   ; Cylinder low port
+    xor al, al       ; al = 0
+    out dx, al
+
+    mov edx, 0x1F7   ; Command port
+    mov al, 0x20     ; Read with retry
+    out dx, al
+
+.still_going:
+    in al, dx
+    test al, 8   ; the sector buffer requires servicing
+    jz .still_going
+
+    mov eax, 512/2 ; to read 256 words = 1 sector
+    xor bx, bx     ; read CH sectors
+    mov ecx, eax   ; ecx is counter for insw
+    mov edx, 0x1F0 ; Data port, in and out
+    rep insw       ; in to [EDI]
 
 .done:
     pop fs
@@ -62,7 +87,3 @@ load_file_from_disk:
     mov esp, ebp
     pop ebp
     ret
-
-inputStr: db 0xA, 0xD ; we don't add 0 so it will print \n\rfileParam
-fileParam: db 0,0,0,0,0,0,0,0,0,0
-twoSpaces: db "  ", 0
