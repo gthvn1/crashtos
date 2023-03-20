@@ -7,6 +7,28 @@
 ;;
 ;; Related links:
 ;;  - [ATA read/write sectors](https://wiki.osdev.org/ATA_read/write_sectors)
+;;  - [forum](https://forum.osdev.org/viewtopic.php?t=12268)
+;;
+;; Read to port 1F7h is to get status:
+;;      - bit 7 = 1  controller is executing a command
+;;      - bit 6 = 1  drive is ready
+;;      - bit 5 = 1  write fault
+;;      - bit 4 = 1  seek complete
+;;      - bit 3 = 1  sector buffer requires servicing
+;;      - bit 2 = 1  disk data read corrected
+;;      - bit 1 = 1  index - set to 1 each revolution
+;;      - bit 0 = 1  previous command ended in an error
+;;
+;; Write to port 1F7h is command register when:
+;;      - 50h format track
+;;      - 20h read sectors with retry
+;;      - 21h read sectors without retry
+;;      - 22h read long with retry
+;;      - 23h read long without retry
+;;      - 30h write sectors with retry
+;;      - 31h write sectors without retry
+;;      - 32h write long with retry
+;;      - 33h write long without retry
 ;; ============================================================================
 
 ;; ----------------------------------------------------------------------------
@@ -37,26 +59,36 @@ load_file_from_disk:
     ; this instruction input byte from I/O port specified in EDX into memory
     ; location specified in ES:EDI. So put parameters directly in right
     ; registers.
-    ;mov esi, [ebp + 8]  ; the filename (not used yet, currently we hard coded)
-    mov es, [ebp + 12]  ; the segment
-    mov edi, [ebp + 16] ; the address of buffer to put data obtained from disk
+    ;mov esi, [ebp + 16]  ; the filename (not used yet, currently we hard coded)
+    ;mov es, [ebp + 12]  ; the segment
+    ;mov edi, [ebp + 8] ; the address of buffer to put data obtained from disk
+    mov eax, 0x18
+    mov es, eax
+    xor eax, eax
+    mov edi, eax    ; We want to copy data in 0x18:0x00000000
 
     ; we know the editor has 4 sectors starting at 7
     ; TODO: Get 4 and 7 from file table
-    mov edx, 0x1F6   ; port to send driver & head numbers
-    xor al, al       ; head index is 0
-    or al, 10100000b ; default 1010b in high nibble
+    mov edx, 0x1F6     ; port 1F6b to send driver & head numbers
+    mov al, 1010_0000b ; Bit 5-7 are: 101b
+                       ; Bit 4 is 0 (select drive 0)
+                       ; Bits 3-0 is head, in our case it is 0
     out dx, al
 
-    mov edx, 0x1F2   ; Sector count port
-    mov al, 0x4      ; let's hard code it for the moment
-    out dx, al
+    mov edx, 0x1F2   ; Port 1F2b is How many sectors to read/write?
+    mov ebx, 0x4     ; let's hard code it for the moment. We use ebx to count
+    mov eax, 0x1     ; we will read 1 sector by 1 sector
+    out dx, al       ; number of sector read.
 
-    mov edx, 0x1F3   ; Sector number port
+    mov edx, 0x1F3   ; Port 1F3b is the sector wanted
     mov al, 0x7      ; let's hard code it for the moment
     out dx, al
 
-    mov edx, 0x1F4   ; Cylinder low port
+    mov edx, 0x1F4   ; Port 1F4b is Cylinder low port
+    xor al, al       ; al = 0
+    out dx, al
+
+    mov edx, 0x1F5   ; Port 1F5b is Cylinder high port
     xor al, al       ; al = 0
     out dx, al
 
@@ -64,16 +96,22 @@ load_file_from_disk:
     mov al, 0x20     ; Read with retry
     out dx, al
 
-.still_going:
+.poll_status:
     in al, dx
     test al, 8   ; the sector buffer requires servicing
-    jz .still_going
+    je .poll_status
 
-    mov eax, 512/2 ; to read 256 words = 1 sector
-    xor bx, bx     ; read CH sectors
-    mov ecx, eax   ; ecx is counter for insw
-    mov edx, 0x1F0 ; Data port, in and out
-    rep insw       ; in to [EDI]
+    mov ecx, 256   ; to read 256 words = 1 sector, ecx is counter for insw
+    mov edx, 0x1F0 ; Data register, bytes are read/written here...
+    rep insw       ; in to ES:EDI
+
+    cmp ebx, 0
+    je .done
+
+    ; if ebx is not null we read the next sector
+    dec ebx
+    mov edx, 0x1F7
+    jmp .poll_status
 
 .done:
     pop fs
