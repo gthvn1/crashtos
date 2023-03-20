@@ -7,6 +7,7 @@
 ;;
 ;; Related links:
 ;;  - [ATA read/write sectors](https://wiki.osdev.org/ATA_read/write_sectors)
+;;  - [ATA PIO Mode](https://wiki.osdev.org/ATA_PIO_Mode)
 ;;  - [forum](https://forum.osdev.org/viewtopic.php?t=12268)
 ;;
 ;; Read to port 1F7h is to get status:
@@ -96,22 +97,49 @@ load_file_from_disk:
     mov al, 0x20     ; Read with retry
     out dx, al
 
-.poll_status:
-    in al, dx
-    test al, 8   ; the sector buffer requires servicing
-    je .poll_status
+    ; Before sending the next command ATA specs suggest to add a 400ns delay
+    ; that can be achieve by reading the status register fifteen times.
+    ; Using the alternate status register (3F6h) is a good choice. We implement
+    ; the 400ns delay on ERR, BSY clean and DRQ set...
+    mov ecx, 4
 
+.poll_status:
+    in al, dx     ; grab status
+    test al, 0x80 ; BSY flag set?
+    jne .retry
+    test al, 8    ; DRQ set?
+    je .data_ready
+.retry:
+    dec ecx
+    jg .poll_status
+
+    ; need to wait some more. Loop until BSY clears or ERR sets...
+.wait_more:
+    in al, dx
+    test al, 0x80 ; BSY flag set?
+    jne .wait_more
+    test al, 0x21 ; ERR or DF sets?
+    jne .failed
+ 
+.data_ready:
     mov ecx, 256   ; to read 256 words = 1 sector, ecx is counter for insw
     mov edx, 0x1F0 ; Data register, bytes are read/written here...
     rep insw       ; in to ES:EDI
+
+    mov edx, 0x1F7 ; delay 400ns to allow drive to set new values BSY and DRQ
+    in al, dx
+    in al, dx
+    in al, dx
+    in al, dx
 
     cmp ebx, 0
     je .done
 
     ; if ebx is not null we read the next sector
-    dec ebx
-    mov edx, 0x1F7
     jmp .poll_status
+
+.failed:
+    ; TODO: return an error
 
 .done:
     pop fs
