@@ -2,4 +2,4 @@ ata0-master: type=disk, path="bin/mini-os.bin"
 boot: disk
 megs: 1
 debugger_log: debugger.out
-sound: driver=dummy
+#sound: driver=dummy
